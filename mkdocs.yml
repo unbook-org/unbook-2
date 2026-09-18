@@ -1,0 +1,98 @@
+site_name: UnBook 2 - Documentação
+site_description: Documentação técnica, arquitetural e guias do ecossistema UnBook 2.0 (Universidade de Brasília)
+site_author: Equipe UnBook
+site_url: https://unbook-org.github.io/unbook-2/
+repo_url: https://github.com/unbook-org/unbook-2
+repo_name: unbook-org/unbook-2
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+theme:
+  name: material
+  language: pt-BR
+  favicon: img/unbook-ico.jpg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Alternar para modo escuro
+    - scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Alternar para modo claro
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.tracking
+    - navigation.indexes
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - search.share
+    - content.code.copy
+    - content.code.annotate
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Início: index.md
+  - Arquitetura:
+      - Visão Geral: architecture/overview.md
+      - Backend & Django Ninja: architecture/backend.md
+      - Multi-Banco & Cache: architecture/database.md
+      - Segurança & Anonimato: architecture/security.md
+  - Microsserviços & Squads:
+      - Portal Web: services/portal.md
+      - Search Engine: services/search.md
+      - Catálogo & Ementas: services/catalog.md
+      - Planner & Grade Horária: services/planner.md
+      - Menu do RU: services/menu.md
+  - Pipeline & Ingestão:
+      - Integração Externa: pipeline/integration.md
+      - Contratos de Dados: pipeline/contracts.md
+  - Contribuição:
+      - Setup Local com Docker: contributing/local-setup.md
+      - Padrões e Squads: contributing/standards.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/unbook-org
+      name: GitHub da Organização UnBook
+
+copyright: "Copyright &copy; 2026 Ecossistema UnBook — Universidade de Brasília (UnB)"
+extra_css:
+  - stylesheets/extra.css
