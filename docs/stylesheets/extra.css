@@ -1,0 +1,226 @@
+/* ==========================================================================
+   UnBook 2.0 — Estilização Institucional (Universidade de Brasília)
+   Cores Oficiais:
+     - Verde UnB (Primária):   #009A5E
+     - Azul UnB (Secundária):  #1348EC
+   ========================================================================== */
+
+:root,
+[data-md-color-scheme="default"] {
+  /* Cor Primária: Verde UnB */
+  --md-primary-fg-color:              #009A5E;
+  --md-primary-fg-color--light:       #26b27d;
+  --md-primary-fg-color--dark:        #007a4a;
+  --md-primary-bg-color:              #ffffff;
+  --md-primary-bg-color--light:       #f5f5f5;
+
+  /* Cor Secundária / Destaque: Azul UnB */
+  --md-accent-fg-color:               #1348EC;
+  --md-accent-fg-color--transparent:  rgba(19, 72, 236, 0.10);
+  --md-accent-bg-color:               #ffffff;
+
+  /* Links e Interações */
+  --md-typeset-a-color:               #1348EC;
+}
+
+[data-md-color-scheme="slate"] {
+  /* Cor Primária: Verde UnB */
+  --md-primary-fg-color:              #009A5E;
+  --md-primary-fg-color--light:       #26b27d;
+  --md-primary-fg-color--dark:        #007a4a;
+
+  /* Cor Secundária: Azul UnB */
+  --md-accent-fg-color:               #1348EC;
+  --md-accent-fg-color--transparent:  rgba(19, 72, 236, 0.20);
+
+  /* Links no modo escuro */
+  --md-typeset-a-color:               #6b8fff;
+}
+
+/* --------------------------------------------------------------------------
+   Cabeçalho & Abas com as Duas Cores Principais
+   ----------------------------------------------------------------------- */
+.md-header {
+  background-color: #009A5E !important;
+  border-bottom: 3px solid #1348EC !important;
+}
+
+.md-tabs {
+  background-color: #008752 !important;
+}
+
+.md-tabs__link--active {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border-bottom: 2px solid #1348EC !important;
+}
+
+/* Ícone do UnBook na Barra Superior (Navbar) */
+.md-header__button.md-logo img {
+  height: 1.65rem;
+  width: 1.65rem;
+  border-radius: 6px;
+  object-fit: cover;
+  vertical-align: middle;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Ícone no Menu Lateral / Mobile (Drawer) */
+.md-nav__title .md-nav__button.md-logo img {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+/* Logo Centralizado da Home (Index) */
+.hero-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 1.5rem auto 2rem auto;
+  text-align: center;
+}
+
+.hero-logo img {
+  max-width: min(100%, 480px);
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+  transition: transform 0.25s ease, filter 0.25s ease;
+}
+
+.hero-logo img:hover {
+  transform: scale(1.02);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.12));
+}
+
+/* --------------------------------------------------------------------------
+   Elementos em Azul UnB (#1348EC)
+   ----------------------------------------------------------------------- */
+/* Links */
+.md-typeset a {
+  color: var(--md-typeset-a-color);
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.md-typeset a:hover {
+  color: #009A5E;
+  text-decoration: underline;
+}
+
+/* Títulos H2 com sutil detalhe azul */
+.md-typeset h2 {
+  border-bottom: 2px solid rgba(19, 72, 236, 0.15);
+  padding-bottom: 0.3rem;
+}
+
+/* Item ativo no menu de navegação e índice */
+.md-nav__link--active {
+  color: #1348EC !important;
+  font-weight: 700 !important;
+}
+
+.md-nav--secondary .md-nav__link--active {
+  border-left: 2px solid #1348EC;
+  padding-left: 0.5rem;
+}
+
+/* Código inline com tom de Azul #1348EC */
+.md-typeset code {
+  color: #1348EC !important;
+  background-color: rgba(19, 72, 236, 0.08) !important;
+  border: 1px solid rgba(19, 72, 236, 0.18);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  color: #8caaff !important;
+  background-color: rgba(19, 72, 236, 0.22) !important;
+  border-color: rgba(107, 143, 255, 0.25);
+}
+
+/* Cabeçalho de tabelas */
+.md-typeset th {
+  background-color: rgba(19, 72, 236, 0.06) !important;
+  color: #1348EC !important;
+  font-weight: 600;
+}
+
+[data-md-color-scheme="slate"] .md-typeset th {
+  background-color: rgba(19, 72, 236, 0.18) !important;
+  color: #9db5ff !important;
+}
+
+/* Caixas de destaque (admonitions) */
+.md-typeset .admonition.tip,
+.md-typeset .admonition.note {
+  border-left-color: #1348EC !important;
+}
+
+.md-typeset .admonition.tip > .admonition-title,
+.md-typeset .admonition.note > .admonition-title {
+  border-left-color: #1348EC !important;
+  color: #1348EC !important;
+}
+
+/* Barra de pesquisa com foco em Azul #1348EC */
+.md-search__input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #1348EC;
+}
+
+/* Destaque de texto na busca */
+.md-typeset mark {
+  background-color: rgba(19, 72, 236, 0.18);
+  color: #1348EC;
+}
+
+/* --------------------------------------------------------------------------
+   Layout Expandido / Tela Cheia (Wide Screen)
+   O texto central ocupa a maior parte da tela, com os índices nas laterais.
+   ----------------------------------------------------------------------- */
+@media screen and (min-width: 60em) {
+  .md-grid {
+    max-width: 100% !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+
+  .md-content {
+    flex-grow: 1 !important;
+    min-width: 0 !important;
+  }
+
+  .md-content__inner {
+    max-width: 100% !important;
+    margin-left: 1.5rem !important;
+    margin-right: 1.5rem !important;
+  }
+}
+
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+
+  /* Barras laterais fixas com larguras proporcionais */
+  .md-sidebar--primary {
+    width: 13.5rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  .md-sidebar--secondary {
+    width: 13.5rem !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Área central de conteúdo expandida ocupando todo o espaço restante */
+  .md-content__inner {
+    margin-left: 2rem !important;
+    margin-right: 2rem !important;
+  }
+}
+
