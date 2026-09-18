@@ -1,0 +1,1790 @@
+
+<!doctype html>
+<html lang="pt" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentação técnica, arquitetural e guias do ecossistema UnBook 2.0 (Universidade de Brasília)">
+      
+      
+        <meta name="author" content="Equipe UnBook">
+      
+      
+        <link rel="canonical" href="https://unbook-org.github.io/unbook-2/architecture/backend/">
+      
+      
+        <link rel="prev" href="../overview/">
+      
+      
+        <link rel="next" href="../database/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../img/unbook-ico.jpg">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Backend & Django Ninja - UnBook 2 - Documentação</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#backend-django-ninja-o-melhor-de-dois-mundos" class="md-skip">
+          Pular para conteúdo
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Cabeçalho">
+    <a href="../.." title="UnBook 2 - Documentação" class="md-header__button md-logo" aria-label="UnBook 2 - Documentação" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            UnBook 2 - Documentação
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Backend & Django Ninja
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Alternar para modo escuro"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Alternar para modo escuro" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3zm3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95zm-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="custom" data-md-color-accent="custom"  aria-label="Alternar para modo claro"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Alternar para modo claro" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5s-1.65.15-2.39.42zM3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29zm.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14zM20.65 7l-1.77 3.79a7.02 7.02 0 0 0-2.38-4.15zm-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29zM12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Buscar" placeholder="Buscar" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Pesquisar">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Compartilhar" aria-label="Compartilhar" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Limpar" aria-label="Limpar" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Inicializando busca
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/unbook-org/unbook-2" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    unbook-org/unbook-2
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Abas" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Início
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../overview/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Arquitetura
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../services/portal/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Microsserviços & Squads
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../pipeline/integration/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Pipeline & Ingestão
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../contributing/local-setup/" class="md-tabs__link">
+          
+  
+  
+    
+  
+  Contribuição
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navegação" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="UnBook 2 - Documentação" class="md-nav__button md-logo" aria-label="UnBook 2 - Documentação" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    UnBook 2 - Documentação
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/unbook-org/unbook-2" title="Ir para repositório" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    unbook-org/unbook-2
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Início
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Arquitetura
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Arquitetura
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Visão Geral
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & Django Ninja
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backend & Django Ninja
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-contexto-motivacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Contexto &amp; Motivação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-comparativo-arquitetural" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Comparativo Arquitetural
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-o-melhor-do-django-para-o-unbook-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. O Melhor do Django para o UnBook 2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. O Melhor do Django para o UnBook 2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-django-orm-migracoes-sem-friccao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Django ORM &amp; Migrações Sem Fricção
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-django-admin-moderacao-imediata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Django Admin: Moderação Imediata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-seguranca-consolidada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Segurança Consolidada
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-o-melhor-do-fastapi-no-django-ninja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. O Melhor do FastAPI no Django Ninja
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. O Melhor do FastAPI no Django Ninja">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-validacao-estrita-com-pydantic-v2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Validação Estrita com Pydantic v2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-documentacao-swagger-e-redoc-automaticas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Documentação Swagger e ReDoc Automáticas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-flexibilidade-sincrona-e-assincrona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Flexibilidade Síncrona e Assíncrona
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-exemplo-pratico-de-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Exemplo Prático de Implementação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-boas-praticas-diretrizes-de-engenharia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Boas Práticas &amp; Diretrizes de Engenharia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-beneficio-para-as-squads-e-comunidade-da-unb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Benefício para as Squads e Comunidade da UnB
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Multi-Banco & Cache
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Segurança & Anonimato
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Microsserviços & Squads
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Microsserviços & Squads
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/portal/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Portal Web
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/search/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Search Engine
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catálogo & Ementas
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/planner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Planner & Grade Horária
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../services/menu/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Menu do RU
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Pipeline & Ingestão
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Pipeline & Ingestão
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/integration/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Integração Externa
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../pipeline/contracts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contratos de Dados
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contribuição
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Contribuição
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/local-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Setup Local com Docker
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/standards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Padrões e Squads
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Índice">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Índice
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-contexto-motivacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Contexto &amp; Motivação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-comparativo-arquitetural" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Comparativo Arquitetural
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-o-melhor-do-django-para-o-unbook-20" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. O Melhor do Django para o UnBook 2.0
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3. O Melhor do Django para o UnBook 2.0">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-django-orm-migracoes-sem-friccao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Django ORM &amp; Migrações Sem Fricção
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-django-admin-moderacao-imediata" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Django Admin: Moderação Imediata
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-seguranca-consolidada" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Segurança Consolidada
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#4-o-melhor-do-fastapi-no-django-ninja" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. O Melhor do FastAPI no Django Ninja
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="4. O Melhor do FastAPI no Django Ninja">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#a-validacao-estrita-com-pydantic-v2" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        A. Validação Estrita com Pydantic v2
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#b-documentacao-swagger-e-redoc-automaticas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        B. Documentação Swagger e ReDoc Automáticas
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#c-flexibilidade-sincrona-e-assincrona" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        C. Flexibilidade Síncrona e Assíncrona
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#5-exemplo-pratico-de-implementacao" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        5. Exemplo Prático de Implementação
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#6-boas-praticas-diretrizes-de-engenharia" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        6. Boas Práticas &amp; Diretrizes de Engenharia
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#7-beneficio-para-as-squads-e-comunidade-da-unb" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        7. Benefício para as Squads e Comunidade da UnB
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="backend-django-ninja-o-melhor-de-dois-mundos">Backend &amp; Django Ninja: O Melhor de Dois Mundos<a class="headerlink" href="#backend-django-ninja-o-melhor-de-dois-mundos" title="Permanent link">&para;</a></h1>
+<p>O ecossistema <strong>UnBook 2.0</strong> adota o <strong>Django Ninja</strong> como o framework central de desenvolvimento de suas APIs de backend. Esta decisão arquitetural consolida a união estratégica entre a robustez operacional do ecossistema <strong>Django</strong> e a experiência moderna de desenvolvimento (<em>Developer Experience - DX</em>) e performance do <strong>FastAPI</strong>.</p>
+<hr />
+<h2 id="1-contexto-motivacao">1. Contexto &amp; Motivação<a class="headerlink" href="#1-contexto-motivacao" title="Permanent link">&para;</a></h2>
+<p>Durante o planejamento inicial do UnBook 2.0, identificou-se um dilema clássico na escolha do framework de backend em Python:</p>
+<ul>
+<li><strong>Abordagem com Microframework (FastAPI puro):</strong><br />
+  Proporciona excelente validação com Pydantic v2, documentação OpenAPI automática e suporte nativo a rotas assíncronas (<code>asyncio</code>). Contudo, exige que a equipe construa e mantenha manualmente do zero: conexão e pool de banco (SQLAlchemy), sistema de migrações complexo (Alembic), autenticação/sessões e, crucialmente, um <strong>painel administrativo</strong> para moderação de dados acadêmicos e avaliações de estudantes.</li>
+<li><strong>Abordagem Tradicional com Django REST Framework (DRF):</strong><br />
+  Traz toda a solidez do Django ("<em>batteries included</em>"), incluindo o lendário Django ORM, migrações automatizadas e o Django Admin. No entanto, o DRF sofre com serializadores verbosos (<code>serializers.ModelSerializer</code>), validação legada, performance de serialização inferior e complexidade para trabalhar com tipagem moderna e rotas assíncronas ASGI.</li>
+</ul>
+<p><strong>A Solução com Django Ninja:</strong><br />
+O <strong>Django Ninja</strong> soluciona esse dilema entregando uma camada de APIs REST sobre o Django inspirada diretamente na ergonomia do FastAPI. Ele viabiliza o uso simultâneo do poder estrutural do Django com schemas Pydantic v2, anotações de tipo padrão do Python e endpoints assíncronos de alta performance.</p>
+<hr />
+<h2 id="2-comparativo-arquitetural">2. Comparativo Arquitetural<a class="headerlink" href="#2-comparativo-arquitetural" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Dimensão Técnica</th>
+<th style="text-align: left;">FastAPI Puro</th>
+<th style="text-align: left;">Django REST Framework (DRF)</th>
+<th style="text-align: left;">Django + Django Ninja</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>ORM &amp; Modelagem</strong></td>
+<td style="text-align: left;">Externo (SQLAlchemy / SQLModel)</td>
+<td style="text-align: left;">Nativo (Django ORM)</td>
+<td style="text-align: left;"><strong>Nativo (Django ORM)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Sistema de Migrações</strong></td>
+<td style="text-align: left;">Manual via Alembic</td>
+<td style="text-align: left;">Nativo (<code>makemigrations</code>/<code>migrate</code>)</td>
+<td style="text-align: left;"><strong>Nativo (<code>makemigrations</code>/<code>migrate</code>)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Painel Administrativo</strong></td>
+<td style="text-align: left;">Inexistente (requer frontend próprio)</td>
+<td style="text-align: left;">Nativo (Django Admin)</td>
+<td style="text-align: left;"><strong>Nativo (Django Admin pronto no Dia 1)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Validação de Schemas</strong></td>
+<td style="text-align: left;">Pydantic v2</td>
+<td style="text-align: left;">Serializers legados do DRF</td>
+<td style="text-align: left;"><strong>Pydantic v2 nativo</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Tipagem (Type Hints)</strong></td>
+<td style="text-align: left;">Nativa Python 3.10+</td>
+<td style="text-align: left;">Suporte parcial / gambiarras</td>
+<td style="text-align: left;"><strong>Nativa Python 3.10+</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Documentação da API</strong></td>
+<td style="text-align: left;">Automática (Swagger / OpenAPI 3)</td>
+<td style="text-align: left;">Requer <code>drf-spectacular</code> ou similar</td>
+<td style="text-align: left;"><strong>Automática (Swagger / ReDoc nativo)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Suporte Assíncrono (ASGI)</strong></td>
+<td style="text-align: left;">Nativo (<code>async def</code>)</td>
+<td style="text-align: left;">Complexo / Parcial</td>
+<td style="text-align: left;"><strong>Nativo (<code>async def</code> e <code>def</code> síncrono)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Performance de Serialização</strong></td>
+<td style="text-align: left;">Altíssima (Pydantic Core em Rust)</td>
+<td style="text-align: left;">Média / Baixa</td>
+<td style="text-align: left;"><strong>Altíssima (Pydantic Core em Rust)</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Curva de Aprendizado (UnB)</strong></td>
+<td style="text-align: left;">Média (fragmentação de bibliotecas)</td>
+<td style="text-align: left;">Alta (boilerplate e mágicas de DRF)</td>
+<td style="text-align: left;"><strong>Baixa/Acelerada (Django + Pydantic claro)</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="3-o-melhor-do-django-para-o-unbook-20">3. O Melhor do Django para o UnBook 2.0<a class="headerlink" href="#3-o-melhor-do-django-para-o-unbook-20" title="Permanent link">&para;</a></h2>
+<h3 id="a-django-orm-migracoes-sem-friccao">A. Django ORM &amp; Migrações Sem Fricção<a class="headerlink" href="#a-django-orm-migracoes-sem-friccao" title="Permanent link">&para;</a></h3>
+<p>O UnBook 2.0 possui relacionamentos acadêmicos complexos:
+- Campi, Institutos, Departamentos e Docentes (com matrículas SIAPE e gabinetes);
+- Disciplinas e sua complexa árvore de dependências (<code>TB_RELACAO_MATERIA</code>), incluindo pré-requisitos, co-requisitos e equivalências inter-campi;
+- Turmas ofertadas com códigos brutos do SIGAA (<code>24M12</code>), salas de aula e histórico semestral;
+- Carteiras anônimas (<code>student_wallets</code>) e transações de tokens para prevenir avaliações fraudulentas.</p>
+<p>O <strong>Django ORM</strong> gerencia essas estruturas de dados relacionais com migrações declarativas, reversíveis e determinísticas, eliminando o atrito comum em configurações de SQLAlchemy/Alembic.</p>
+<h3 id="b-django-admin-moderacao-imediata">B. Django Admin: Moderação Imediata<a class="headerlink" href="#b-django-admin-moderacao-imediata" title="Permanent link">&para;</a></h3>
+<p>O UnBook lida com dados sensíveis e conteúdo gerado pela comunidade discente da UnB. O <strong>Django Admin</strong> disponibiliza imediatamente:
+1. <strong>Moderação de Avaliações Anônimas:</strong> Visualização rápida de denúncias de ofensas pessoais ou violações de conduta, permitindo suspensão de comentários com um clique.
+2. <strong>Correção de Inconsistências do SIGAA:</strong> Ajuste manual emergencial caso um professor tenha mudado de departamento ou uma turma tenha sofrido retificação de horário no sistema da UnB.
+3. <strong>Gestão do Cardápio do RU:</strong> Edição e homologação do cardápio semanal e preços do Restaurante Universitário sem exigir scripts diretos no banco de produção.</p>
+<h3 id="c-seguranca-consolidada">C. Segurança Consolidada<a class="headerlink" href="#c-seguranca-consolidada" title="Permanent link">&para;</a></h3>
+<p>O core do Django traz proteções automáticas e maduras contra SQL Injection, Clickjacking, Cross-Site Scripting (XSS) e Cross-Site Request Forgery (CSRF), além de um sistema granulado de grupos e permissões (<code>auth.models</code>).</p>
+<hr />
+<h2 id="4-o-melhor-do-fastapi-no-django-ninja">4. O Melhor do FastAPI no Django Ninja<a class="headerlink" href="#4-o-melhor-do-fastapi-no-django-ninja" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>flowchart LR
+    REQ[Requisição HTTP JSON] --&gt; NINJA["Django Ninja (ASGI / WSGI)"]
+
+    subgraph ENGINE ["Validação &amp; Tipagem"]
+        NINJA --&gt; PYD[Pydantic v2 Core\nValidação Estrita &amp; Schemas]
+        PYD --&gt; DOCS[Geração OpenAPI 3.0 / Swagger UI]
+    end
+
+    subgraph RESOLVER ["Execução de Handlers"]
+        ENGINE --&gt; ASYNC_H["async def (I/O Bound:\nMeilisearch, Redis, Gemini AI)"]
+        ENGINE --&gt; SYNC_H["def (CPU Bound / Consultas ORM padrão)"]
+    end
+
+    RESOLVER --&gt; DJ_ORM[Django ORM 5.x]
+    DJ_ORM --&gt; PG[(PostgreSQL 16)]</code></pre>
+<h3 id="a-validacao-estrita-com-pydantic-v2">A. Validação Estrita com Pydantic v2<a class="headerlink" href="#a-validacao-estrita-com-pydantic-v2" title="Permanent link">&para;</a></h3>
+<p>Toda entrada e saída de dados é tipada por classes <code>ninja.Schema</code> (baseadas no Pydantic v2). Erros de validação (ex: formato de horário inválido no Planner ou nota fora da escala de 1 a 5) retornam respostas HTTP 422 padronizadas automaticamente.</p>
+<h3 id="b-documentacao-swagger-e-redoc-automaticas">B. Documentação Swagger e ReDoc Automáticas<a class="headerlink" href="#b-documentacao-swagger-e-redoc-automaticas" title="Permanent link">&para;</a></h3>
+<p>Ao rodar a aplicação, a documentação interativa completa é servida instantaneamente em <code>/api/docs</code>, permitindo que a equipe de frontend (<code>services/portal</code>) teste contratos e payloads sem depender de documentações manuais desatualizadas.</p>
+<h3 id="c-flexibilidade-sincrona-e-assincrona">C. Flexibilidade Síncrona e Assíncrona<a class="headerlink" href="#c-flexibilidade-sincrona-e-assincrona" title="Permanent link">&para;</a></h3>
+<p>Diferente de frameworks rígidos, o Django Ninja permite definir rotas assíncronas onde I/O é crítico e rotas síncronas onde a simplicidade impera:
+- <strong>Rotas <code>async def</code>:</strong> Ideais para consultas ao <strong>Meilisearch</strong> (&lt;15ms), chamadas à <strong>Google Gemini API</strong> (sumarização de ementas) e leitura no <strong>Redis 7</strong> (grades temporárias do Planner).
+- <strong>Rotas <code>def</code> tradicionais:</strong> Executam no pool de threads padrão do Django, permitindo o uso convencional do Django ORM sem risco de concorrência.</p>
+<hr />
+<h2 id="5-exemplo-pratico-de-implementacao">5. Exemplo Prático de Implementação<a class="headerlink" href="#5-exemplo-pratico-de-implementacao" title="Permanent link">&para;</a></h2>
+<p>Abaixo, um exemplo da arquitetura aplicada a um endpoint de busca e detalhamento de disciplinas no <code>services/catalog</code>:</p>
+<div class="language-python highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1"># services/catalog/api.py</span>
+</span><span id="__span-0-2"><a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span>
+</span><span id="__span-0-3"><a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="kn">from</span><span class="w"> </span><span class="nn">uuid</span><span class="w"> </span><span class="kn">import</span> <span class="n">UUID</span>
+</span><span id="__span-0-4"><a id="__codelineno-0-4" name="__codelineno-0-4" href="#__codelineno-0-4"></a><span class="kn">from</span><span class="w"> </span><span class="nn">ninja</span><span class="w"> </span><span class="kn">import</span> <span class="n">NinjaAPI</span><span class="p">,</span> <span class="n">Router</span><span class="p">,</span> <span class="n">Schema</span>
+</span><span id="__span-0-5"><a id="__codelineno-0-5" name="__codelineno-0-5" href="#__codelineno-0-5"></a><span class="kn">from</span><span class="w"> </span><span class="nn">django.shortcuts</span><span class="w"> </span><span class="kn">import</span> <span class="n">aget_object_or_404</span>
+</span><span id="__span-0-6"><a id="__codelineno-0-6" name="__codelineno-0-6" href="#__codelineno-0-6"></a><span class="kn">from</span><span class="w"> </span><span class="nn">.models</span><span class="w"> </span><span class="kn">import</span> <span class="n">Course</span><span class="p">,</span> <span class="n">Relation</span>
+</span><span id="__span-0-7"><a id="__codelineno-0-7" name="__codelineno-0-7" href="#__codelineno-0-7"></a>
+</span><span id="__span-0-8"><a id="__codelineno-0-8" name="__codelineno-0-8" href="#__codelineno-0-8"></a><span class="c1"># Instância da API com documentação OpenAPI integrada</span>
+</span><span id="__span-0-9"><a id="__codelineno-0-9" name="__codelineno-0-9" href="#__codelineno-0-9"></a><span class="n">api</span> <span class="o">=</span> <span class="n">NinjaAPI</span><span class="p">(</span>
+</span><span id="__span-0-10"><a id="__codelineno-0-10" name="__codelineno-0-10" href="#__codelineno-0-10"></a>    <span class="n">title</span><span class="o">=</span><span class="s2">"UnBook 2.0 - Catalog API"</span><span class="p">,</span>
+</span><span id="__span-0-11"><a id="__codelineno-0-11" name="__codelineno-0-11" href="#__codelineno-0-11"></a>    <span class="n">version</span><span class="o">=</span><span class="s2">"2.0.0"</span><span class="p">,</span>
+</span><span id="__span-0-12"><a id="__codelineno-0-12" name="__codelineno-0-12" href="#__codelineno-0-12"></a>    <span class="n">description</span><span class="o">=</span><span class="s2">"Endpoints de catálogo acadêmico, ementas e dependências curriculares da UnB"</span>
+</span><span id="__span-0-13"><a id="__codelineno-0-13" name="__codelineno-0-13" href="#__codelineno-0-13"></a><span class="p">)</span>
+</span><span id="__span-0-14"><a id="__codelineno-0-14" name="__codelineno-0-14" href="#__codelineno-0-14"></a>
+</span><span id="__span-0-15"><a id="__codelineno-0-15" name="__codelineno-0-15" href="#__codelineno-0-15"></a><span class="n">router</span> <span class="o">=</span> <span class="n">Router</span><span class="p">()</span>
+</span><span id="__span-0-16"><a id="__codelineno-0-16" name="__codelineno-0-16" href="#__codelineno-0-16"></a>
+</span><span id="__span-0-17"><a id="__codelineno-0-17" name="__codelineno-0-17" href="#__codelineno-0-17"></a><span class="c1"># 1. Schemas Pydantic para validação e serialização</span>
+</span><span id="__span-0-18"><a id="__codelineno-0-18" name="__codelineno-0-18" href="#__codelineno-0-18"></a><span class="k">class</span><span class="w"> </span><span class="nc">RelationOut</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+</span><span id="__span-0-19"><a id="__codelineno-0-19" name="__codelineno-0-19" href="#__codelineno-0-19"></a>    <span class="n">codigo_alvo</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-20"><a id="__codelineno-0-20" name="__codelineno-0-20" href="#__codelineno-0-20"></a>    <span class="n">nome_alvo</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-21"><a id="__codelineno-0-21" name="__codelineno-0-21" href="#__codelineno-0-21"></a>    <span class="n">tipo</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># pre_requisito, co_requisito, equivalencia</span>
+</span><span id="__span-0-22"><a id="__codelineno-0-22" name="__codelineno-0-22" href="#__codelineno-0-22"></a>
+</span><span id="__span-0-23"><a id="__codelineno-0-23" name="__codelineno-0-23" href="#__codelineno-0-23"></a><span class="k">class</span><span class="w"> </span><span class="nc">CourseDetailOut</span><span class="p">(</span><span class="n">Schema</span><span class="p">):</span>
+</span><span id="__span-0-24"><a id="__codelineno-0-24" name="__codelineno-0-24" href="#__codelineno-0-24"></a>    <span class="nb">id</span><span class="p">:</span> <span class="n">UUID</span>
+</span><span id="__span-0-25"><a id="__codelineno-0-25" name="__codelineno-0-25" href="#__codelineno-0-25"></a>    <span class="n">codigo</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-26"><a id="__codelineno-0-26" name="__codelineno-0-26" href="#__codelineno-0-26"></a>    <span class="n">nome</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-27"><a id="__codelineno-0-27" name="__codelineno-0-27" href="#__codelineno-0-27"></a>    <span class="n">ementa</span><span class="p">:</span> <span class="nb">str</span>
+</span><span id="__span-0-28"><a id="__codelineno-0-28" name="__codelineno-0-28" href="#__codelineno-0-28"></a>    <span class="n">horas</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-29"><a id="__codelineno-0-29" name="__codelineno-0-29" href="#__codelineno-0-29"></a>    <span class="n">creditos</span><span class="p">:</span> <span class="nb">int</span>
+</span><span id="__span-0-30"><a id="__codelineno-0-30" name="__codelineno-0-30" href="#__codelineno-0-30"></a>    <span class="n">relacoes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RelationOut</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="__span-0-31"><a id="__codelineno-0-31" name="__codelineno-0-31" href="#__codelineno-0-31"></a>
+</span><span id="__span-0-32"><a id="__codelineno-0-32" name="__codelineno-0-32" href="#__codelineno-0-32"></a><span class="c1"># 2. Endpoint Assíncrono de alta performance</span>
+</span><span id="__span-0-33"><a id="__codelineno-0-33" name="__codelineno-0-33" href="#__codelineno-0-33"></a><span class="nd">@router</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"/courses/</span><span class="si">{codigo}</span><span class="s2">"</span><span class="p">,</span> <span class="n">response</span><span class="o">=</span><span class="n">CourseDetailOut</span><span class="p">)</span>
+</span><span id="__span-0-34"><a id="__codelineno-0-34" name="__codelineno-0-34" href="#__codelineno-0-34"></a><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">get_course_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">codigo</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+</span><span id="__span-0-35"><a id="__codelineno-0-35" name="__codelineno-0-35" href="#__codelineno-0-35"></a><span class="w">    </span><span class="sd">"""</span>
+</span><span id="__span-0-36"><a id="__codelineno-0-36" name="__codelineno-0-36" href="#__codelineno-0-36"></a><span class="sd">    Recupera os detalhes de uma disciplina e seu grafo de dependências.</span>
+</span><span id="__span-0-37"><a id="__codelineno-0-37" name="__codelineno-0-37" href="#__codelineno-0-37"></a><span class="sd">    Executa de forma assíncrona usando o Django 5 async ORM.</span>
+</span><span id="__span-0-38"><a id="__codelineno-0-38" name="__codelineno-0-38" href="#__codelineno-0-38"></a><span class="sd">    """</span>
+</span><span id="__span-0-39"><a id="__codelineno-0-39" name="__codelineno-0-39" href="#__codelineno-0-39"></a>    <span class="n">course</span> <span class="o">=</span> <span class="k">await</span> <span class="n">aget_object_or_404</span><span class="p">(</span>
+</span><span id="__span-0-40"><a id="__codelineno-0-40" name="__codelineno-0-40" href="#__codelineno-0-40"></a>        <span class="n">Course</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">prefetch_related</span><span class="p">(</span><span class="s2">"relacoes_origem__disciplina_destino"</span><span class="p">),</span>
+</span><span id="__span-0-41"><a id="__codelineno-0-41" name="__codelineno-0-41" href="#__codelineno-0-41"></a>        <span class="n">codigo</span><span class="o">=</span><span class="n">codigo</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+</span><span id="__span-0-42"><a id="__codelineno-0-42" name="__codelineno-0-42" href="#__codelineno-0-42"></a>    <span class="p">)</span>
+</span><span id="__span-0-43"><a id="__codelineno-0-43" name="__codelineno-0-43" href="#__codelineno-0-43"></a>
+</span><span id="__span-0-44"><a id="__codelineno-0-44" name="__codelineno-0-44" href="#__codelineno-0-44"></a>    <span class="c1"># Montagem da resposta estruturada tipada</span>
+</span><span id="__span-0-45"><a id="__codelineno-0-45" name="__codelineno-0-45" href="#__codelineno-0-45"></a>    <span class="n">relacoes_data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span id="__span-0-46"><a id="__codelineno-0-46" name="__codelineno-0-46" href="#__codelineno-0-46"></a>        <span class="n">RelationOut</span><span class="p">(</span>
+</span><span id="__span-0-47"><a id="__codelineno-0-47" name="__codelineno-0-47" href="#__codelineno-0-47"></a>            <span class="n">codigo_alvo</span><span class="o">=</span><span class="n">rel</span><span class="o">.</span><span class="n">disciplina_destino</span><span class="o">.</span><span class="n">codigo</span><span class="p">,</span>
+</span><span id="__span-0-48"><a id="__codelineno-0-48" name="__codelineno-0-48" href="#__codelineno-0-48"></a>            <span class="n">nome_alvo</span><span class="o">=</span><span class="n">rel</span><span class="o">.</span><span class="n">disciplina_destino</span><span class="o">.</span><span class="n">nome</span><span class="p">,</span>
+</span><span id="__span-0-49"><a id="__codelineno-0-49" name="__codelineno-0-49" href="#__codelineno-0-49"></a>            <span class="n">tipo</span><span class="o">=</span><span class="n">rel</span><span class="o">.</span><span class="n">tipo_relacao</span>
+</span><span id="__span-0-50"><a id="__codelineno-0-50" name="__codelineno-0-50" href="#__codelineno-0-50"></a>        <span class="p">)</span>
+</span><span id="__span-0-51"><a id="__codelineno-0-51" name="__codelineno-0-51" href="#__codelineno-0-51"></a>        <span class="k">async</span> <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">course</span><span class="o">.</span><span class="n">relacoes_origem</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+</span><span id="__span-0-52"><a id="__codelineno-0-52" name="__codelineno-0-52" href="#__codelineno-0-52"></a>    <span class="p">]</span>
+</span><span id="__span-0-53"><a id="__codelineno-0-53" name="__codelineno-0-53" href="#__codelineno-0-53"></a>
+</span><span id="__span-0-54"><a id="__codelineno-0-54" name="__codelineno-0-54" href="#__codelineno-0-54"></a>    <span class="k">return</span> <span class="n">CourseDetailOut</span><span class="p">(</span>
+</span><span id="__span-0-55"><a id="__codelineno-0-55" name="__codelineno-0-55" href="#__codelineno-0-55"></a>        <span class="nb">id</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+</span><span id="__span-0-56"><a id="__codelineno-0-56" name="__codelineno-0-56" href="#__codelineno-0-56"></a>        <span class="n">codigo</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">codigo</span><span class="p">,</span>
+</span><span id="__span-0-57"><a id="__codelineno-0-57" name="__codelineno-0-57" href="#__codelineno-0-57"></a>        <span class="n">nome</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">nome</span><span class="p">,</span>
+</span><span id="__span-0-58"><a id="__codelineno-0-58" name="__codelineno-0-58" href="#__codelineno-0-58"></a>        <span class="n">ementa</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">ementa</span><span class="p">,</span>
+</span><span id="__span-0-59"><a id="__codelineno-0-59" name="__codelineno-0-59" href="#__codelineno-0-59"></a>        <span class="n">horas</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">carga_horaria</span><span class="p">,</span>
+</span><span id="__span-0-60"><a id="__codelineno-0-60" name="__codelineno-0-60" href="#__codelineno-0-60"></a>        <span class="n">creditos</span><span class="o">=</span><span class="n">course</span><span class="o">.</span><span class="n">carga_horaria</span> <span class="o">//</span> <span class="mi">15</span><span class="p">,</span>
+</span><span id="__span-0-61"><a id="__codelineno-0-61" name="__codelineno-0-61" href="#__codelineno-0-61"></a>        <span class="n">relacoes</span><span class="o">=</span><span class="n">relacoes_data</span>
+</span><span id="__span-0-62"><a id="__codelineno-0-62" name="__codelineno-0-62" href="#__codelineno-0-62"></a>    <span class="p">)</span>
+</span><span id="__span-0-63"><a id="__codelineno-0-63" name="__codelineno-0-63" href="#__codelineno-0-63"></a>
+</span><span id="__span-0-64"><a id="__codelineno-0-64" name="__codelineno-0-64" href="#__codelineno-0-64"></a><span class="n">api</span><span class="o">.</span><span class="n">add_router</span><span class="p">(</span><span class="s2">"/catalog"</span><span class="p">,</span> <span class="n">router</span><span class="p">)</span>
+</span></code></pre></div>
+<hr />
+<h2 id="6-boas-praticas-diretrizes-de-engenharia">6. Boas Práticas &amp; Diretrizes de Engenharia<a class="headerlink" href="#6-boas-praticas-diretrizes-de-engenharia" title="Permanent link">&para;</a></h2>
+<p>Para evitar armadilhas comuns na união de Django com operações assíncronas:</p>
+<ol>
+<li><strong>Evite <code>SynchronousOnlyOperation</code> em rotas <code>async def</code>:</strong><br />
+   Ao utilizar <code>async def</code>, utilize os métodos nativos assíncronos do Django ORM (<code>.afirst()</code>, <code>.aget()</code>, <code>.acount()</code>, <code>async for</code>) ou envolva blocos relacionais síncronos com <code>sync_to_async</code> do <code>asgiref</code>.</li>
+<li><strong>Utilize <code>select_related</code> e <code>prefetch_related</code>:</strong><br />
+   Sempre realize o carregamento antecipado de chaves estrangeiras e relacionamentos muitos-para-muitos para mitigar o problema de consultas <em>N+1</em> e garantir que as instâncias estejam preenchidas antes da serialização no Pydantic.</li>
+<li><strong>Moderar no Django Admin, Consumir no Django Ninja:</strong><br />
+   Regra de ouro das squads: o Django Admin é a central interna de governança e curadoria de dados da UnB; as interfaces de usuário finais (PWA Next.js) consomem exclusivamente as rotas versionadas do Django Ninja.</li>
+<li><strong>Testabilidade:</strong><br />
+   Utilize o cliente de testes <code>TestClient(api)</code> nativo do Django Ninja em conjunto com o <code>pytest-django</code> para validar contratos de requisição e resposta com cobertura contínua de CI.</li>
+</ol>
+<hr />
+<h2 id="7-beneficio-para-as-squads-e-comunidade-da-unb">7. Benefício para as Squads e Comunidade da UnB<a class="headerlink" href="#7-beneficio-para-as-squads-e-comunidade-da-unb" title="Permanent link">&para;</a></h2>
+<p>Na Universidade de Brasília, estudantes dos cursos de Engenharia de Software e Ciência da Computação frequentemente aprendem Django em disciplinas como Métodos de Desenvolvimento de Software (MDS) e Engenharia de Produto de Software (EPS). </p>
+<p>A adoção do <strong>Django Ninja</strong> equilibra com precisão:
+- <strong>Acessibilidade Pedagógica:</strong> Aproveita o conhecimento prévio da comunidade acadêmica no ecossistema Django;
+- <strong>Modernidade Tecnológica:</strong> Capacita os contribuidores nos conceitos mais avançados de tipagem estrita com Pydantic v2, APIs reativas assíncronas e arquitetura orientada a microsserviços modulares.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Voltar para o topo
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Rodapé" >
+        
+          
+          <a href="../overview/" class="md-footer__link md-footer__link--prev" aria-label="Anterior: Visão Geral">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Anterior
+              </span>
+              <div class="md-ellipsis">
+                Visão Geral
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../database/" class="md-footer__link md-footer__link--next" aria-label="Próximo: Multi-Banco &amp; Cache">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Próximo
+              </span>
+              <div class="md-ellipsis">
+                Multi-Banco & Cache
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2026 Ecossistema UnBook — Universidade de Brasília (UnB)
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        
+<div class="md-social">
+  
+    
+    
+    
+    
+    <a href="https://github.com/unbook-org" target="_blank" rel="noopener" title="GitHub da Organização UnBook" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top", "navigation.tracking", "navigation.indexes", "navigation.footer", "search.suggest", "search.highlight", "search.share", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copiado para \u00e1rea de transfer\u00eancia", "clipboard.copy": "Copiar para \u00e1rea de transfer\u00eancia", "search.result.more.one": "mais 1 nesta p\u00e1gina", "search.result.more.other": "# mais nesta p\u00e1gina", "search.result.none": "Nenhum documento encontrado", "search.result.one": "1 documento encontrado", "search.result.other": "# documentos encontrados", "search.result.placeholder": "Digite para iniciar a busca", "search.result.term.missing": "Ausente", "select.version": "Selecione a vers\u00e3o"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+    
+  </body>
+</html>
