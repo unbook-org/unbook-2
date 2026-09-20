@@ -12,7 +12,7 @@ api = NinjaAPI(
 )
 
 
-api.add_router("//", portal_router, tags=["LandingPage"])
+api.add_router("/portal/", portal_router, tags=["LandingPage"])
 api.add_router("/ru/", ru_router, tags=["Cardapio"])
 api.add_router("/catalog/", catalog_router, tags=["Catalogo"])
 api.add_router("/search/", search_router, tags=["Busca"])

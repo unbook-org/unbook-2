@@ -3,4 +3,4 @@ ru_router = Router()
 
 @ru_router.get("/")
 def ru_home(request):
-    return print("Router")
+    return {"status": "ok", "service": "ru"}
