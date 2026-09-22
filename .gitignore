@@ -10,6 +10,18 @@ ENV/
 env.bak/
 venv.bak/
 
+# Django
+*.sqlite3
+db.sqlite3
+local_settings.py
+staticfiles/
+media/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # MkDocs
 site/
 .cache/
