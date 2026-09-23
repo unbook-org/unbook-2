@@ -35,3 +35,30 @@ site/
 # OS
 .DS_Store
 Thumbs.db
+
+# MkDocs build output
+site/
+
+# Ambientes virtuais
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Variáveis locais e dados
+.env
+.env.local
+data/raw/
+data/processed/
+
+# Banco SQLite local (caso rode testes sem Docker)
+*.sqlite3
+db.sqlite3
+
+# IDEs
+.vscode/
+.idea/
