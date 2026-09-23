@@ -47,21 +47,24 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'search',
-    'planner',
-    'portal',
+    'core',
     'catalog',
+    'perfil',
+    'planner',
+    'review',
     'ru',
-    
+    'search',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -90,9 +93,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
+
 
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 
@@ -101,16 +104,17 @@ if POSTGRES_DB:
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': POSTGRES_DB,
-            'USER': os.getenv('POSTGRES_USER', 'unbook'),
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'unbook_secret'),
-            'HOST': os.getenv('POSTGRES_HOST', 'db'),
-            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('POSTGRES_HOST'),
+            'PORT': os.getenv('POSTGRES_PORT'),
         }
     }
 else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
+
             'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
@@ -161,3 +165,24 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# CORS Configuration
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
+    if origin.strip()
+]
+
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8080,http://127.0.0.1:8080').split(',')
+    if origin.strip()
+]
+
+# Cache & External Services
+REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
+MEILI_HOST = os.getenv('MEILI_HOST', 'http://meilisearch:7700')
+MEILI_MASTER_KEY = os.getenv('MEILI_MASTER_KEY', 'unbook_meili_master_key_local')
