@@ -54,6 +54,8 @@ docker compose exec backend python manage.py migrate
 
 ## Como rodar localmente sem Docker
 
+### 1. Backend (Django Ninja)
+
 1. Ativando o ambiente virtual:
 ```bash
 # Linux / macOS
@@ -65,8 +67,9 @@ python -m venv venv
 venv\Scripts\activate
 ```
 
-2. Instalando as dependências:
+2. Instalando as dependências do backend:
 ```bash
+cd backend
 pip install -r requirements.txt
 ```
 
@@ -79,5 +82,23 @@ python manage.py migrate
 ```bash
 uvicorn config.asgi:application --reload --port 8080
 ```
+
+---
+
+### 2. FrontEnd (React Native)
+
+1. Navegue até a pasta do frontend e instale as dependências:
+```bash
+cd frontend
+npm install
+```
+
+2. Inicialize o servidor de desenvolvimento (Expo):
+```bash
+npm start
+```
+- Pressione `a` para abrir no Android Emulator / dispositivo físico via Expo Go
+- Pressione `i` para abrir no iOS Simulator
+- Pressione `w` para abrir na Web
 
 
