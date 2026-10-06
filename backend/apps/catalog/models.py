@@ -113,13 +113,13 @@ class Professor(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     departamento = models.ForeignKey(Departamento, on_delete=models.SET_NULL, null=True, blank=True, related_name="professores")
     siape = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    nome_completo = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=200, unique=True, db_index=True)
+    nome_completo = models.CharField(max_length=300)
     email_institucional = models.EmailField(blank=True, null=True)
     url_foto = models.URLField(blank=True, null=True)
     titulo_academico = models.CharField(max_length=50, blank=True, null=True)
     url_lattes = models.URLField(blank=True, null=True)
     localizacao_gabinete = models.CharField(max_length=150, blank=True, null=True)
+    descricao = models.TextField(max_length=5000, blank=True, null=True)
 
     class Meta:
         db_table = "professores"

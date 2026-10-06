@@ -55,10 +55,9 @@ class MatrizCurricularAdmin(admin.ModelAdmin):
 
 @admin.register(Professor)
 class ProfessorAdmin(admin.ModelAdmin):
-    list_display = ("nome_completo", "siape", "departamento", "titulo_academico", "email_institucional")
+    list_display = ("nome_completo", "siape", "departamento", "titulo_academico", "email_institucional", "descricao")
     list_filter = ("departamento__campus", "departamento")
     search_fields = ("nome_completo", "siape", "email_institucional")
-    prepopulated_fields = {"slug": ("nome_completo",)}
 
 
 @admin.register(Turma)
