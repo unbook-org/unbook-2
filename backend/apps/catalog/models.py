@@ -51,13 +51,16 @@ class CursoGraduacao(models.Model):
 class Materia(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE, related_name="materias")
-    codigo_materia = models.CharField(max_length=20, unique=True, db_index=True)  # CIC0004
+    codigo_materia = models.CharField(max_length=20, unique=True, db_index=True)  
     nome = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
     ementa = models.TextField(blank=True, null=True)
     creditos = models.PositiveIntegerField(default=4)
     carga_horaria = models.PositiveIntegerField(default=60)
-
+    pre_requisito = models.JSONField(blank=True, null=True, help_text="arvore lógica")
+    co_requisito = models.JSONField(blank=True, null=True, help_text="arvore lógica")
+    equivalencia = models.JSONField(blank=True, null=True, help_text="arvore lógica")
+    
     class Meta:
         db_table = "materias"
         verbose_name = "Matéria"
@@ -117,7 +120,7 @@ class Professor(models.Model):
     email_institucional = models.EmailField(blank=True, null=True)
     url_foto = models.URLField(blank=True, null=True)
     titulo_academico = models.CharField(max_length=50, blank=True, null=True)
-    url_lattes = models.URLField(blank=True, null=True)
+    url_lattes = models.URLField(max_length=500, blank=True, null=True)
     localizacao_gabinete = models.CharField(max_length=150, blank=True, null=True)
     descricao = models.TextField(max_length=5000, blank=True, null=True)
 
