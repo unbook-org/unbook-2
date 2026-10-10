@@ -8,12 +8,17 @@
 
 O **UnBook 2.0** é a plataforma comunitária e aberta projetada para apoiar os estudantes da UnB em suas decisões de matrícula, planejamento de semestres, descoberta de ementas e avaliação transparente de disciplinas e didática docente com preservação total de anonimato.
 
-Este repositório é um **monorepo** composto por:
-- **`services/portal`**: Frontend web em Next.js (React 19) + Tailwind CSS + Zustand (*Mobile-First* PWA);
-- **`services/search`**: Motor de busca em tempo real com Django Ninja + Meilisearch (latência <15ms e tolerância a apelidos da UnB);
-- **`services/catalog`**: Catálogo curricular, ementas, grafos de pré-requisitos (`TB_RELACAO_MATERIA`) e síntese inteligente da "Análise UnBook" via Google Gemini API;
-- **`services/planner`**: Simulador interativo de grade horária com validação matricial de conflitos (ex: `24M12` vs `35T34`) e exportação `.ics`;
-- **`services/menu`**: Gestão do cardápio do RU multi-campi, acompanhamento de filas e avaliações gastronômicas;
+Este repositório é composto por:
+- **`backend/`**: Backend unificado em Django + Django Ninja (Python), Pydantic v2, Django ORM e ASGI/Uvicorn, composto pelos módulos:
+  - `catalog`: Catálogo curricular, ementas e grafos de pré-requisitos;
+  - `search`: Motor de busca em tempo real com tolerância a apelidos da UnB;
+  - `planner`: Simulador interativo de grade horária com validação de conflitos (ex: `24M12` vs `35T34`);
+  - `ru`: Gestão do cardápio do RU multi-campi, acompanhamento de filas e avaliações;
+  - `perfil`: Perfis anônimos, carteira de tokens e disciplinas salvas;
+  - `review`: Voz anônima e avaliações de disciplinas/docentes;
+  - `core`: Tratamento de exceções, paginação e segurança.
+- **`frontend/`**: Aplicação mobile em React Native (Expo) + TypeScript;
+- **`infra/`**: Scripts de inicialização e infraestrutura (PostgreSQL com pgvector);
 - **`docs/`**: Documentação técnica e arquitetural completa mantida com Material for MkDocs.
 
 O repositório parceiro de engenharia de dados e extração do SIGAA encontra-se em [`unbook-data-pipeline`](https://github.com/unbook-org/unbook-data-pipeline).
@@ -22,8 +27,8 @@ O repositório parceiro de engenharia de dados e extração do SIGAA encontra-se
 
 ## Tech Stack Consolidada
 
-- **Frontend:** Next.js 19, Tailwind CSS, Radix UI, Zustand, TanStack Query
-- **Backend APIs:** Django 5 + Django Ninja (Python 3.12), Pydantic v2, Django ORM, ASGI
+- **Frontend:** React Native (Expo), TypeScript
+- **Backend APIs:** Django + Django Ninja, Pydantic v2, Django ORM, ASGI/Uvicorn
 - **Bancos de Dados & Cache:** PostgreSQL 16 + `pgvector`, Redis 7
 - **Search Engine:** Meilisearch
 - **Inteligência Artificial:** Google Gemini API (via Instructor e LiteLLM)
