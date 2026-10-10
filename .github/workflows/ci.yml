@@ -10,7 +10,7 @@ on:
 jobs:
 
   changes:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     outputs:
       python: ${{ steps.filter.outputs.python }}
@@ -34,7 +34,7 @@ jobs:
 
   lint:
     needs: changes
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -65,8 +65,7 @@ jobs:
       - name: Run Frontend Lint(JS/TS)
         if: ${{ needs.changes.outputs.nextjs == 'true' }}
         working-directory: ./frontend
-        run: |
-          echo npm run lint
+        run: npm run lint
 
 
 
