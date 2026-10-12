@@ -41,9 +41,10 @@ import {
 
 interface HomeScreenProps {
   onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
+  onExplorar?: () => void;
 }
 
-export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
+export function HomeScreen({ onSelectMateria, onExplorar }: HomeScreenProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [searchLayoutY, setSearchLayoutY] = useState(0);
   const [featuresLayoutY, setFeaturesLayoutY] = useState(0);
@@ -110,7 +111,7 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
         {/* Banner de Novidades e Barra de Navegação no topo da página */}
         <NewsBanner />
         <Navbar
-          onPressExplore={handleScrollToSearch}
+          onPressExplore={onExplorar ?? handleScrollToSearch}
           onPressAbout={handleScrollToFeatures}
           onPressLogo={handleScrollToTop}
         />

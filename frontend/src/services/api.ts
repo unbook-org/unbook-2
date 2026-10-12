@@ -3,6 +3,7 @@ import type {
   MateriaDetalhe,
   MateriaResumo,
   Pagina,
+  ProfessorCatalogo,
 } from '../types/materia';
 import type { NivelEnsino } from '../utils/nivelEnsino';
 
@@ -41,13 +42,17 @@ export interface FiltrosBusca {
   termo: string;
   departamentoId: string | null;
   pagina: number;
+  tamanhoPagina?: number;
 }
 
 export function buscarMaterias(
-  { termo, departamentoId, pagina }: FiltrosBusca,
+  { termo, departamentoId, pagina, tamanhoPagina = 10 }: FiltrosBusca,
   sinal?: AbortSignal,
 ) {
-  const parametros = new URLSearchParams({ page: String(pagina), page_size: '10' });
+  const parametros = new URLSearchParams({
+    page: String(pagina),
+    page_size: String(tamanhoPagina),
+  });
   if (termo) {
     parametros.set('termo', termo);
   }
@@ -65,5 +70,37 @@ export function getMateria(codigo: string, nivel: NivelEnsino, sinal?: AbortSign
   return requisitar<MateriaDetalhe>(
     `/catalog/materia/${encodeURIComponent(codigo)}?nivel=${nivel}`,
     sinal,
+  );
+}
+
+export interface FiltrosProfessores {
+  termo: string;
+  departamentoCodigo: string | null;
+  pagina: number;
+  tamanhoPagina?: number;
+}
+
+// Retorna `null` enquanto o endpoint de professores não estiver disponível (404).
+export function listarProfessores(
+  { termo, departamentoCodigo, pagina, tamanhoPagina = 20 }: FiltrosProfessores,
+  sinal?: AbortSignal,
+): Promise<Pagina<ProfessorCatalogo> | null> {
+  const parametros = new URLSearchParams({
+    page: String(pagina),
+    page_size: String(tamanhoPagina),
+  });
+  if (termo) {
+    parametros.set('busca', termo);
+  }
+  if (departamentoCodigo) {
+    parametros.set('departamento', departamentoCodigo);
+  }
+  return requisitar<Pagina<ProfessorCatalogo>>(`/catalog/professores?${parametros}`, sinal).catch(
+    (erro) => {
+      if (erro instanceof ApiError && erro.status === 404) {
+        return null;
+      }
+      throw erro;
+    },
   );
 }

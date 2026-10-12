@@ -19,6 +19,7 @@ export default function MateriaRoute() {
       codigo={codigo.toUpperCase()}
       nivel={nivelSelecionado}
       onVoltar={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+      onExplorar={() => router.push('/catalogo')}
       onSelectMateria={(codigoRequisito, nivelRequisito) =>
         router.push(hrefMateria(codigoRequisito, nivelRequisito))
       }

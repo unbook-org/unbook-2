@@ -67,3 +67,13 @@ export interface Pagina<Item> {
     total_pages: number;
   };
 }
+
+export interface ProfessorCatalogo {
+  id: string;
+  nome_completo: string;
+  slug: string;
+  titulo_academico: string | null;
+  url_foto: string | null;
+  departamento: Departamento | null;
+  total_turmas: number;
+}

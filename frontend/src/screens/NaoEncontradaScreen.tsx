@@ -15,7 +15,7 @@ export function NaoEncontradaScreen() {
     <SafeAreaView style={styles.tela}>
       <ScrollView contentContainerStyle={styles.conteudo}>
         <NewsBanner />
-        <Navbar onPressLogo={irParaInicio} onPressExplore={irParaInicio} />
+        <Navbar onPressLogo={irParaInicio} onPressExplore={() => router.push('/catalogo')} />
         <View style={styles.aviso} accessibilityRole="alert">
           <Text style={styles.titulo}>Página não encontrada</Text>
           <Text style={styles.descricao}>

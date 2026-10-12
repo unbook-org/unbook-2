@@ -7,6 +7,9 @@ export default function HomeRoute() {
   const router = useRouter();
 
   return (
-    <HomeScreen onSelectMateria={(codigo, nivel) => router.push(hrefMateria(codigo, nivel))} />
+    <HomeScreen
+      onSelectMateria={(codigo, nivel) => router.push(hrefMateria(codigo, nivel))}
+      onExplorar={() => router.push('/catalogo')}
+    />
   );
 }
