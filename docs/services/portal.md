@@ -58,6 +58,27 @@ O portal é totalmente otimizado para celulares e tablets:
 
 ---
 
+## Estado Atual: Expo + Integração com o Catálogo
+
+!!! info "Stack real"
+    O frontend atual fica em `frontend/` e usa **Expo (React Native) + TypeScript**, rodando na web via `react-native-web`. As seções acima descrevem a visão planejada (Next.js).
+
+### Integração com a API
+
+| Arquivo | Responsabilidade |
+| :--- | :--- |
+| `src/services/api.ts` | Funções `buscarMaterias()` e `getMateria()`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
+| `src/hooks/useConsulta.ts` | Hook único de carregamento/erro, com cancelamento da requisição anterior e atraso opcional (debounce). |
+| `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API. |
+| `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home, a partir de 3 caracteres e com 350 ms de debounce. |
+| `src/screens/materia/MateriaScreen.tsx` | Página da matéria: dados, ementa e requisitos com a lógica E/OU; requisitos clicáveis. |
+
+A troca entre home e matéria é feita por estado em `App.tsx`, sem biblioteca de navegação. O botão voltar do navegador e links diretos (`/materia/MAT0025`) ainda não funcionam; quando houver mais telas, a recomendação é adotar `expo-router` ou React Navigation.
+
+Para testar no celular, `localhost` não funciona: defina `EXPO_PUBLIC_API_URL` com o IP do computador (ver `frontend/.env.example`).
+
+---
+
 ## Execução Local
 
 ```bash

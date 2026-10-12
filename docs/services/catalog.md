@@ -90,6 +90,60 @@ O endpoint `/catalog/mylist` armazena o planejamento pessoal de longo prazo do e
 
 ---
 
+## Endpoints Implementados (estado atual)
+
+!!! info "Onde está o código"
+    O catálogo roda no backend unificado em `backend/apps/catalog/`. As rotas ficam em `api.py`, a regra de negócio em `services.py` e as respostas em `schemas.py`. O prefixo de todas as rotas é `/api/catalog`.
+
+| Método | Rota | Descrição |
+| :--- | :--- | :--- |
+| `GET` | `/api/catalog/materia/{codigo}` | Todos os dados da matéria, com requisitos em lista (código + nome) e em árvore (lógica E/OU). |
+| `GET` | `/api/catalog/materia/busca?termo=&page=&page_size=` | Busca paginada por código ou nome. |
+
+### Detalhe da matéria — `GET /api/catalog/materia/{codigo}`
+
+- O código ignora espaços e maiúsculas/minúsculas (`mat0025` encontra `MAT0025`).
+- Matéria inexistente responde **404** com `{"error": "Matéria XYZ0000 não encontrada.", "status_code": 404}`.
+- `pre_requisitos`, `co_requisitos` e `equivalencias` trazem cada código **com o nome buscado no banco**, em uma única consulta. Código que não existe na tabela `materias` vem com `nome: null` e gera um aviso no log.
+- `pre_requisito_arvore`, `co_requisito_arvore` e `equivalencia_arvore` trazem a estrutura original gravada pelo pipeline, que preserva a lógica **E/OU**. A lista plana sozinha não diferencia "A **ou** B" de "A **e** B".
+
+Formato da árvore (colunas JSON `pre_requisito`, `co_requisito` e `equivalencia` da tabela `materias`):
+
+```json
+{
+  "relação": "OR",
+  "condicao": [
+    {"relação": "AND", "condicao": [{"codigo": "FIL0177", "materia_id": null}, {"codigo": "FIL0181", "materia_id": null}]},
+    {"codigo": "FIL0176", "materia_id": null}
+  ]
+}
+```
+
+Folhas têm `codigo`; nós têm `relação` (`AND`/`OR`) e `condicao` (lista de filhos). Uma lista na raiz também é aceita e tratada como `AND`.
+
+### Busca — `GET /api/catalog/materia/busca`
+
+| Parâmetro | Padrão | Regra |
+| :--- | :--- | :--- |
+| `termo` | obrigatório | Mínimo de **3 caracteres** (após remover espaços); menos que isso responde **400**. |
+| `page` | `1` | Mínimo 1. |
+| `page_size` | `20` | Entre 1 e 100. |
+
+- Procura no **código** e no **nome**, ignorando **acentos** e **maiúsculas** (`calculo` encontra `CÁLCULO 1`). No Postgres usa a extensão `unaccent`; no SQLite dos testes, uma função Python equivalente registrada em `apps/core/db.py`.
+- Ordenação por relevância: código que começa com o termo, depois nome que começa com o termo, depois os demais; empate por nome.
+- Resposta: `{"items": [{"codigo_materia", "nome", "departamento"}], "meta": {"page", "page_size", "total_items", "total_pages"}}`.
+
+!!! warning "Extensão obrigatória no Supabase"
+    A busca depende da extensão `unaccent`. Ative em **Database → Extensions** ou com `create extension if not exists unaccent;`. Sem ela, a busca responde 500.
+
+### Pendências conhecidas
+
+- Filtro por departamento e listagem sem termo (issues #12 e #24).
+- Turmas ativas no detalhe: a tabela `turmas` ainda está vazia no Supabase.
+- O model `RequisitoMateria` aponta para a tabela `requisitos_materia`, que não existe no banco; os requisitos reais estão nas colunas JSON de `materias`.
+
+---
+
 ## Execução Local
 
 ```bash
