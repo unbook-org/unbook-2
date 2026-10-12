@@ -64,6 +64,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'apps.core.middleware.RequestLogMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -97,9 +98,10 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
 
+TESTING = (len(sys.argv) > 1 and sys.argv[1] == 'test') or 'pytest' in sys.modules
 POSTGRES_DB = os.getenv('POSTGRES_DB')
 
-if POSTGRES_DB:
+if POSTGRES_DB and not TESTING:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -108,6 +110,10 @@ if POSTGRES_DB:
             'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
             'HOST': os.getenv('POSTGRES_HOST'),
             'PORT': os.getenv('POSTGRES_PORT'),
+            'CONN_MAX_AGE': int(os.getenv('POSTGRES_CONN_MAX_AGE', '0')),
+            'OPTIONS': {
+                'sslmode': os.getenv('POSTGRES_SSLMODE', 'prefer'),
+            },
         }
     }
 else:
@@ -186,3 +192,9 @@ CSRF_TRUSTED_ORIGINS = [
 REDIS_URL = os.getenv('REDIS_URL', 'redis://redis:6379/0')
 MEILI_HOST = os.getenv('MEILI_HOST', 'http://meilisearch:7700')
 MEILI_MASTER_KEY = os.getenv('MEILI_MASTER_KEY', 'unbook_meili_master_key_local')
+
+# Logging
+from apps.core.log import build_logging_config
+
+LOG_LEVEL = 'CRITICAL' if TESTING else os.getenv('LOG_LEVEL', 'INFO').upper()
+LOGGING = build_logging_config(LOG_LEVEL)

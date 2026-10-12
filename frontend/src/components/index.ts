@@ -12,3 +12,4 @@ export * from './Preloader';
 export * from './HeroTornPaper';
 export * from './FeaturesTornPaper';
 export * from './FloatingQuickNav';
+export * from './SeletorDepartamento';

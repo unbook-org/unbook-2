@@ -98,6 +98,55 @@ GEMINI_API_KEY=sua_chave_aqui
 
 ---
 
+## 2.1 Backend Conectado ao Supabase
+
+O banco oficial do projeto é o **Supabase** (PostgreSQL 17). O backend se conecta pelo **Session pooler**, que funciona por IPv4 e se comporta como uma conexão direta.
+
+| Modo do Supabase | Host / porta | Quando usar |
+| :--- | :--- | :--- |
+| Direct connection | `db.<ref>.supabase.co:5432` | Só com IPv6 (plano padrão). |
+| **Session pooler** | `aws-0-<regiao>.pooler.supabase.com:5432` | **Backend Django (padrão do projeto)**, redes e containers só com IPv4. |
+| Transaction pooler | mesmo host, porta `6543` | Serverless; exige `DISABLE_SERVER_SIDE_CURSORS = True` no Django. |
+
+### Passo a passo
+
+1. Copie `backend/.env.example` para `backend/.env` (o `.env` está no `.gitignore`).
+2. No painel do Supabase, clique em **Connect → Connection String → Session pooler** e preencha:
+    - `POSTGRES_USER=postgres.<project_ref>`
+    - `POSTGRES_PASSWORD=<senha do banco>` (entre aspas se tiver `#`, `$` ou espaço)
+    - `POSTGRES_HOST=aws-0-<regiao>.pooler.supabase.com`
+3. Gere `SECRET_KEY` e `ANONYMOUS_SALT` com `python -c "import secrets; print(secrets.token_urlsafe(50))"`. **Nunca altere o `ANONYMOUS_SALT` depois**: os hashes de anonimato existentes deixariam de bater.
+4. Ative a extensão `unaccent` no Supabase (**Database → Extensions**).
+
+!!! note "As chaves `NEXT_PUBLIC_SUPABASE_*` não servem para o backend"
+    A URL e a *publishable key* são da API REST do Supabase, para uso no navegador. O Django conversa direto com o Postgres e precisa da **senha do banco**.
+
+### Regras importantes
+
+- **Não rode `migrate` no Supabase.** As tabelas são criadas e populadas pelo `unbook-data-pipeline`, e o histórico de migrations do Supabase inclui arquivos que ainda não estão no repositório. Se precisar registrar migrations como aplicadas, use `--fake` e combine com o time.
+- **Os testes nunca usam o Supabase.** Com `manage.py test` (ou pytest), o backend usa SQLite mesmo com o `.env` preenchido.
+- `POSTGRES_CONN_MAX_AGE=0` (padrão): sob ASGI/Uvicorn, conexões persistentes vazam por thread e esgotam as vagas do pooler.
+- Sem `POSTGRES_DB` no ambiente, o backend usa SQLite local (`backend/db.sqlite3`).
+
+### Rodando backend e frontend juntos
+
+```bash
+# Backend (porta 8080, conectado ao Supabase pelo .env)
+cd backend
+python -m venv .venv
+.venv/Scripts/pip install -r requirements.txt   # Linux/macOS: .venv/bin/pip
+.venv/Scripts/python manage.py runserver 8080
+# Swagger: http://localhost:8080/api/docs
+
+# Frontend (porta 8081)
+cd frontend
+npm ci
+npx expo start --web
+# App: http://localhost:8081
+```
+
+---
+
 ## 3. Executando os Microsserviços
 
 Em terminais separados (ou via script de orquestração):
