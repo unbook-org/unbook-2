@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { theme } from '../../../constants/theme';
 import { FeaturesTornPaper } from '../../../components/FeaturesTornPaper';
 import { getTransitionHeight } from '../../../components/HeroTornPaper';
 import { useInView } from '../../../hooks/useInView';
+import { CubeTransition } from '../../../components/CubeTransition';
 
 // Ícone vetorial de Livro Aberto (usado em Catálogo e Avaliações)
 function BookOpenIcon({
@@ -85,6 +86,27 @@ function CalendarIcon({
         d="M16 2v4M8 2v4M3 10h18"
         stroke={color}
         strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+// Ícone vetorial de seta apontando para baixo
+function ArrowDownIcon({
+  size = 13,
+  color = '#1F1F1F',
+}: {
+  size?: number;
+  color?: string;
+}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M12 4v13M18 11l-6 6-6-6"
+        stroke={color}
+        strokeWidth="2.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -204,6 +226,7 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
   // 0 = folha inteira contínua ao Hero | 1 = parte de baixo arrancada e fora da tela
   const [tearAnim] = useState(() => new Animated.Value(0));
   const [isTornDone, setIsTornDone] = useState(false);
+  const hasStartedTearRef = useRef(false);
   const [overlayHeight, setOverlayHeight] = useState(920);
 
   const [backBtnHovered, setBackBtnHovered] = useState(false);
@@ -215,27 +238,33 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
   const transitionHeight = getTransitionHeight(width);
   const transitionMarginTop = -transitionHeight;
 
-  // O rasgo só começa quando o preloader sai da tela (isPageReady).
-  // Antes disso as duas peças ficam perfeitamente encaixadas.
-  const shouldTear = isPageReady === undefined ? true : isPageReady;
-
+  // O rasgo de papel da esquerda para a direita dispara quando a seção entra em visão na tela
   useEffect(() => {
-    if (!shouldTear) return;
+    if (!isVisible || hasStartedTearRef.current) return;
+    hasStartedTearRef.current = true;
+
     const anim = Animated.sequence([
-      // Breve pausa para mostrar as duas metades encaixadas como uma folha contínua
-      Animated.delay(420),
-      // Pequena tensão no papel (resistência elástica inicial)
+      // Breve pausa para mostrar as duas metades perfeitamente encaixadas como uma folha contínua
+      Animated.delay(320),
+      // Fase 1: O rasgo inicia na ponta esquerda e rasga até o meio (lado esquerdo cai inclinado)
       Animated.timing(tearAnim, {
-        toValue: 0.05,
-        duration: 120,
-        easing: Easing.out(Easing.quad),
+        toValue: 0.45,
+        duration: 700,
+        easing: Easing.bezier(0.35, 0, 0.25, 1),
         useNativeDriver: Platform.OS !== 'web',
       }),
-      // A folha se solta e flutua suavemente para baixo como um papel leve
+      // Fase 2: O corte atinge a ponta direita e desencaixa por completo
+      Animated.timing(tearAnim, {
+        toValue: 0.65,
+        duration: 380,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: Platform.OS !== 'web',
+      }),
+      // Fase 3: A folha descolada despenca livremente e flutua para fora da tela
       Animated.timing(tearAnim, {
         toValue: 1,
-        duration: 1750,
-        easing: Easing.bezier(0.22, 0.61, 0.36, 1),
+        duration: 900,
+        easing: Easing.bezier(0.25, 1, 0.5, 1),
         useNativeDriver: Platform.OS !== 'web',
       }),
     ]);
@@ -243,26 +272,32 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
       if (finished) setIsTornDone(true);
     });
     return () => anim.stop();
-  }, [shouldTear, tearAnim]);
+  }, [isVisible, tearAnim]);
 
-  // Interpolações suaves: o papel plana, balança de um lado para o outro e flutua até o fim
+  // Interpolações do rasgo da esquerda para a direita:
+  // Com o pivô fixo no topo direito (transformOrigin: 'top right'), a rotação positiva faz
+  // a ponta esquerda cair imediatamente enquanto a direita segura no alto, simulando o rasgo autêntico!
   const tearTranslateY = tearAnim.interpolate({
-    inputRange: [0, 0.05, 0.35, 0.7, 1],
+    inputRange: [0, 0.15, 0.45, 0.65, 1],
     outputRange: [
       0,
-      -4,
-      Math.round(overlayHeight * 0.28),
-      Math.round(overlayHeight * 0.68),
-      Math.max(overlayHeight * 1.18, 980),
+      12,
+      75,
+      Math.round(overlayHeight * 0.45),
+      Math.max(overlayHeight * 1.35, 1250),
     ],
   });
+  const tearTranslateX = tearAnim.interpolate({
+    inputRange: [0, 0.45, 0.65, 1],
+    outputRange: [0, 10, 32, 75],
+  });
   const tearRotate = tearAnim.interpolate({
-    inputRange: [0, 0.05, 0.3, 0.65, 1],
-    outputRange: ['0deg', '0.4deg', '-2.4deg', '1.6deg', '-3.8deg'],
+    inputRange: [0, 0.15, 0.45, 0.65, 0.85, 1],
+    outputRange: ['0deg', '4deg', '16deg', '19deg', '14deg', '10deg'],
   });
   const tearOpacity = tearAnim.interpolate({
-    inputRange: [0, 0.45, 0.85, 1],
-    outputRange: [1, 0.95, 0.55, 0],
+    inputRange: [0, 0.65, 0.85, 1],
+    outputRange: [1, 1, 0.65, 0],
   });
   const features: FeatureItem[] = [
     {
@@ -374,9 +409,12 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
         }
       }}
     >
-      {/* Down-top rasgado da feat: estendido por toda a div da feat, se solta no meio revelando o fundo verde */}
+      {/* Papel do caderno rasgando da esquerda para a direita e caindo */}
       {!isTornDone && (
         <Animated.View
+          nativeID="paper-tear-overlay"
+          // @ts-ignore
+          id="paper-tear-overlay"
           style={[
             styles.paperTearOverlay,
             {
@@ -384,11 +422,13 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
               opacity: tearOpacity,
               transform: [
                 { translateY: tearTranslateY },
+                { translateX: tearTranslateX },
                 { rotate: tearRotate },
               ],
             },
             Platform.OS === 'web' && ({
-              filter: 'drop-shadow(0 12px 24px rgba(0, 0, 0, 0.35))',
+              transformOrigin: 'top right',
+              WebkitTransformOrigin: 'top right',
             } as any),
           ]}
           pointerEvents="none"
@@ -396,6 +436,8 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
           <FeaturesTornPaper
             height={overlayHeight}
             transitionHeight={transitionHeight}
+            hasTornBorder={false}
+            hasShadow={false}
           />
         </Animated.View>
       )}
@@ -415,11 +457,30 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
         {/* ========================================================================= */}
         {!selectedFeature && (
           <View style={styles.sectionHeaderWrapper}>
-            {/* Tag da seção */}
+            {/* Tag da seção com seta para rolar até a grade de recursos */}
             <View style={styles.topTagRow}>
-              <View style={[styles.badgePill, isMobile && styles.badgePillMobile]}>
-                <Text style={styles.badgePillText}>POR QUE USAR O UNBOOK?</Text>
-              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ver recursos do UnBook"
+                onPress={() => {
+                  if (Platform.OS === 'web' && typeof document !== 'undefined') {
+                    const cardsEl = document.getElementById('features-cards-grid');
+                    if (cardsEl) {
+                      cardsEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }
+                  }
+                }}
+                style={({ pressed }) => [
+                  styles.badgePill,
+                  isMobile && styles.badgePillMobile,
+                  pressed && styles.badgePillPressed,
+                ]}
+              >
+                <View style={styles.badgePillContent}>
+                  <Text style={styles.badgePillText}>POR QUE USAR O UNBOOK?</Text>
+                  <ArrowDownIcon size={12} color="#1F1F1F" />
+                </View>
+              </Pressable>
             </View>
 
             {/* Título Principal sempre branco */}
@@ -452,6 +513,9 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
         {/* ========================================================================= */}
         {!selectedFeature && (
           <View
+            nativeID="features-cards-grid"
+            // @ts-ignore
+            id="features-cards-grid"
             style={[
               styles.grid,
               isMobile && styles.gridMobile,
@@ -560,6 +624,13 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
           </View>
         )}
       </View>
+
+      {/* Transição quadriculada em cubos (pixel dither) ligando Features -> Search */}
+      <CubeTransition
+        color={activeColor}
+        targetBgColor="#FFFFFF"
+        direction="down"
+      />
     </View>
   );
 }
@@ -579,11 +650,11 @@ const styles = StyleSheet.create({
   },
   section: {
     paddingHorizontal: 32,
-    paddingBottom: 110,
+    paddingBottom: 72,
     paddingTop: theme.spacing.sm,
     alignItems: 'center',
     justifyContent: 'center',
-    minHeight: 920,
+    minHeight: 880,
     marginTop: -1,
     width: '100%',
     position: 'relative',
@@ -595,9 +666,9 @@ const styles = StyleSheet.create({
   },
   sectionMobile: {
     paddingHorizontal: theme.spacing.md,
-    paddingBottom: 85,
+    paddingBottom: 52,
     paddingTop: theme.spacing.xs,
-    minHeight: 1100,
+    minHeight: 1040,
   },
   sectionTablet: {
     paddingHorizontal: theme.spacing.lg,
@@ -636,8 +707,25 @@ const styles = StyleSheet.create({
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: '2px 2px 0px #1F1F1F',
+          cursor: 'pointer',
+          transition: 'transform 0.15s ease, box-shadow 0.15s ease',
         } as any)
       : {}),
+  },
+  badgePillPressed: {
+    shadowOffset: { width: 1, height: 1 },
+    elevation: 1,
+    ...(Platform.OS === 'web'
+      ? ({
+          transform: 'translate(1.5px, 1.5px)',
+          boxShadow: '0.5px 0.5px 0px #1F1F1F',
+        } as any)
+      : {}),
+  },
+  badgePillContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   badgePillMobile: {
     paddingHorizontal: 10,

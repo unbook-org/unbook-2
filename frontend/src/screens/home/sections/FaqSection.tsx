@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { useInView } from '../../../hooks/useInView';
+import { CubeTransition } from '../../../components/CubeTransition';
 
 function ChevronDownIcon({
   size = 18,
@@ -206,6 +207,14 @@ export function FaqSection() {
           </View>
         </View>
       </View>
+
+      {/* Transição quadriculada em cubos na base da FAQ (invertida em relação ao topo/feats) */}
+      <CubeTransition
+        color="#FAF9F5"
+        targetBgColor="#009A5E"
+        direction="up"
+        flipX={true}
+      />
     </View>
   );
 }

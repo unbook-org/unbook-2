@@ -215,8 +215,7 @@ export function Footer() {
 const styles = StyleSheet.create({
   footerWrapper: {
     backgroundColor: '#FAF9F5',
-    borderTopWidth: 2.5,
-    borderTopColor: '#1F1F1F',
+    borderTopWidth: 0,
     paddingVertical: 56,
     paddingHorizontal: 24,
     alignItems: 'center',

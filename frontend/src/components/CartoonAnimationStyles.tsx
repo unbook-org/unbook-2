@@ -138,48 +138,123 @@ const CSS_ANIMATIONS = `
   }
 }
 
-@keyframes preloaderStampIn {
+/* Pop-in enérgico com rebote cartoon elástico para o logo principal */
+@keyframes heroLogoPopIn {
   0% {
     opacity: 0;
-    transform: scale(2.8) rotate(-18deg) translateY(-20px);
+    transform: scale(0.1) translateY(50px);
+  }
+  45% {
+    opacity: 1;
+    transform: scale(1.22) translateY(-12px);
+  }
+  70% {
+    transform: scale(0.93) translateY(4px);
+  }
+  86% {
+    transform: scale(1.04) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Flutuação sutil contínua para manter a logo viva e em movimento */
+@keyframes heroLogoFloat {
+  0% {
+    transform: translateY(0px) rotate(-0.25deg);
+  }
+  100% {
+    transform: translateY(-7px) rotate(0.35deg);
+  }
+}
+
+/* Queda com rebote elástico para a pílula de boas-vindas */
+@keyframes heroPillDropIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-28px) scale(0.85);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(4px) scale(1.05);
+  }
+  85% {
+    transform: translateY(-2px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Flutuação leve da pílula */
+@keyframes heroPillFloat {
+  0% {
+    transform: translateY(0px) rotate(-0.3deg);
+  }
+  100% {
+    transform: translateY(-3.5px) rotate(0.3deg);
+  }
+}
+
+/* Entrada dos textos descritivos deslizando suavemente para cima */
+@keyframes heroTextSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.005);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Pop-in saltitante para o botão principal */
+@keyframes heroButtonPunchIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.6) translateY(24px);
   }
   60% {
     opacity: 1;
-    transform: scale(0.92) rotate(4deg) translateY(2px);
+    transform: scale(1.09) translateY(-4px);
   }
-  80% {
-    transform: scale(1.06) rotate(-2deg);
+  82% {
+    transform: scale(0.97) translateY(1px);
   }
   100% {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes preloaderPopOut {
+/* Entrada escalonada dos selos de confiança */
+@keyframes heroTrustFadeUp {
   0% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  20% {
-    transform: scale(0.94);
-    opacity: 1;
+    opacity: 0;
+    transform: translateY(18px);
   }
   100% {
-    transform: scale(2.8);
-    opacity: 0;
-    filter: blur(6px);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-@keyframes preloaderSparklePulse {
-  0%, 100% {
-    transform: scale(1) rotate(0deg);
-    opacity: 0.85;
+/* Deslize suave de entrada da barra de navegação */
+@keyframes navSlideDown {
+  0% {
+    opacity: 0;
+    transform: translateY(-100%);
   }
-  50% {
-    transform: scale(1.35) rotate(25deg);
+  100% {
     opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -351,9 +426,61 @@ const CSS_ANIMATIONS = `
   z-index: 10;
   pointer-events: none;
 }
+/* Seletores diretos para garantia total de animação nativa no browser */
+#hero-logo-container {
+  animation: heroLogoPopIn 0.85s cubic-bezier(0.34, 1.56, 0.64, 1) 0.08s both !important;
+  transform-origin: center center;
+}
+
+#hero-logo-svg {
+  animation: heroLogoFloat 4s ease-in-out 0.95s infinite alternate !important;
+  transform-origin: center center;
+}
+
+#hero-welcome-pill {
+  animation: heroPillDropIn 0.58s cubic-bezier(0.34, 1.56, 0.64, 1) 0.04s both !important;
+}
+
+#hero-description {
+  animation: heroTextSlideUp 0.72s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both !important;
+}
+
+#hero-button-group {
+  animation: heroButtonPunchIn 0.76s cubic-bezier(0.34, 1.56, 0.64, 1) 0.44s both !important;
+}
+
+#hero-trust-row {
+  animation: heroTrustFadeUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.58s both !important;
+}
+
+#app-navbar {
+  animation: navSlideDown 0.45s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+
+#paper-tear-overlay {
+  transform-origin: top right !important;
+  -webkit-transform-origin: top right !important;
+  will-change: transform, opacity;
+}
 `;
 
 export function CartoonAnimationStyles() {
+  React.useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      return;
+    }
+    const styleId = 'unbook-cartoon-animations';
+    let el = document.getElementById(styleId);
+    if (!el) {
+      el = document.createElement('style');
+      el.id = styleId;
+      el.textContent = CSS_ANIMATIONS;
+      document.head.appendChild(el);
+    } else {
+      el.textContent = CSS_ANIMATIONS;
+    }
+  }, []);
+
   if (Platform.OS !== 'web') {
     return null;
   }
