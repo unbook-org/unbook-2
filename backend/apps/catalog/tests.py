@@ -224,6 +224,80 @@ class MateriaBuscaApiTestCase(CatalogoBaseTestCase):
         self.assertEqual(len(dados["items"]), 1)
 
 
+class FiltroDepartamentoApiTestCase(CatalogoBaseTestCase):
+    def setUp(self):
+        super().setUp()
+        criar_materia(self.departamento_mat, "MAT0026", "Cálculo 2")
+        criar_materia(self.departamento_mat, "MAT0025", "Cálculo 1")
+        criar_materia(self.departamento_cic, "CIC0004", "Algoritmos e Programação")
+        criar_materia(self.departamento_cic, "CIC0201", "Cálculo Numérico")
+        self.departamento_vazio = Departamento.objects.create(
+            campus=self.departamento_mat.campus,
+            codigo="DEX",
+            nome="Decanato de Extensão",
+        )
+
+    def buscar(self, **parametros):
+        return self.client.get("/api/catalog/materia/busca", parametros)
+
+    def test_lista_so_departamentos_com_materias_em_ordem_alfabetica(self):
+        dados = self.client.get("/api/catalog/departamentos").json()
+
+        self.assertEqual(
+            dados,
+            [
+                {
+                    "id": str(self.departamento_cic.id),
+                    "codigo": "CIC",
+                    "nome": "Departamento de Ciência da Computação",
+                    "total_materias": 2,
+                },
+                {
+                    "id": str(self.departamento_mat.id),
+                    "codigo": "MAT",
+                    "nome": "Departamento de Matemática",
+                    "total_materias": 2,
+                },
+            ],
+        )
+
+    def test_departamento_sem_termo_lista_todas_as_materias_dele_por_nome(self):
+        dados = self.buscar(departamento=str(self.departamento_mat.id)).json()
+
+        self.assertEqual(
+            [item["codigo_materia"] for item in dados["items"]], ["MAT0025", "MAT0026"]
+        )
+        self.assertEqual(dados["meta"]["total_items"], 2)
+
+    def test_termo_e_departamento_combinados(self):
+        dados = self.buscar(
+            termo="calculo", departamento=str(self.departamento_cic.id)
+        ).json()
+
+        self.assertEqual(
+            [item["codigo_materia"] for item in dados["items"]], ["CIC0201"]
+        )
+
+    def test_sem_termo_e_sem_departamento_retorna_400(self):
+        response = self.buscar()
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()["error"],
+            "Informe um termo de busca ou escolha um departamento.",
+        )
+
+    def test_termo_curto_continua_invalido_mesmo_com_departamento(self):
+        response = self.buscar(termo="ca", departamento=str(self.departamento_mat.id))
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_departamento_com_id_invalido_retorna_422(self):
+        response = self.buscar(departamento="nao-e-um-uuid")
+
+        self.assertEqual(response.status_code, 422)
+
+
 class CatalogoLogTestCase(CatalogoBaseTestCase):
     def test_avisa_quando_requisito_nao_esta_cadastrado(self):
         criar_materia(

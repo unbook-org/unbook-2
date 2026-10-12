@@ -1,8 +1,15 @@
+from uuid import UUID
+
 from ninja import Router
 
-from apps.catalog.schemas import MateriaBuscaOut, MateriaDetalheOut
+from apps.catalog.schemas import (
+    DepartamentoOpcaoOut,
+    MateriaBuscaOut,
+    MateriaDetalheOut,
+)
 from apps.catalog.services import buscar_materias as fetch_materias_busca
 from apps.catalog.services import get_materia_por_codigo as fetch_materia_detalhe
+from apps.catalog.services import listar_departamentos as fetch_departamentos
 from apps.core.pagination import PaginatedResponse
 
 router = Router()
@@ -16,13 +23,31 @@ def health_check(request):
 
 
 @router.get(
+    "/departamentos",
+    response=list[DepartamentoOpcaoOut],
+    summary="Listar departamentos que têm matérias",
+)
+def listar_departamentos(request):
+    """Lista os departamentos com matérias, em ordem alfabética, para filtros."""
+    return fetch_departamentos()
+
+
+@router.get(
     "/materia/busca",
     response=PaginatedResponse[MateriaBuscaOut],
-    summary="Buscar matérias por código ou nome (mínimo de 3 caracteres)",
+    summary="Buscar matérias por termo (mínimo de 3 caracteres) e/ou departamento",
 )
-def buscar_materias(request, termo: str, page: int = 1, page_size: int = 20):
-    """Busca matérias por código ou nome, sem diferenciar acentos e maiúsculas."""
-    return fetch_materias_busca(termo=termo, page=page, page_size=page_size)
+def buscar_materias(
+    request,
+    termo: str | None = None,
+    departamento: UUID | None = None,
+    page: int = 1,
+    page_size: int = 20,
+):
+    """Busca matérias por código ou nome, ignorando acentos e caixa, com filtro opcional por departamento."""
+    return fetch_materias_busca(
+        termo=termo, departamento=departamento, page=page, page_size=page_size
+    )
 
 
 @router.get(

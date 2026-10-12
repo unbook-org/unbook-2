@@ -1,12 +1,14 @@
 import logging
 from collections.abc import Iterable
 from typing import Any
+from uuid import UUID
 
-from catalog.models import Materia
-from django.db.models import Case, IntegerField, Q, QuerySet, Value, When
+from catalog.models import Departamento, Materia
+from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 
 from apps.catalog.schemas import (
+    DepartamentoOpcaoOut,
     DepartamentoResumoOut,
     MateriaBuscaOut,
     MateriaDetalheOut,
@@ -124,31 +126,55 @@ def get_materia_por_codigo(codigo: str) -> MateriaDetalheOut:
     )
 
 
-def _validar_termo_busca(termo: str | None) -> str:
-    """Remove espaços do termo e exige o tamanho mínimo da busca; lança 400 se for curto."""
+def listar_departamentos() -> list[DepartamentoOpcaoOut]:
+    """Lista os departamentos que têm matérias, em ordem alfabética, com o total de cada um."""
+    departamentos = (
+        Departamento.objects.annotate(total_materias=Count("materias"))
+        .filter(total_materias__gt=0)
+        .order_by("nome")
+    )
+    return [
+        DepartamentoOpcaoOut(
+            id=departamento.id,
+            codigo=departamento.codigo,
+            nome=departamento.nome,
+            total_materias=departamento.total_materias,
+        )
+        for departamento in departamentos
+    ]
+
+
+def _validar_criterios_busca(termo: str | None, departamento: UUID | None) -> str:
+    """Exige termo com o tamanho mínimo ou um departamento; lança 400 caso contrário."""
     termo_limpo = (termo or "").strip()
-    if len(termo_limpo) < TAMANHO_MINIMO_BUSCA:
+    if termo_limpo and len(termo_limpo) < TAMANHO_MINIMO_BUSCA:
         raise UnBookException(
             f"Informe pelo menos {TAMANHO_MINIMO_BUSCA} caracteres para buscar matérias.",
+            status_code=400,
+        )
+    if not termo_limpo and departamento is None:
+        raise UnBookException(
+            "Informe um termo de busca ou escolha um departamento.",
             status_code=400,
         )
     return termo_limpo
 
 
-def _filtrar_por_termo(termo: str) -> QuerySet:
+def _filtrar_por_termo(consulta: QuerySet, termo: str) -> QuerySet:
     """Filtra matérias cujo código ou nome contém o termo, ignorando acentos e caixa."""
     termo_normalizado = Lower(SemAcento(Value(termo)))
-    return (
-        Materia.objects.select_related("departamento")
-        .annotate(
-            codigo_normalizado=Lower("codigo_materia"),
-            nome_normalizado=Lower(SemAcento("nome")),
-        )
-        .filter(
-            Q(codigo_normalizado__contains=termo_normalizado)
-            | Q(nome_normalizado__contains=termo_normalizado)
-        )
+    return consulta.annotate(
+        codigo_normalizado=Lower("codigo_materia"),
+        nome_normalizado=Lower(SemAcento("nome")),
+    ).filter(
+        Q(codigo_normalizado__contains=termo_normalizado)
+        | Q(nome_normalizado__contains=termo_normalizado)
     )
+
+
+def _filtrar_por_departamento(consulta: QuerySet, departamento: UUID) -> QuerySet:
+    """Mantém só as matérias do departamento informado (pelo id, pois há códigos repetidos)."""
+    return consulta.filter(departamento_id=departamento)
 
 
 def _ordenar_por_relevancia(consulta: QuerySet, termo: str) -> QuerySet:
@@ -164,14 +190,17 @@ def _ordenar_por_relevancia(consulta: QuerySet, termo: str) -> QuerySet:
     ).order_by("relevancia", "nome", "codigo_materia")
 
 
-def _registrar_busca(termo: str, meta: PageMeta) -> None:
-    """Registra no log o termo buscado e quantos resultados ele trouxe."""
+def _registrar_busca(termo: str, departamento: UUID | None, meta: PageMeta) -> None:
+    """Registra no log os critérios da busca e quantos resultados ela trouxe."""
+    criterios = f"termo={termo!r}"
+    if departamento is not None:
+        criterios += f" departamento={departamento}"
     if meta.total_items == 0:
-        logger.info("Busca de matérias termo=%r: nenhum resultado", termo)
+        logger.info("Busca de matérias %s: nenhum resultado", criterios)
         return
     logger.info(
-        "Busca de matérias termo=%r: %d %s (página %d de %d)",
-        termo,
+        "Busca de matérias %s: %d %s (página %d de %d)",
+        criterios,
         meta.total_items,
         "resultado" if meta.total_items == 1 else "resultados",
         meta.page,
@@ -179,12 +208,25 @@ def _registrar_busca(termo: str, meta: PageMeta) -> None:
     )
 
 
-def buscar_materias(termo: str, page: int = 1, page_size: int = 20) -> dict[str, Any]:
-    """Busca matérias por código ou nome e devolve a página pedida com os metadados."""
-    termo_limpo = _validar_termo_busca(termo)
-    consulta = _ordenar_por_relevancia(_filtrar_por_termo(termo_limpo), termo_limpo)
+def buscar_materias(
+    termo: str | None = None,
+    departamento: UUID | None = None,
+    page: int = 1,
+    page_size: int = 20,
+) -> dict[str, Any]:
+    """Busca matérias por termo e/ou departamento e devolve a página pedida com os metadados."""
+    termo_limpo = _validar_criterios_busca(termo, departamento)
+    consulta = Materia.objects.select_related("departamento")
+    if departamento is not None:
+        consulta = _filtrar_por_departamento(consulta, departamento)
+    if termo_limpo:
+        consulta = _ordenar_por_relevancia(
+            _filtrar_por_termo(consulta, termo_limpo), termo_limpo
+        )
+    else:
+        consulta = consulta.order_by("nome", "codigo_materia")
     materias_pagina, meta = paginar_consulta(consulta, page, page_size)
-    _registrar_busca(termo_limpo, meta)
+    _registrar_busca(termo_limpo, departamento, meta)
 
     return {
         "items": [

@@ -9,9 +9,14 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { SeletorDepartamento } from '../../../components/SeletorDepartamento';
 import { theme } from '../../../constants/theme';
 import { useConsulta } from '../../../hooks/useConsulta';
-import { TAMANHO_MINIMO_BUSCA, buscarMaterias } from '../../../services/api';
+import {
+  TAMANHO_MINIMO_BUSCA,
+  buscarMaterias,
+  listarDepartamentos,
+} from '../../../services/api';
 import type { MateriaResumo } from '../../../types/materia';
 
 const ATRASO_BUSCA_MS = 350;
@@ -24,14 +29,30 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
   const [termo, setTermo] = useState('');
+  const [departamentoId, setDepartamentoId] = useState<string | null>(null);
+  const [pagina, setPagina] = useState(1);
   const termoLimpo = termo.trim();
-  const buscaAtiva = termoLimpo.length >= TAMANHO_MINIMO_BUSCA;
+  const termoCurto = termoLimpo.length > 0 && termoLimpo.length < TAMANHO_MINIMO_BUSCA;
+  const buscaAtiva = !termoCurto && (termoLimpo.length > 0 || departamentoId !== null);
 
+  const departamentos = useConsulta((sinal) => listarDepartamentos(sinal), []);
   const { dados, carregando, erro } = useConsulta(
-    buscaAtiva ? (sinal) => buscarMaterias(termoLimpo, 1, sinal) : null,
-    [termoLimpo],
+    buscaAtiva
+      ? (sinal) => buscarMaterias({ termo: termoLimpo, departamentoId, pagina }, sinal)
+      : null,
+    [termoLimpo, departamentoId, pagina],
     ATRASO_BUSCA_MS,
   );
+
+  const alterarTermo = (novoTermo: string) => {
+    setTermo(novoTermo);
+    setPagina(1);
+  };
+
+  const alterarDepartamento = (novoDepartamentoId: string | null) => {
+    setDepartamentoId(novoDepartamentoId);
+    setPagina(1);
+  };
 
   return (
     <View
@@ -45,12 +66,20 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
           Encontre qualquer matéria da UnB
         </Text>
         <Text style={styles.subtitle}>
-          Busque pelo nome ou código, com ou sem acento.
+          Busque pelo nome ou código, com ou sem acento, ou escolha um departamento.
         </Text>
+
+        <SeletorDepartamento
+          departamentos={departamentos.dados}
+          selecionadoId={departamentoId}
+          onSelecionar={alterarDepartamento}
+          carregando={departamentos.carregando}
+          erro={departamentos.erro}
+        />
 
         <TextInput
           value={termo}
-          onChangeText={setTermo}
+          onChangeText={alterarTermo}
           placeholder="Ex.: cálculo, CIC0004, estruturas de dados..."
           placeholderTextColor={theme.colors.gray}
           style={styles.input}
@@ -60,7 +89,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
         />
 
         <View style={styles.resultados}>
-          {!buscaAtiva && termoLimpo.length > 0 && (
+          {termoCurto && (
             <Text style={styles.aviso}>
               Digite pelo menos {TAMANHO_MINIMO_BUSCA} caracteres.
             </Text>
@@ -74,10 +103,9 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
               <Text style={styles.total}>
                 {dados.meta.total_items === 0
                   ? 'Nenhuma matéria encontrada.'
-                  : `${dados.meta.total_items} matérias encontradas` +
-                    (dados.meta.total_items > dados.items.length
-                      ? ` (mostrando ${dados.items.length})`
-                      : '')}
+                  : `${dados.meta.total_items} ${
+                      dados.meta.total_items === 1 ? 'matéria encontrada' : 'matérias encontradas'
+                    }`}
               </Text>
               {dados.items.map((materia) => (
                 <ItemMateria
@@ -86,11 +114,65 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
                   onPress={() => onSelectMateria(materia.codigo_materia)}
                 />
               ))}
+              {dados.meta.total_pages > 1 && (
+                <Paginacao
+                  pagina={dados.meta.page}
+                  totalPaginas={dados.meta.total_pages}
+                  onMudar={setPagina}
+                />
+              )}
             </>
           )}
         </View>
       </View>
     </View>
+  );
+}
+
+interface PaginacaoProps {
+  pagina: number;
+  totalPaginas: number;
+  onMudar: (pagina: number) => void;
+}
+
+function Paginacao({ pagina, totalPaginas, onMudar }: PaginacaoProps) {
+  return (
+    <View style={styles.paginacao}>
+      <BotaoPagina
+        texto="← Anterior"
+        desabilitado={pagina <= 1}
+        onPress={() => onMudar(pagina - 1)}
+      />
+      <Text style={styles.textoPagina}>
+        Página {pagina} de {totalPaginas}
+      </Text>
+      <BotaoPagina
+        texto="Próxima →"
+        desabilitado={pagina >= totalPaginas}
+        onPress={() => onMudar(pagina + 1)}
+      />
+    </View>
+  );
+}
+
+function BotaoPagina({
+  texto,
+  desabilitado,
+  onPress,
+}: {
+  texto: string;
+  desabilitado: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={desabilitado}
+      style={[styles.botaoPagina, desabilitado && styles.botaoPaginaDesabilitado]}
+      accessibilityRole="button"
+    >
+      <Text style={styles.textoBotaoPagina}>{texto}</Text>
+    </Pressable>
   );
 }
 
@@ -222,6 +304,33 @@ const styles = StyleSheet.create({
   itemNome: {
     fontSize: 15,
     fontWeight: '700',
+    color: theme.colors.dark,
+  },
+  paginacao: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  textoPagina: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.gray,
+  },
+  botaoPagina: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  botaoPaginaDesabilitado: {
+    opacity: 0.35,
+  },
+  textoBotaoPagina: {
+    fontSize: 13,
+    fontWeight: '800',
     color: theme.colors.dark,
   },
   itemDepartamento: {

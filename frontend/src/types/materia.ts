@@ -3,6 +3,11 @@ export interface Departamento {
   nome: string;
 }
 
+export interface DepartamentoOpcao extends Departamento {
+  id: string;
+  total_materias: number;
+}
+
 export interface Requisito {
   codigo: string;
   nome: string | null;

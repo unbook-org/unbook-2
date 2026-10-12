@@ -1,4 +1,9 @@
-import type { MateriaDetalhe, MateriaResumo, Pagina } from '../types/materia';
+import type {
+  DepartamentoOpcao,
+  MateriaDetalhe,
+  MateriaResumo,
+  Pagina,
+} from '../types/materia';
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
 
@@ -31,9 +36,28 @@ async function requisitar<Resposta>(caminho: string, sinal?: AbortSignal): Promi
   return corpo as Resposta;
 }
 
-export function buscarMaterias(termo: string, pagina = 1, sinal?: AbortSignal) {
-  const parametros = new URLSearchParams({ termo, page: String(pagina), page_size: '10' });
+export interface FiltrosBusca {
+  termo: string;
+  departamentoId: string | null;
+  pagina: number;
+}
+
+export function buscarMaterias(
+  { termo, departamentoId, pagina }: FiltrosBusca,
+  sinal?: AbortSignal,
+) {
+  const parametros = new URLSearchParams({ page: String(pagina), page_size: '10' });
+  if (termo) {
+    parametros.set('termo', termo);
+  }
+  if (departamentoId) {
+    parametros.set('departamento', departamentoId);
+  }
   return requisitar<Pagina<MateriaResumo>>(`/catalog/materia/busca?${parametros}`, sinal);
+}
+
+export function listarDepartamentos(sinal?: AbortSignal) {
+  return requisitar<DepartamentoOpcao[]>('/catalog/departamentos', sinal);
 }
 
 export function getMateria(codigo: string, sinal?: AbortSignal) {

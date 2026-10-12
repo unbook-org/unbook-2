@@ -67,10 +67,11 @@ O portal é totalmente otimizado para celulares e tablets:
 
 | Arquivo | Responsabilidade |
 | :--- | :--- |
-| `src/services/api.ts` | Funções `buscarMaterias()` e `getMateria()`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
+| `src/services/api.ts` | Funções `buscarMaterias()` (termo, departamento e página), `listarDepartamentos()` e `getMateria()`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
 | `src/hooks/useConsulta.ts` | Hook único de carregamento/erro, com cancelamento da requisição anterior e atraso opcional (debounce). |
 | `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API. |
-| `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home, a partir de 3 caracteres e com 350 ms de debounce. |
+| `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home: termo (a partir de 3 caracteres, com 350 ms de debounce), filtro por departamento e paginação. |
+| `src/components/SeletorDepartamento.tsx` | Seletor de departamento reutilizável, com filtro por texto que ignora acentos. |
 | `src/screens/materia/MateriaScreen.tsx` | Página da matéria: dados, ementa e requisitos com a lógica E/OU; requisitos clicáveis. |
 
 A troca entre home e matéria é feita por estado em `App.tsx`, sem biblioteca de navegação. O botão voltar do navegador e links diretos (`/materia/MAT0025`) ainda não funcionam; quando houver mais telas, a recomendação é adotar `expo-router` ou React Navigation.

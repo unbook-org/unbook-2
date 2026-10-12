@@ -9,6 +9,13 @@ class DepartamentoResumoOut(Schema):
     nome: str
 
 
+class DepartamentoOpcaoOut(Schema):
+    id: UUID
+    codigo: str
+    nome: str
+    total_materias: int
+
+
 class RequisitoOut(Schema):
     codigo: str
     nome: str | None = None

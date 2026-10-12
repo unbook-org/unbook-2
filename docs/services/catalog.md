@@ -98,7 +98,8 @@ O endpoint `/catalog/mylist` armazena o planejamento pessoal de longo prazo do e
 | Método | Rota | Descrição |
 | :--- | :--- | :--- |
 | `GET` | `/api/catalog/materia/{codigo}` | Todos os dados da matéria, com requisitos em lista (código + nome) e em árvore (lógica E/OU). |
-| `GET` | `/api/catalog/materia/busca?termo=&page=&page_size=` | Busca paginada por código ou nome. |
+| `GET` | `/api/catalog/materia/busca?termo=&departamento=&page=&page_size=` | Busca paginada por código ou nome, com filtro opcional por departamento. |
+| `GET` | `/api/catalog/departamentos` | Departamentos que têm matérias, em ordem alfabética, com o total de cada um. |
 
 ### Detalhe da matéria — `GET /api/catalog/materia/{codigo}`
 
@@ -125,20 +126,29 @@ Folhas têm `codigo`; nós têm `relação` (`AND`/`OR`) e `condicao` (lista de 
 
 | Parâmetro | Padrão | Regra |
 | :--- | :--- | :--- |
-| `termo` | obrigatório | Mínimo de **3 caracteres** (após remover espaços); menos que isso responde **400**. |
+| `termo` | opcional | Se informado, mínimo de **3 caracteres** (após remover espaços); menos que isso responde **400**. |
+| `departamento` | opcional | **id (UUID)** do departamento, vindo de `/api/catalog/departamentos`. Id inválido responde **422**. |
 | `page` | `1` | Mínimo 1. |
 | `page_size` | `20` | Entre 1 e 100. |
 
 - Procura no **código** e no **nome**, ignorando **acentos** e **maiúsculas** (`calculo` encontra `CÁLCULO 1`). No Postgres usa a extensão `unaccent`; no SQLite dos testes, uma função Python equivalente registrada em `apps/core/db.py`.
-- Ordenação por relevância: código que começa com o termo, depois nome que começa com o termo, depois os demais; empate por nome.
+- É preciso informar `termo` **ou** `departamento`; sem nenhum dos dois, responde **400**. Só com `departamento`, lista todas as matérias dele por nome (é a listagem geral).
+- Ordenação por relevância quando há termo: código que começa com o termo, depois nome que começa com o termo, depois os demais; empate por nome.
 - Resposta: `{"items": [{"codigo_materia", "nome", "departamento"}], "meta": {"page", "page_size", "total_items", "total_pages"}}`.
 
 !!! warning "Extensão obrigatória no Supabase"
     A busca depende da extensão `unaccent`. Ative em **Database → Extensions** ou com `create extension if not exists unaccent;`. Sem ela, a busca responde 500.
 
+### Departamentos — `GET /api/catalog/departamentos`
+
+Resposta: `[{"id", "codigo", "nome", "total_materias"}]`, só com departamentos que têm pelo menos uma matéria.
+
+!!! warning "Filtre pelo id, não pelo código"
+    No Supabase há códigos de departamento repetidos (ex.: `PPGBB`, `PPGMAT`, `PPGA`, `DPG`), e quase todos os departamentos estão associados ao campus Darcy, inclusive FGA e FCE. Por isso o filtro usa o `id`. Os dois problemas vêm do pipeline.
+
 ### Pendências conhecidas
 
-- Filtro por departamento e listagem sem termo (issues #12 e #24).
+- Filtro por tipo (matérias/professores) na visão geral (#24), que depende do endpoint de professores.
 - Turmas ativas no detalhe: a tabela `turmas` ainda está vazia no Supabase.
 - O model `RequisitoMateria` aponta para a tabela `requisitos_materia`, que não existe no banco; os requisitos reais estão nas colunas JSON de `materias`.
 
