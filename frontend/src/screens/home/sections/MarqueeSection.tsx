@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Platform, Animated, Easing } from 'react-native';
 
 const ROW_1_ITEMS = [
@@ -59,7 +59,7 @@ function MarqueeRow({
   const trackItems = [...items, ...items];
 
   // Animação para Mobile Nativo (caso não seja Web)
-  const animatedValue = useRef(new Animated.Value(0)).current;
+  const [animatedValue] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (Platform.OS === 'web') return;

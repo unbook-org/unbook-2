@@ -9,7 +9,6 @@ import {
   Linking,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
-import { TransitionCube } from '../../../components/TransitionCube';
 import { useInView } from '../../../hooks/useInView';
 
 function ChevronDownIcon({
@@ -144,7 +143,6 @@ export function FaqSection() {
   const { width } = useWindowDimensions();
   const [sectionRef, isVisible] = useInView<View>({ threshold: 0.1 });
   const isMobile = width < 640;
-  const cubeHeight = isMobile ? 42 : 62;
 
   const [openIndexes, setOpenIndexes] = useState<number[]>([0]);
 

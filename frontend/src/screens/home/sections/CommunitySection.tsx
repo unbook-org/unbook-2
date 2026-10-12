@@ -8,8 +8,7 @@ import {
   useWindowDimensions,
   Linking,
 } from 'react-native';
-import Svg, { Path, Circle, Rect } from 'react-native-svg';
-import { theme } from '../../../constants/theme';
+import Svg, { Path, Rect } from 'react-native-svg';
 import { useInView } from '../../../hooks/useInView';
 
 function BookPencilIcon({ size = 24, color = '#1F1F1F' }: { size?: number; color?: string }) {

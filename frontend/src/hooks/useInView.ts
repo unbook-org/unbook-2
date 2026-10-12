@@ -9,16 +9,18 @@ interface UseInViewOptions {
 export function useInView<T = any>(options: UseInViewOptions = {}) {
   const { threshold = 0.15, triggerOnce = true } = options;
   const ref = useRef<T>(null);
-  const [isInView, setIsInView] = useState(Platform.OS !== 'web');
+  const [isInView, setIsInView] = useState(
+    Platform.OS !== 'web' ||
+      typeof window === 'undefined' ||
+      !('IntersectionObserver' in window)
+  );
 
   useEffect(() => {
-    if (Platform.OS !== 'web') {
-      setIsInView(true);
-      return;
-    }
-
-    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
-      setIsInView(true);
+    if (
+      Platform.OS !== 'web' ||
+      typeof window === 'undefined' ||
+      !('IntersectionObserver' in window)
+    ) {
       return;
     }
 

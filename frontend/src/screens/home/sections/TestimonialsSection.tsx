@@ -86,7 +86,7 @@ function TestimonialCard({
         ))}
       </View>
 
-      <Text style={styles.quoteText}>"{quote}"</Text>
+      <Text style={styles.quoteText}>“{quote}”</Text>
 
       {/* Autor */}
       <View style={styles.authorRow}>

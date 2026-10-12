@@ -23,8 +23,6 @@ export function AnimatedCounter({
 
   useEffect(() => {
     if (!trigger) {
-      setCount(0);
-      setHasCompleted(false);
       return;
     }
 
@@ -59,15 +57,16 @@ export function AnimatedCounter({
     };
   }, [end, duration, trigger]);
 
-  // Formata número com ponto de milhar padrão pt-BR (ex: 5.000, 11.000)
-  const formattedCount = count.toLocaleString('pt-BR');
+  const activeCount = trigger ? count : 0;
+  const isFinished = trigger && hasCompleted;
+  const formattedCount = activeCount.toLocaleString('pt-BR');
 
   return (
     <Text
       style={[
         styles.counterText,
         style,
-        hasCompleted && styles.completedPunch,
+        isFinished && styles.completedPunch,
       ]}
     >
       {prefix}

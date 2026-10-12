@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,6 @@ import Svg, { Path } from 'react-native-svg';
 import { theme } from '../../../constants/theme';
 import { FeaturesTornPaper } from '../../../components/FeaturesTornPaper';
 import { getTransitionHeight } from '../../../components/HeroTornPaper';
-import { NotebookBackground } from '../../../components/NotebookBackground';
 import { useInView } from '../../../hooks/useInView';
 
 // Ícone vetorial de Livro Aberto (usado em Catálogo e Avaliações)
@@ -203,7 +202,7 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
 
   // Animação do papel rasgando (Animated API — funciona de verdade no RN Web)
   // 0 = folha inteira contínua ao Hero | 1 = parte de baixo arrancada e fora da tela
-  const tearAnim = useRef(new Animated.Value(0)).current;
+  const [tearAnim] = useState(() => new Animated.Value(0));
   const [isTornDone, setIsTornDone] = useState(false);
   const [overlayHeight, setOverlayHeight] = useState(920);
 

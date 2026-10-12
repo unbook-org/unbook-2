@@ -1,23 +1,12 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
   StyleSheet,
   Platform,
   useWindowDimensions,
-  Pressable,
 } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
 import { theme } from '../../../constants/theme';
-
-function SearchIcon({ size = 20, color = '#707070' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Circle cx="11" cy="11" r="7" stroke={color} strokeWidth="2.2" />
-      <Path d="M20 20L16 16" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
-    </Svg>
-  );
-}
 
 export function SearchSection() {
   const { width } = useWindowDimensions();

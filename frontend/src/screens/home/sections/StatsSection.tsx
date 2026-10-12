@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,6 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import { theme } from '../../../constants/theme';
 import { AnimatedCounter } from '../../../components/AnimatedCounter';
 import { CartoonButton } from '../../../components/CartoonButton';
 import { useInView } from '../../../hooks/useInView';
@@ -50,7 +49,7 @@ function StatCard({
   // Animação de crescimento da altura do card em formato de gráfico
   // O card começa pequeno (180px) e conforme os números contam até o final,
   // a altura se expande verticalmente para cima até o targetHeight!
-  const heightAnim = useRef(new Animated.Value(0)).current;
+  const [heightAnim] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
     if (!isVisible) return;

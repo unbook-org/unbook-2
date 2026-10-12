@@ -25,8 +25,11 @@ export function Preloader({ onComplete, onExitStart, durationMs = 1250 }: Preloa
   // Refs para os callbacks: re-renders do pai não reiniciam o preloader
   const onCompleteRef = useRef(onComplete);
   const onExitStartRef = useRef(onExitStart);
-  onCompleteRef.current = onComplete;
-  onExitStartRef.current = onExitStart;
+
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+    onExitStartRef.current = onExitStart;
+  });
 
   useEffect(() => {
     let startTimestamp: number | null = null;

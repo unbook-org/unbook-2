@@ -8,8 +8,7 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import Svg, { Path, Circle, Line, Rect } from 'react-native-svg';
-import { theme } from '../constants/theme';
+import Svg, { Path } from 'react-native-svg';
 import { UnbookLogo } from './UnbookLogo';
 
 function GithubIcon({ size = 18, color = '#1F1F1F' }: { size?: number; color?: string }) {
@@ -22,29 +21,6 @@ function GithubIcon({ size = 18, color = '#1F1F1F' }: { size?: number; color?: s
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-    </Svg>
-  );
-}
-
-function CoffeeCupIcon({ size = 16, color = '#1F1F1F' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M18 8h1a3.5 3.5 0 0 1 0 7h-1"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-      />
-      <Path
-        d="M3 8h15v8a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4V8Z"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Line x1="6.5" y1="2.5" x2="6.5" y2="5.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <Line x1="10.5" y1="2.5" x2="10.5" y2="5.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
-      <Line x1="14.5" y1="2.5" x2="14.5" y2="5.5" stroke={color} strokeWidth="2" strokeLinecap="round" />
     </Svg>
   );
 }

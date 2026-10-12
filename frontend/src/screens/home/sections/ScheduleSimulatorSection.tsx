@@ -7,18 +7,8 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import Svg, { Path, Rect } from 'react-native-svg';
-import { theme } from '../../../constants/theme';
+import Svg, { Path } from 'react-native-svg';
 import { useInView } from '../../../hooks/useInView';
-
-function CalendarIcon({ size = 20, color = '#1F1F1F' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Rect x="3" y="4" width="18" height="18" rx="2" stroke={color} strokeWidth="2.2" />
-      <Path d="M16 2v4M8 2v4M3 10h18" stroke={color} strokeWidth="2.2" strokeLinecap="round" />
-    </Svg>
-  );
-}
 
 function AlertTriangleIcon({ size = 18, color = '#FE4141' }: { size?: number; color?: string }) {
   return (
@@ -147,9 +137,8 @@ const TIME_SLOTS = [
 
 export function ScheduleSimulatorSection() {
   const { width } = useWindowDimensions();
-  const [sectionRef, isVisible] = useInView<View>({ threshold: 0.1 });
+  const [sectionRef] = useInView<View>({ threshold: 0.1 });
   const isMobile = width < 640;
-  const isTablet = width >= 640 && width < 1024;
 
   // Matérias ativas selecionadas pelo estudante (por padrão, 3 sem conflito)
   const [selectedIds, setSelectedIds] = useState<string[]>([
