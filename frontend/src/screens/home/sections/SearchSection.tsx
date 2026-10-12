@@ -1,16 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
+  ActivityIndicator,
   Platform,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
   useWindowDimensions,
 } from 'react-native';
 import { theme } from '../../../constants/theme';
+import { useConsulta } from '../../../hooks/useConsulta';
+import { TAMANHO_MINIMO_BUSCA, buscarMaterias } from '../../../services/api';
+import type { MateriaResumo } from '../../../types/materia';
 
-export function SearchSection() {
+const ATRASO_BUSCA_MS = 350;
+
+interface SearchSectionProps {
+  onSelectMateria: (codigo: string) => void;
+}
+
+export function SearchSection({ onSelectMateria }: SearchSectionProps) {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
+  const [termo, setTermo] = useState('');
+  const termoLimpo = termo.trim();
+  const buscaAtiva = termoLimpo.length >= TAMANHO_MINIMO_BUSCA;
+
+  const { dados, carregando, erro } = useConsulta(
+    buscaAtiva ? (sinal) => buscarMaterias(termoLimpo, 1, sinal) : null,
+    [termoLimpo],
+    ATRASO_BUSCA_MS,
+  );
 
   return (
     <View
@@ -19,27 +40,82 @@ export function SearchSection() {
       id="search-section"
       style={styles.sectionWrapper}
     >
-      <View style={styles.container}>
-        {/* Placeholder reservado para a busca */}
-        <View style={[styles.placeholderCard, isMobile && styles.placeholderCardMobile]}>
-          <View style={styles.tagWrapper}>
-            <View style={styles.tagPill}>
-              <Text style={styles.tagText}>EM BREVE • BUSCA EM TEMPO REAL</Text>
-            </View>
-          </View>
+      <View style={[styles.card, isMobile && styles.cardMobile]}>
+        <Text style={[styles.title, isMobile && styles.titleMobile]}>
+          Encontre qualquer matéria da UnB
+        </Text>
+        <Text style={styles.subtitle}>
+          Busque pelo nome ou código, com ou sem acento.
+        </Text>
 
-          <Text style={[styles.title, isMobile && styles.titleMobile]}>
-            Encontre qualquer matéria ou professor da UnB
-          </Text>
+        <TextInput
+          value={termo}
+          onChangeText={setTermo}
+          placeholder="Ex.: cálculo, CIC0004, estruturas de dados..."
+          placeholderTextColor={theme.colors.gray}
+          style={styles.input}
+          autoCorrect={false}
+          autoCapitalize="none"
+          accessibilityLabel="Buscar matérias"
+        />
 
-          <Text style={styles.subtitle}>
-            Catálogo completo de disciplinas sincronizado com o SIGAA e notas da comunidade acadêmica.
-          </Text>
+        <View style={styles.resultados}>
+          {!buscaAtiva && termoLimpo.length > 0 && (
+            <Text style={styles.aviso}>
+              Digite pelo menos {TAMANHO_MINIMO_BUSCA} caracteres.
+            </Text>
+          )}
+          {buscaAtiva && carregando && (
+            <ActivityIndicator color={theme.colors.primary} style={styles.carregando} />
+          )}
+          {buscaAtiva && !carregando && erro && <Text style={styles.erro}>{erro}</Text>}
+          {buscaAtiva && !carregando && dados && (
+            <>
+              <Text style={styles.total}>
+                {dados.meta.total_items === 0
+                  ? 'Nenhuma matéria encontrada.'
+                  : `${dados.meta.total_items} matérias encontradas` +
+                    (dados.meta.total_items > dados.items.length
+                      ? ` (mostrando ${dados.items.length})`
+                      : '')}
+              </Text>
+              {dados.items.map((materia) => (
+                <ItemMateria
+                  key={materia.codigo_materia}
+                  materia={materia}
+                  onPress={() => onSelectMateria(materia.codigo_materia)}
+                />
+              ))}
+            </>
+          )}
         </View>
       </View>
     </View>
   );
 }
+
+function ItemMateria({ materia, onPress }: { materia: MateriaResumo; onPress: () => void }) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.item, pressed && styles.itemPressionado]}
+      accessibilityRole="button"
+    >
+      <Text style={styles.itemCodigo}>{materia.codigo_materia}</Text>
+      <View style={styles.itemTextos}>
+        <Text style={styles.itemNome}>{materia.nome}</Text>
+        {materia.departamento && (
+          <Text style={styles.itemDepartamento}>{materia.departamento.nome}</Text>
+        )}
+      </View>
+    </Pressable>
+  );
+}
+
+const sombra = (deslocamento: number) =>
+  Platform.OS === 'web'
+    ? ({ boxShadow: `${deslocamento}px ${deslocamento}px 0px ${theme.colors.dark}` } as object)
+    : {};
 
 const styles = StyleSheet.create({
   sectionWrapper: {
@@ -54,50 +130,26 @@ const styles = StyleSheet.create({
         } as any)
       : {}),
   },
-  container: {
+  card: {
     width: '100%',
-    height: 400,
-    maxWidth: 1440,
-    alignItems: 'center',
-  },
-  placeholderCard: {
-    width: '100%',
-    height: 400,
-    backgroundColor: '#FAF9F6',
+    maxWidth: 820,
+    minHeight: 400,
+    backgroundColor: theme.colors.cream,
     borderWidth: 2,
-    borderStyle: 'dashed',
-    borderColor: '#B0B0AF',
+    borderColor: theme.colors.dark,
     borderRadius: 8,
     paddingVertical: 36,
     paddingHorizontal: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
+    ...sombra(6),
   },
-  placeholderCardMobile: {
+  cardMobile: {
     paddingVertical: 24,
     paddingHorizontal: 16,
-  },
-  tagWrapper: {
-    marginBottom: 12,
-  },
-  tagPill: {
-    backgroundColor: '#EFEDE1',
-    borderWidth: 1.5,
-    borderColor: '#1F1F1F',
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-  },
-  tagText: {
-    fontSize: 11,
-    fontWeight: '800',
-    color: '#1F1F1F',
-    letterSpacing: 0.8,
   },
   title: {
     fontSize: 24,
     fontWeight: '800',
-    color: '#1F1F1F',
+    color: theme.colors.dark,
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -106,10 +158,75 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    color: '#707070',
+    color: theme.colors.gray,
     textAlign: 'center',
-    maxWidth: 580,
-    lineHeight: 20,
     marginBottom: 24,
+  },
+  input: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: theme.colors.dark,
+    ...sombra(3),
+    ...(Platform.OS === 'web' ? ({ outlineStyle: 'none' } as object) : {}),
+  },
+  resultados: {
+    marginTop: 20,
+    gap: 10,
+  },
+  aviso: {
+    fontSize: 13,
+    color: theme.colors.gray,
+  },
+  erro: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: theme.colors.danger,
+  },
+  carregando: {
+    marginTop: 12,
+  },
+  total: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: theme.colors.gray,
+  },
+  item: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: theme.colors.white,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    borderRadius: 6,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    ...sombra(3),
+  },
+  itemPressionado: {
+    backgroundColor: theme.colors.beige,
+  },
+  itemCodigo: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.primary,
+    minWidth: 72,
+  },
+  itemTextos: {
+    flex: 1,
+  },
+  itemNome: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: theme.colors.dark,
+  },
+  itemDepartamento: {
+    fontSize: 12,
+    color: theme.colors.gray,
+    marginTop: 2,
   },
 });

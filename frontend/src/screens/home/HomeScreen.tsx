@@ -16,7 +16,7 @@ import { NewsBanner } from '../../components/NewsBanner';
 // Import das seções da Landing Page:
 // 1. HeroSection (com boas-vindas, logo oficial e Começar Agora direcionando à busca)
 // 2. FeaturesSection (Por que usar o UnBook com folha rasgada suave e cards ativos)
-// 3. SearchSection (espaço reservado para a busca de matérias)
+// 3. SearchSection (busca de matérias integrada à API do catálogo)
 // 4. BadgesSection (Badges oficiais da aplicação: Só o ódio, Morri de paia, Soninho, Passável, Tranquilo, SS papai)
 // 5. MarqueeSection (fitas coloridas deslizando em sentidos opostos)
 // 6. StatsSection (A UnB em Números com cards em formato de gráfico que crescem em altura)
@@ -38,7 +38,11 @@ import {
   FaqSection,
 } from './sections';
 
-export function HomeScreen() {
+interface HomeScreenProps {
+  onSelectMateria: (codigo: string) => void;
+}
+
+export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [searchLayoutY, setSearchLayoutY] = useState(0);
   const [featuresLayoutY, setFeaturesLayoutY] = useState(0);
@@ -117,7 +121,7 @@ export function HomeScreen() {
         </View>
 
         <View onLayout={(e) => setSearchLayoutY(e.nativeEvent.layout.y)}>
-          <SearchSection />
+          <SearchSection onSelectMateria={onSelectMateria} />
         </View>
 
         {/* Badges Oficiais da Aplicação (Só o ódio, Morri de paia, Soninho, etc.) */}
