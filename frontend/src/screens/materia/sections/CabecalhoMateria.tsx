@@ -46,8 +46,15 @@ export function CabecalhoMateria({ materia }: { materia: MateriaDetalhe }) {
     <View style={styles.cabecalho}>
       <View style={[styles.cabecalhoConteudo, compacto && styles.cabecalhoCompacto]}>
         <View style={styles.identificacao}>
-          <View style={styles.seloMaterias}>
-            <Text style={styles.textoSeloMaterias}>MATÉRIAS</Text>
+          <View style={styles.selos}>
+            <View style={styles.seloMaterias}>
+              <Text style={styles.textoSeloMaterias}>MATÉRIAS</Text>
+            </View>
+            {materia.nivel_de_ensino && (
+              <View style={styles.seloNivel}>
+                <Text style={styles.textoSeloNivel}>{materia.nivel_de_ensino.toUpperCase()}</Text>
+              </View>
+            )}
           </View>
           <Text style={[styles.titulo, compacto && styles.tituloCompacto]} accessibilityRole="header">
             [{materia.codigo_materia}] {materia.nome}
@@ -150,8 +157,12 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     gap: 8,
   },
+  selos: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
   seloMaterias: {
-    alignSelf: 'flex-start',
     backgroundColor: theme.colors.secondary,
     borderWidth: 1.5,
     borderColor: theme.colors.dark,
@@ -162,6 +173,19 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: theme.colors.white,
+    letterSpacing: 0.5,
+  },
+  seloNivel: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  textoSeloNivel: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: theme.colors.dark,
     letterSpacing: 0.5,
   },
   titulo: {

@@ -21,6 +21,8 @@ export interface MateriaResumo {
   codigo_materia: string;
   nome: string;
   departamento: Departamento | null;
+  // Ainda não exposto pela busca; o mesmo código pode existir em níveis diferentes.
+  nivel_de_ensino?: string | null;
 }
 
 export interface ProfessorResumo {

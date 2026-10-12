@@ -8,6 +8,7 @@ import { theme } from '../../constants/theme';
 import { useConsulta } from '../../hooks/useConsulta';
 import { ApiError, getMateria } from '../../services/api';
 import type { MateriaDetalhe } from '../../types/materia';
+import { nivelDaApi, type NivelEnsino } from '../../utils/nivelEnsino';
 import { coresMateria, sombra } from './estilos';
 import {
   BarraSuperior,
@@ -19,13 +20,18 @@ import {
 
 interface MateriaScreenProps {
   codigo: string;
+  nivel: NivelEnsino;
   onVoltar: () => void;
-  onSelectMateria: (codigo: string) => void;
+  onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
 }
 
 // 404 vira `null` para a tela distinguir "não encontrada" de falhas de rede/servidor.
-function buscarMateria(codigo: string, sinal: AbortSignal): Promise<MateriaDetalhe | null> {
-  return getMateria(codigo, sinal).catch((erro) => {
+function buscarMateria(
+  codigo: string,
+  nivel: NivelEnsino,
+  sinal: AbortSignal,
+): Promise<MateriaDetalhe | null> {
+  return getMateria(codigo, nivel, sinal).catch((erro) => {
     if (erro instanceof ApiError && erro.status === 404) {
       return null;
     }
@@ -33,11 +39,13 @@ function buscarMateria(codigo: string, sinal: AbortSignal): Promise<MateriaDetal
   });
 }
 
-export function MateriaScreen({ codigo, onVoltar, onSelectMateria }: MateriaScreenProps) {
+export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: MateriaScreenProps) {
   const { dados: materia, carregando, erro } = useConsulta(
-    (sinal) => buscarMateria(codigo, sinal),
-    [codigo],
+    (sinal) => buscarMateria(codigo, nivel, sinal),
+    [codigo, nivel],
   );
+  // Os requisitos guardam só o código: abrem no mesmo nível da matéria exibida.
+  const nivelAtual = nivelDaApi(materia?.nivel_de_ensino) ?? nivel;
   const naoEncontrada = !carregando && !erro && materia === null;
 
   return (
@@ -72,7 +80,10 @@ export function MateriaScreen({ codigo, onVoltar, onSelectMateria }: MateriaScre
             <CabecalhoMateria materia={materia} />
             <View style={styles.corpo}>
               <EmentaSection materia={materia} />
-              <RequisitosSection materia={materia} onSelectMateria={onSelectMateria} />
+              <RequisitosSection
+                materia={materia}
+                onSelectMateria={(codigoRequisito) => onSelectMateria(codigoRequisito, nivelAtual)}
+              />
             </View>
             <View style={styles.turmas}>
               <TurmasSection turmas={materia.turmas ?? []} />
