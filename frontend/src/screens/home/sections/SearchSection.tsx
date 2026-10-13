@@ -19,6 +19,7 @@ import {
   listarDepartamentos,
 } from '../../../services/api';
 import type { MateriaResumo } from '../../../types/materia';
+import { nivelDaApi, type NivelEnsino } from '../../../utils/nivelEnsino';
 
 const ATRASO_BUSCA_MS = 350;
 
@@ -58,7 +59,7 @@ export function getCategoryColors(tab: SearchTab) {
 }
 
 interface SearchSectionProps {
-  onSelectMateria: (codigo: string) => void;
+  onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
 }
 
 // =========================================================================

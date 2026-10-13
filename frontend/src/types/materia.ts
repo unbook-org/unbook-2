@@ -21,6 +21,24 @@ export interface MateriaResumo {
   codigo_materia: string;
   nome: string;
   departamento: Departamento | null;
+  // Ainda não exposto pela busca; o mesmo código pode existir em níveis diferentes.
+  nivel_de_ensino?: string | null;
+}
+
+export interface ProfessorResumo {
+  nome_completo: string;
+  slug: string;
+}
+
+export interface Turma {
+  id: string;
+  codigo_turma: string;
+  semestre: string;
+  horario_bruto: string;
+  local_sala: string | null;
+  vagas_ofertadas: number;
+  vagas_ocupadas: number;
+  professor: ProfessorResumo | null;
 }
 
 export interface MateriaDetalhe extends MateriaResumo {
@@ -36,6 +54,8 @@ export interface MateriaDetalhe extends MateriaResumo {
   pre_requisito_arvore: ArvoreRequisito | ArvoreRequisito[] | null;
   co_requisito_arvore: ArvoreRequisito | ArvoreRequisito[] | null;
   equivalencia_arvore: ArvoreRequisito | ArvoreRequisito[] | null;
+  // Ainda não exposto pelo endpoint de detalhes; a tela trata a ausência.
+  turmas?: Turma[];
 }
 
 export interface Pagina<Item> {
