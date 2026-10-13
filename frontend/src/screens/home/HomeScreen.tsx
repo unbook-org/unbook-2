@@ -9,7 +9,6 @@ import {
 import { theme } from '../../constants/theme';
 import { Footer } from '../../components/Footer';
 import { CartoonAnimationStyles } from '../../components/CartoonAnimationStyles';
-import { Preloader } from '../../components/Preloader';
 import { Navbar } from '../../components/Navbar';
 import { NewsBanner } from '../../components/NewsBanner';
 import type { NivelEnsino } from '../../utils/nivelEnsino';
@@ -47,7 +46,6 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [searchLayoutY, setSearchLayoutY] = useState(0);
   const [featuresLayoutY, setFeaturesLayoutY] = useState(0);
-  const [isPageReady, setIsPageReady] = useState(false);
 
   // Rolagem suave até o topo
   const handleScrollToTop = () => {
@@ -61,6 +59,17 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
 
   // Rolagem suave até a seção de funcionalidades
   const handleScrollToFeatures = () => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      const featuresElement = document.getElementById('features-section');
+      if (featuresElement) {
+        featuresElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        });
+        return;
+      }
+    }
+
     if (scrollViewRef.current) {
       scrollViewRef.current.scrollTo({
         y: Math.max(0, featuresLayoutY - 20),
@@ -92,12 +101,6 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      {/* Preloader com símbolo centralizado e barra rápida de carregamento */}
-      <Preloader
-        durationMs={1200}
-        onExitStart={() => setIsPageReady(true)}
-      />
-
       {/* Injeção global das animações, keyframes e curvas cartoon */}
       <CartoonAnimationStyles />
 
@@ -115,10 +118,13 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
           onPressLogo={handleScrollToTop}
         />
 
-        <HeroSection onPressStart={handleScrollToSearch} />
+        <HeroSection
+          onPressStart={handleScrollToSearch}
+          onPressAbout={handleScrollToFeatures}
+        />
 
         <View onLayout={(e) => setFeaturesLayoutY(e.nativeEvent.layout.y)}>
-          <FeaturesSection isPageReady={isPageReady} />
+          <FeaturesSection />
         </View>
 
         <View onLayout={(e) => setSearchLayoutY(e.nativeEvent.layout.y)}>

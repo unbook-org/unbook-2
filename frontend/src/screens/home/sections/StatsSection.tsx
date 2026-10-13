@@ -199,8 +199,8 @@ export function StatsSection() {
         >
           {/* Card 1 - 20 Departamentos (Nível 1 • 360px) */}
           <StatCard
-            endNumber={20}
-            prefix=""
+            endNumber={200}
+            prefix="+"
             title="departamentos acadêmicos."
             subtitle="Faculdades e institutos da UnB."
             description="De Darcy Ribeiro a Ceilândia, Gama e Planaltina, englobando todas as faculdades e unidades acadêmicas."

@@ -56,7 +56,7 @@ export function HeroTornPaper({
   patternId = 'hero-torn-pautas',
   clipId = 'hero-torn-clip',
   hasShadow = false, // Sem drop-shadow global para não gerar linha ou borda no topo
-  hasTornBorder = true,
+  hasTornBorder = false,
   style,
   ...props
 }: HeroTornPaperProps) {

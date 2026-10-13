@@ -85,7 +85,12 @@ export function Navbar({
 
   return (
     <>
-      <View style={styles.navWrapper}>
+      <View
+        nativeID="app-navbar"
+        // @ts-ignore
+        id="app-navbar"
+        style={styles.navWrapper}
+      >
         <View style={styles.navContainer}>
           {/* LADO ESQUERDO: LOGO UNBOOK */}
           <Pressable
@@ -355,6 +360,14 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1F1F1F',
     width: '100%',
     zIndex: 90,
+    ...(Platform.OS === 'web'
+      ? ({
+          animationKeyframes: 'navSlideDown',
+          animationDuration: '450ms',
+          animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+          animationFillMode: 'both',
+        } as any)
+      : {}),
   },
   navContainer: {
     maxWidth: 'auto',

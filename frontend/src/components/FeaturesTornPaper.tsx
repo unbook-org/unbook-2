@@ -41,8 +41,8 @@ export function FeaturesTornPaper({
   marginColor = 'rgba(254, 65, 65, 0.45)',
   patternId = 'feat-torn-pautas',
   clipId = 'feat-torn-clip',
-  hasShadow = true,
-  hasTornBorder = true,
+  hasShadow = false,
+  hasTornBorder = false,
   style,
   ...props
 }: FeaturesTornPaperProps) {
