@@ -24,9 +24,18 @@ export function nivelDaApi(nivel: string | null | undefined): NivelEnsino | null
   }
   const normalizado = nivel
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
   return NIVEIS_ENSINO.find((opcao) => opcao === normalizado) ?? null;
+}
+
+/** Lê o `?nivel=` da URL: sem valor usa o padrão; valor desconhecido retorna `null`. */
+export function nivelDaUrl(valor: string | string[] | undefined): NivelEnsino | null {
+  const texto = Array.isArray(valor) ? valor[0] : valor;
+  if (!texto) {
+    return NIVEL_PADRAO;
+  }
+  return NIVEIS_ENSINO.find((opcao) => opcao === texto) ?? null;
 }

@@ -67,7 +67,7 @@ O portal é totalmente otimizado para celulares e tablets:
 
 | Arquivo | Responsabilidade |
 | :--- | :--- |
-| `src/services/api.ts` | Funções `buscarMaterias()` (termo, departamento e página), `listarDepartamentos()` e `getMateria(codigo, nivel)`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
+| `src/services/api.ts` | Funções `buscarMaterias()` (termo, departamento, página e tamanho), `listarDepartamentos()`, `getMateria(codigo, nivel)` e `listarProfessores()`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
 | `src/hooks/useConsulta.ts` | Hook único de carregamento/erro, com cancelamento da requisição anterior e atraso opcional (debounce). |
 | `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API. |
 | `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home: termo (a partir de 3 caracteres, com 350 ms de debounce), filtro por departamento e paginação. |
@@ -76,6 +76,8 @@ O portal é totalmente otimizado para celulares e tablets:
 | `src/screens/materia/sections/` | Seções da página: `CabecalhoMateria` (código, nome, departamento, nível, créditos e horas), `EmentaSection` (ementa e panorama), `RequisitosSection` (árvore E/OU clicável) e `TurmasSection` (filtro por professor/turma e semestre). |
 | `src/utils/horario.ts` | Converte o horário do SIGAA (`35M34` → "Terça e Quinta, 10h - 12h") e calcula o semestre atual. |
 | `src/utils/nivelEnsino.ts` | Níveis de ensino aceitos no `?nivel=` e conversão do nível vindo da API. |
+| `src/screens/catalogo/` | Página do catálogo: `TopoCatalogo` (barra do semestre, hero e "Como funciona"), `BarraFiltros`, `Prateleira`, `Resultados` e os cards em `components/Cartoes.tsx`. |
+| `src/utils/rotas.ts` | Monta o link da página da matéria (`hrefMateria`). |
 
 ### Página da matéria
 
@@ -83,7 +85,25 @@ O portal é totalmente otimizado para celulares e tablets:
 - **Turmas:** a página lê o campo opcional `turmas` da resposta (`id`, `codigo_turma`, `semestre`, `horario_bruto`, `local_sala`, `vagas_ofertadas`, `vagas_ocupadas`, `professor`). Sem esse campo, mostra "Ainda não há turmas cadastradas".
 - **Panorama e dificuldade** mostram "—" e "N/A" até o módulo de avaliações expor dados.
 
-A troca entre home e matéria é feita por estado em `App.tsx`, sem biblioteca de navegação. O botão voltar do navegador e links diretos (`/materia/MAT0025`) ainda não funcionam; quando houver mais telas, a recomendação é adotar `expo-router` ou React Navigation.
+### Rotas (`expo-router`)
+
+As rotas ficam em `src/app/` e as telas em `src/screens/`:
+
+| Rota | Tela |
+| :--- | :--- |
+| `/` | Home (landing page) |
+| `/catalogo?tipo=&busca=&departamento=&pagina=` | Catálogo. Os filtros ficam na URL, então o link pode ser compartilhado |
+| `/materia/[codigo]?nivel=` | Página da matéria (`nivel` é opcional; o padrão é Graduação) |
+| qualquer outra | "Página não encontrada" (`+not-found.tsx`) |
+
+O botão voltar do navegador e os links diretos funcionam. O "Explorar" da navbar leva ao catálogo.
+
+### Catálogo
+
+- **Visão geral:** prateleiras com os 6 departamentos que têm mais matérias, cada uma com "Ver todas". Ainda não há categorias definidas, então o filtro é por departamento (chips de atalho mais o seletor completo).
+- **Busca e filtro:** grade paginada com `GET /api/catalog/materia/busca`. A API exige termo (mínimo de 3 caracteres) ou departamento.
+- **Professores:** o alternador "Matérias | Professores" usa `GET /api/catalog/professores` (`busca`, `departamento` = sigla). Enquanto o endpoint não existir, a página mostra um aviso.
+- O Top 10, o "Para salvar o IRA", o "% match" e o número de turmas do Figma ficam escondidos até existirem dados de acessos, avaliações e turmas.
 
 Para testar no celular, `localhost` não funciona: defina `EXPO_PUBLIC_API_URL` com o IP do computador (ver `frontend/.env.example`).
 

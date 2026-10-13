@@ -22,6 +22,7 @@ interface MateriaScreenProps {
   codigo: string;
   nivel: NivelEnsino;
   onVoltar: () => void;
+  onExplorar?: () => void;
   onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
 }
 
@@ -39,7 +40,13 @@ function buscarMateria(
   });
 }
 
-export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: MateriaScreenProps) {
+export function MateriaScreen({
+  codigo,
+  nivel,
+  onVoltar,
+  onExplorar,
+  onSelectMateria,
+}: MateriaScreenProps) {
   const { dados: materia, carregando, erro } = useConsulta(
     (sinal) => buscarMateria(codigo, nivel, sinal),
     [codigo, nivel],
@@ -52,7 +59,7 @@ export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: Mate
     <SafeAreaView style={styles.tela}>
       <ScrollView contentContainerStyle={styles.conteudo}>
         <NewsBanner />
-        <Navbar onPressLogo={onVoltar} onPressExplore={onVoltar} />
+        <Navbar onPressLogo={onVoltar} onPressExplore={onExplorar ?? onVoltar} />
         <BarraSuperior onVoltar={onVoltar} />
 
         {carregando && (
