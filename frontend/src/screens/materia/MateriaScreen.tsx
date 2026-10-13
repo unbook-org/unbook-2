@@ -1,325 +1,171 @@
 import React from 'react';
-import {
-  ActivityIndicator,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { ActivityIndicator, SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { CartoonButton } from '../../components/CartoonButton';
+import { Footer } from '../../components/Footer';
+import { Navbar } from '../../components/Navbar';
+import { NewsBanner } from '../../components/NewsBanner';
 import { theme } from '../../constants/theme';
 import { useConsulta } from '../../hooks/useConsulta';
-import { getMateria } from '../../services/api';
-import type { ArvoreRequisito, Requisito } from '../../types/materia';
+import { ApiError, getMateria } from '../../services/api';
+import type { MateriaDetalhe } from '../../types/materia';
+import { nivelDaApi, type NivelEnsino } from '../../utils/nivelEnsino';
+import { coresMateria, sombra } from './estilos';
+import {
+  BarraSuperior,
+  CabecalhoMateria,
+  EmentaSection,
+  RequisitosSection,
+  TurmasSection,
+} from './sections';
 
 interface MateriaScreenProps {
   codigo: string;
+  nivel: NivelEnsino;
   onVoltar: () => void;
-  onSelectMateria: (codigo: string) => void;
+  onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
 }
 
-export function MateriaScreen({ codigo, onVoltar, onSelectMateria }: MateriaScreenProps) {
+// 404 vira `null` para a tela distinguir "não encontrada" de falhas de rede/servidor.
+function buscarMateria(
+  codigo: string,
+  nivel: NivelEnsino,
+  sinal: AbortSignal,
+): Promise<MateriaDetalhe | null> {
+  return getMateria(codigo, nivel, sinal).catch((erro) => {
+    if (erro instanceof ApiError && erro.status === 404) {
+      return null;
+    }
+    throw erro;
+  });
+}
+
+export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: MateriaScreenProps) {
   const { dados: materia, carregando, erro } = useConsulta(
-    (sinal) => getMateria(codigo, sinal),
-    [codigo],
+    (sinal) => buscarMateria(codigo, nivel, sinal),
+    [codigo, nivel],
   );
+  // Os requisitos guardam só o código: abrem no mesmo nível da matéria exibida.
+  const nivelAtual = nivelDaApi(materia?.nivel_de_ensino) ?? nivel;
+  const naoEncontrada = !carregando && !erro && materia === null;
 
   return (
-    <ScrollView style={styles.tela} contentContainerStyle={styles.conteudo}>
-      <Pressable onPress={onVoltar} style={styles.botaoVoltar} accessibilityRole="button">
-        <Text style={styles.textoVoltar}>← Voltar para a busca</Text>
-      </Pressable>
+    <SafeAreaView style={styles.tela}>
+      <ScrollView contentContainerStyle={styles.conteudo}>
+        <NewsBanner />
+        <Navbar onPressLogo={onVoltar} onPressExplore={onVoltar} />
+        <BarraSuperior onVoltar={onVoltar} />
 
-      {carregando && <ActivityIndicator color={theme.colors.primary} style={styles.carregando} />}
-      {!carregando && erro && <Text style={styles.erro}>{erro}</Text>}
+        {carregando && (
+          <ActivityIndicator color={theme.colors.secondary} size="large" style={styles.carregando} />
+        )}
 
-      {!carregando && materia && (
-        <View style={styles.card}>
-          <Text style={styles.codigo}>{materia.codigo_materia}</Text>
-          <Text style={styles.nome}>{materia.nome}</Text>
-          {materia.departamento && (
-            <Text style={styles.departamento}>{materia.departamento.nome}</Text>
-          )}
-
-          <View style={styles.etiquetas}>
-            <Etiqueta texto={`${materia.creditos} créditos`} />
-            <Etiqueta texto={`${materia.carga_horaria}h`} />
-            {materia.nivel_de_ensino && <Etiqueta texto={materia.nivel_de_ensino} />}
-          </View>
-
-          <Secao titulo="Ementa">
-            <Text style={styles.ementa}>{materia.ementa || 'Ementa não informada.'}</Text>
-          </Secao>
-
-          <SecaoRequisitos
-            titulo="Pré-requisitos"
-            arvore={materia.pre_requisito_arvore}
-            requisitos={materia.pre_requisitos}
-            onSelectMateria={onSelectMateria}
+        {!carregando && erro && (
+          <Aviso
+            titulo="Não foi possível carregar a matéria"
+            descricao={erro}
+            onVoltar={onVoltar}
           />
-          <SecaoRequisitos
-            titulo="Co-requisitos"
-            arvore={materia.co_requisito_arvore}
-            requisitos={materia.co_requisitos}
-            onSelectMateria={onSelectMateria}
+        )}
+
+        {naoEncontrada && (
+          <Aviso
+            titulo="Matéria não encontrada"
+            descricao={`Não encontramos nenhuma matéria com o código ${codigo.toUpperCase()}. Confira o código ou volte para a busca.`}
+            onVoltar={onVoltar}
           />
-          <SecaoRequisitos
-            titulo="Equivalências"
-            arvore={materia.equivalencia_arvore}
-            requisitos={materia.equivalencias}
-            onSelectMateria={onSelectMateria}
-          />
-        </View>
-      )}
-    </ScrollView>
+        )}
+
+        {!carregando && materia && (
+          <>
+            <CabecalhoMateria materia={materia} />
+            <View style={styles.corpo}>
+              <EmentaSection materia={materia} />
+              <RequisitosSection
+                materia={materia}
+                onSelectMateria={(codigoRequisito) => onSelectMateria(codigoRequisito, nivelAtual)}
+              />
+            </View>
+            <View style={styles.turmas}>
+              <TurmasSection turmas={materia.turmas ?? []} />
+            </View>
+          </>
+        )}
+
+        <View style={styles.espacador} />
+        <Footer />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
-function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
-  return (
-    <View style={styles.secao}>
-      <Text style={styles.tituloSecao}>{titulo}</Text>
-      {children}
-    </View>
-  );
-}
-
-function Etiqueta({ texto }: { texto: string }) {
-  return (
-    <View style={styles.etiqueta}>
-      <Text style={styles.textoEtiqueta}>{texto}</Text>
-    </View>
-  );
-}
-
-interface SecaoRequisitosProps {
+interface AvisoProps {
   titulo: string;
-  arvore: ArvoreRequisito | ArvoreRequisito[] | null;
-  requisitos: Requisito[];
-  onSelectMateria: (codigo: string) => void;
+  descricao: string;
+  onVoltar: () => void;
 }
 
-function SecaoRequisitos({ titulo, arvore, requisitos, onSelectMateria }: SecaoRequisitosProps) {
-  const nomesPorCodigo = new Map(requisitos.map((requisito) => [requisito.codigo, requisito.nome]));
-
+function Aviso({ titulo, descricao, onVoltar }: AvisoProps) {
   return (
-    <Secao titulo={titulo}>
-      {requisitos.length === 0 || !arvore ? (
-        <Text style={styles.vazio}>Nenhum.</Text>
-      ) : (
-        <NoRequisito
-          arvore={arvore}
-          nomesPorCodigo={nomesPorCodigo}
-          onSelectMateria={onSelectMateria}
-        />
-      )}
-    </Secao>
-  );
-}
-
-interface NoRequisitoProps {
-  arvore: ArvoreRequisito | ArvoreRequisito[];
-  nomesPorCodigo: Map<string, string | null>;
-  onSelectMateria: (codigo: string) => void;
-  aninhado?: boolean;
-}
-
-function NoRequisito({ arvore, nomesPorCodigo, onSelectMateria, aninhado = false }: NoRequisitoProps) {
-  if (Array.isArray(arvore)) {
-    return (
-      <NoRequisito
-        arvore={{ 'relação': 'AND', condicao: arvore }}
-        nomesPorCodigo={nomesPorCodigo}
-        onSelectMateria={onSelectMateria}
-        aninhado={aninhado}
-      />
-    );
-  }
-
-  if ('codigo' in arvore) {
-    const nome = nomesPorCodigo.get(arvore.codigo);
-    return (
-      <Pressable
-        onPress={nome ? () => onSelectMateria(arvore.codigo) : undefined}
-        disabled={!nome}
-        style={({ pressed }) => [styles.requisito, pressed && styles.requisitoPressionado]}
-        accessibilityRole={nome ? 'link' : 'text'}
-      >
-        <Text style={styles.requisitoCodigo}>{arvore.codigo}</Text>
-        <Text style={styles.requisitoNome}>{nome ?? 'Matéria não cadastrada'}</Text>
-      </Pressable>
-    );
-  }
-
-  const conector = arvore['relação'] === 'OR' ? 'OU' : 'E';
-  return (
-    <View style={[styles.grupo, aninhado && styles.grupoAninhado]}>
-      {!aninhado && (
-        <Text style={styles.legendaGrupo}>
-          {conector === 'OU' ? 'Cumpra uma das opções:' : 'Cumpra todas:'}
-        </Text>
-      )}
-      {(arvore.condicao ?? []).map((condicao, indice) => (
-        <React.Fragment key={indice}>
-          {indice > 0 && <Text style={styles.conector}>{conector}</Text>}
-          <NoRequisito
-            arvore={condicao}
-            nomesPorCodigo={nomesPorCodigo}
-            onSelectMateria={onSelectMateria}
-            aninhado
-          />
-        </React.Fragment>
-      ))}
+    <View style={styles.aviso} accessibilityRole="alert">
+      <Text style={styles.tituloAviso}>{titulo}</Text>
+      <Text style={styles.descricaoAviso}>{descricao}</Text>
+      <CartoonButton variant="secondary" onPress={onVoltar} style={styles.botaoAviso}>
+        Voltar para a busca
+      </CartoonButton>
     </View>
   );
 }
-
-const sombra = (deslocamento: number) =>
-  Platform.OS === 'web'
-    ? ({ boxShadow: `${deslocamento}px ${deslocamento}px 0px ${theme.colors.dark}` } as object)
-    : {};
 
 const styles = StyleSheet.create({
   tela: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: coresMateria.fundo,
   },
   conteudo: {
-    alignItems: 'center',
-    paddingVertical: 32,
-    paddingHorizontal: 16,
-  },
-  botaoVoltar: {
-    alignSelf: 'center',
-    width: '100%',
-    maxWidth: 820,
-    marginBottom: 16,
-  },
-  textoVoltar: {
-    fontSize: 15,
-    fontWeight: '800',
-    color: theme.colors.primary,
+    flexGrow: 1,
   },
   carregando: {
-    marginTop: 48,
+    marginVertical: 96,
   },
-  erro: {
-    marginTop: 32,
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.danger,
+  corpo: {
+    paddingHorizontal: 16,
+    paddingTop: 24,
+    paddingBottom: 40,
+    gap: 24,
   },
-  card: {
+  turmas: {
+    paddingBottom: 48,
+  },
+  espacador: {
+    flexGrow: 1,
+  },
+  aviso: {
     width: '100%',
-    maxWidth: 820,
+    maxWidth: 560,
+    alignSelf: 'center',
+    alignItems: 'center',
+    gap: 12,
+    marginVertical: 64,
+    marginHorizontal: 16,
     backgroundColor: theme.colors.white,
     borderWidth: 2,
     borderColor: theme.colors.dark,
-    borderRadius: 8,
     padding: 28,
     ...sombra(6),
   },
-  codigo: {
-    fontSize: 14,
-    fontWeight: '800',
-    color: theme.colors.primary,
-    letterSpacing: 1,
-  },
-  nome: {
-    fontSize: 26,
+  tituloAviso: {
+    fontSize: 22,
     fontWeight: '800',
     color: theme.colors.dark,
-    marginTop: 4,
+    textAlign: 'center',
   },
-  departamento: {
+  descricaoAviso: {
     fontSize: 14,
-    color: theme.colors.gray,
-    marginTop: 4,
+    lineHeight: 21,
+    color: theme.colors.darkCharcoal,
+    textAlign: 'center',
   },
-  etiquetas: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginTop: 16,
-  },
-  etiqueta: {
-    backgroundColor: theme.colors.beige,
-    borderWidth: 1.5,
-    borderColor: theme.colors.dark,
-    borderRadius: 4,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  textoEtiqueta: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: theme.colors.dark,
-  },
-  secao: {
-    marginTop: 28,
-  },
-  tituloSecao: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: theme.colors.dark,
-    marginBottom: 10,
-  },
-  ementa: {
-    fontSize: 15,
-    lineHeight: 23,
-    color: theme.colors.textPrimary,
-  },
-  vazio: {
-    fontSize: 14,
-    color: theme.colors.gray,
-  },
-  grupo: {
-    gap: 8,
-  },
-  grupoAninhado: {
-    borderWidth: 1.5,
-    borderColor: theme.colors.lightGray,
-    borderStyle: 'dashed',
-    borderRadius: 6,
-    padding: 10,
-  },
-  legendaGrupo: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: theme.colors.gray,
-  },
-  conector: {
-    alignSelf: 'flex-start',
-    fontSize: 12,
-    fontWeight: '800',
-    color: theme.colors.secondary,
-    paddingHorizontal: 4,
-  },
-  requisito: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: theme.colors.cream,
-    borderWidth: 2,
-    borderColor: theme.colors.dark,
-    borderRadius: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  requisitoPressionado: {
-    backgroundColor: theme.colors.beige,
-  },
-  requisitoCodigo: {
-    fontSize: 13,
-    fontWeight: '800',
-    color: theme.colors.primary,
-    minWidth: 72,
-  },
-  requisitoNome: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: theme.colors.dark,
+  botaoAviso: {
+    marginTop: 8,
   },
 });

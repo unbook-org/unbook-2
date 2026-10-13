@@ -18,11 +18,12 @@ import {
   listarDepartamentos,
 } from '../../../services/api';
 import type { MateriaResumo } from '../../../types/materia';
+import { nivelDaApi, type NivelEnsino } from '../../../utils/nivelEnsino';
 
 const ATRASO_BUSCA_MS = 350;
 
 interface SearchSectionProps {
-  onSelectMateria: (codigo: string) => void;
+  onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
 }
 
 export function SearchSection({ onSelectMateria }: SearchSectionProps) {
@@ -109,9 +110,14 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
               </Text>
               {dados.items.map((materia) => (
                 <ItemMateria
-                  key={materia.codigo_materia}
+                  key={`${materia.codigo_materia}-${materia.nivel_de_ensino ?? materia.nome}`}
                   materia={materia}
-                  onPress={() => onSelectMateria(materia.codigo_materia)}
+                  onPress={() =>
+                    onSelectMateria(
+                      materia.codigo_materia,
+                      nivelDaApi(materia.nivel_de_ensino) ?? undefined,
+                    )
+                  }
                 />
               ))}
               {dados.meta.total_pages > 1 && (

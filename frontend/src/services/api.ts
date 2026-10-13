@@ -4,6 +4,7 @@ import type {
   MateriaResumo,
   Pagina,
 } from '../types/materia';
+import type { NivelEnsino } from '../utils/nivelEnsino';
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
 
@@ -60,6 +61,9 @@ export function listarDepartamentos(sinal?: AbortSignal) {
   return requisitar<DepartamentoOpcao[]>('/catalog/departamentos', sinal);
 }
 
-export function getMateria(codigo: string, sinal?: AbortSignal) {
-  return requisitar<MateriaDetalhe>(`/catalog/materia/${encodeURIComponent(codigo)}`, sinal);
+export function getMateria(codigo: string, nivel: NivelEnsino, sinal?: AbortSignal) {
+  return requisitar<MateriaDetalhe>(
+    `/catalog/materia/${encodeURIComponent(codigo)}?nivel=${nivel}`,
+    sinal,
+  );
 }

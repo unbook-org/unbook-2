@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 import Svg, {
   SvgProps,
   G,
@@ -30,6 +30,9 @@ export function UnbookLogo({
   ...props
 }: UnbookLogoProps) {
   const calculatedHeight = height ?? width * ASPECT_RATIO;
+  // Id único por instância: com o id fixo, o url(#...) resolvia para o clipPath de uma
+  // logo escondida (display: none) e o recorte das letras sumia nas outras telas.
+  const clipId = `unbook_text_clip_${useId().replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   return (
     <Svg
@@ -42,7 +45,7 @@ export function UnbookLogo({
     >
       <Defs>
         {/* Recorte preciso das letras UNBOOK */}
-        <ClipPath id="unbook_text_clip">
+        <ClipPath id={clipId}>
           <Path d={UNBOOK_TEXT_PATH} />
         </ClipPath>
       </Defs>
@@ -69,7 +72,7 @@ export function UnbookLogo({
       />
 
       {/* Letras UNBOOK com recorte limpo */}
-      <G clipPath="url(#unbook_text_clip)">
+      <G clipPath={`url(#${clipId})`}>
         {/* Fundo base branco da letra */}
         <Rect x="0" y="0" width={ORIGINAL_WIDTH} height={ORIGINAL_HEIGHT} fill="#FFFFFF" />
 

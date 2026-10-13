@@ -12,6 +12,7 @@ import { CartoonAnimationStyles } from '../../components/CartoonAnimationStyles'
 import { Preloader } from '../../components/Preloader';
 import { Navbar } from '../../components/Navbar';
 import { NewsBanner } from '../../components/NewsBanner';
+import type { NivelEnsino } from '../../utils/nivelEnsino';
 
 // Import das seções da Landing Page:
 // 1. HeroSection (com boas-vindas, logo oficial e Começar Agora direcionando à busca)
@@ -39,7 +40,7 @@ import {
 } from './sections';
 
 interface HomeScreenProps {
-  onSelectMateria: (codigo: string) => void;
+  onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
 }
 
 export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
