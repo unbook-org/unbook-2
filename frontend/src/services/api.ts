@@ -4,6 +4,7 @@ import type {
   MateriaResumo,
   Pagina,
 } from '../types/materia';
+import type { ProfessorListItem, ProfessorProfile } from '../types/professor';
 import type { NivelEnsino } from '../utils/nivelEnsino';
 
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080/api';
@@ -19,10 +20,17 @@ export class ApiError extends Error {
   }
 }
 
-async function requisitar<Resposta>(caminho: string, sinal?: AbortSignal): Promise<Resposta> {
+async function requisitar<Resposta>(
+  caminho: string,
+  sinal?: AbortSignal,
+  opcoes?: RequestInit,
+): Promise<Resposta> {
   let resposta: Response;
   try {
-    resposta = await fetch(`${API_URL}${caminho}`, { signal: sinal });
+    resposta = await fetch(`${API_URL}${caminho}`, {
+      signal: sinal,
+      ...opcoes,
+    });
   } catch (erro) {
     if (erro instanceof Error && erro.name === 'AbortError') {
       throw erro;
@@ -67,3 +75,25 @@ export function getMateria(codigo: string, nivel: NivelEnsino, sinal?: AbortSign
     sinal,
   );
 }
+
+export function getProfessor(identifier: string, sinal?: AbortSignal) {
+  return requisitar<ProfessorProfile>(
+    `/catalog/professores/${encodeURIComponent(identifier)}`,
+    sinal,
+  );
+}
+
+export function listarProfessores(
+  { busca, departamento, pagina = 1, limite = 20 }: { busca?: string; departamento?: string; pagina?: number; limite?: number },
+  sinal?: AbortSignal,
+) {
+  const parametros = new URLSearchParams({ page: String(pagina), page_size: String(limite) });
+  if (busca) {
+    parametros.set('busca', busca);
+  }
+  if (departamento) {
+    parametros.set('departamento', departamento);
+  }
+  return requisitar<Pagina<ProfessorListItem>>(`/catalog/professores?${parametros}`, sinal);
+}
+

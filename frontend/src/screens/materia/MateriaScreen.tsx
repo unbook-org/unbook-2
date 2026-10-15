@@ -23,6 +23,7 @@ interface MateriaScreenProps {
   nivel: NivelEnsino;
   onVoltar: () => void;
   onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
+  onSelectProfessor?: (identifier: string) => void;
 }
 
 // 404 vira `null` para a tela distinguir "não encontrada" de falhas de rede/servidor.
@@ -39,7 +40,13 @@ function buscarMateria(
   });
 }
 
-export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: MateriaScreenProps) {
+export function MateriaScreen({
+  codigo,
+  nivel,
+  onVoltar,
+  onSelectMateria,
+  onSelectProfessor,
+}: MateriaScreenProps) {
   const { dados: materia, carregando, erro } = useConsulta(
     (sinal) => buscarMateria(codigo, nivel, sinal),
     [codigo, nivel],
@@ -86,7 +93,10 @@ export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: Mate
               />
             </View>
             <View style={styles.turmas}>
-              <TurmasSection turmas={materia.turmas ?? []} />
+              <TurmasSection
+                turmas={materia.turmas ?? []}
+                onAcessarProfessor={onSelectProfessor}
+              />
             </View>
           </>
         )}
