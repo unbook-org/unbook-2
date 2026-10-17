@@ -58,6 +58,37 @@ O portal é totalmente otimizado para celulares e tablets:
 
 ---
 
+## Estado Atual: Expo + Integração com o Catálogo
+
+!!! info "Stack real"
+    O frontend atual fica em `frontend/` e usa **Expo (React Native) + TypeScript**, rodando na web via `react-native-web`. As seções acima descrevem a visão planejada (Next.js).
+
+### Integração com a API
+
+| Arquivo | Responsabilidade |
+| :--- | :--- |
+| `src/services/api.ts` | Funções `buscarMaterias()` (termo, departamento e página), `listarDepartamentos()` e `getMateria(codigo, nivel)`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
+| `src/hooks/useConsulta.ts` | Hook único de carregamento/erro, com cancelamento da requisição anterior e atraso opcional (debounce). |
+| `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API. |
+| `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home: termo (a partir de 3 caracteres, com 350 ms de debounce), filtro por departamento e paginação. |
+| `src/components/SeletorDepartamento.tsx` | Seletor de departamento reutilizável, com filtro por texto que ignora acentos. |
+| `src/screens/materia/MateriaScreen.tsx` | Página da matéria (layout do Figma): carrega a matéria por código + nível e trata carregando, erro e 404. |
+| `src/screens/materia/sections/` | Seções da página: `CabecalhoMateria` (código, nome, departamento, nível, créditos e horas), `EmentaSection` (ementa e panorama), `RequisitosSection` (árvore E/OU clicável) e `TurmasSection` (filtro por professor/turma e semestre). |
+| `src/utils/horario.ts` | Converte o horário do SIGAA (`35M34` → "Terça e Quinta, 10h - 12h") e calcula o semestre atual. |
+| `src/utils/nivelEnsino.ts` | Níveis de ensino aceitos no `?nivel=` e conversão do nível vindo da API. |
+
+### Página da matéria
+
+- **Nível de ensino:** o código só é único dentro do nível (ex.: `FCE0001` existe em Graduação e em Formação Complementar). A página envia `GET /api/catalog/materia/{codigo}?nivel=<nivel>`, com `graduacao` como padrão. Os outros valores são `formacao-complementar`, `lato-sensu-especializacao`, `lato-sensu-residencia` e `stricto-sensu`. Os requisitos abrem no mesmo nível da matéria exibida.
+- **Turmas:** a página lê o campo opcional `turmas` da resposta (`id`, `codigo_turma`, `semestre`, `horario_bruto`, `local_sala`, `vagas_ofertadas`, `vagas_ocupadas`, `professor`). Sem esse campo, mostra "Ainda não há turmas cadastradas".
+- **Panorama e dificuldade** mostram "—" e "N/A" até o módulo de avaliações expor dados.
+
+A troca entre home e matéria é feita por estado em `App.tsx`, sem biblioteca de navegação. O botão voltar do navegador e links diretos (`/materia/MAT0025`) ainda não funcionam; quando houver mais telas, a recomendação é adotar `expo-router` ou React Navigation.
+
+Para testar no celular, `localhost` não funciona: defina `EXPO_PUBLIC_API_URL` com o IP do computador (ver `frontend/.env.example`).
+
+---
+
 ## Execução Local
 
 ```bash
