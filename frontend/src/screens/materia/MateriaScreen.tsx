@@ -32,6 +32,7 @@ interface MateriaScreenProps {
   nivel: NivelEnsino;
   onVoltar: () => void;
   onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
+  onSelectProfessor?: (identifier: string) => void;
 }
 
 // 404 vira `null` para a tela distinguir "não encontrada" de falhas de rede/servidor.
