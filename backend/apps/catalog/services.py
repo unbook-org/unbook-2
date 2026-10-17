@@ -3,7 +3,7 @@ from collections.abc import Iterable
 from typing import Any
 from uuid import UUID
 
-from catalog.models import Departamento, Materia
+from catalog.models import Departamento, Materia, Turma
 from django.db.models import Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 
@@ -12,7 +12,9 @@ from apps.catalog.schemas import (
     DepartamentoResumoOut,
     MateriaBuscaOut,
     MateriaDetalheOut,
+    ProfessorResumoOut,
     RequisitoOut,
+    TurmaOut,
 )
 from apps.core.db import SemAcento
 from apps.core.exceptions import NotFoundException, UnBookException
@@ -84,6 +86,28 @@ def _serializar_departamento(materia: Materia) -> DepartamentoResumoOut | None:
     )
 
 
+def _serializar_turma(turma: Turma) -> TurmaOut:
+    """Monta os dados de uma turma para resposta da API."""
+    professor = (
+        ProfessorResumoOut(
+            nome_completo=turma.professor.nome_completo,
+            slug=turma.professor.slug,
+        )
+        if turma.professor
+        else None
+    )
+    return TurmaOut(
+        id=turma.id,
+        codigo_turma=turma.codigo_turma,
+        semestre=turma.semestre,
+        horario_bruto=turma.horario_bruto,
+        local_sala=turma.local_sala,
+        vagas_ofertadas=turma.vagas_ofertadas,
+        vagas_ocupadas=turma.vagas_ocupadas,
+        professor=professor,
+    )
+
+
 def _buscar_materia_por_codigo(codigo: str) -> Materia:
     """Encontra a matéria pelo código ignorando espaços e caixa; lança 404 se não existir."""
     codigo_normalizado = codigo.strip().upper()
@@ -107,6 +131,11 @@ def get_materia_por_codigo(codigo: str) -> MateriaDetalheOut:
     nomes_por_codigo = _buscar_nomes_por_codigo(todos_requisitos)
     _avisar_requisitos_nao_cadastrados(materia, todos_requisitos, nomes_por_codigo)
 
+    turmas = (
+        materia.turmas.select_related("professor")
+        .order_by("-semestre", "codigo_turma")
+    )
+
     return MateriaDetalheOut(
         id=materia.id,
         codigo_materia=materia.codigo_materia,
@@ -123,6 +152,7 @@ def get_materia_por_codigo(codigo: str) -> MateriaDetalheOut:
         pre_requisito_arvore=materia.pre_requisito,
         co_requisito_arvore=materia.co_requisito,
         equivalencia_arvore=materia.equivalencia,
+        turmas=[_serializar_turma(turma) for turma in turmas],
     )
 
 

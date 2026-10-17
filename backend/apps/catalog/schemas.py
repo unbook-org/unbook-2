@@ -21,6 +21,22 @@ class RequisitoOut(Schema):
     nome: str | None = None
 
 
+class ProfessorResumoOut(Schema):
+    nome_completo: str
+    slug: str
+
+
+class TurmaOut(Schema):
+    id: UUID
+    codigo_turma: str
+    semestre: str
+    horario_bruto: str
+    local_sala: str | None = None
+    vagas_ofertadas: int
+    vagas_ocupadas: int
+    professor: ProfessorResumoOut | None = None
+
+
 class MateriaDetalheOut(Schema):
     id: UUID
     codigo_materia: str
@@ -37,6 +53,7 @@ class MateriaDetalheOut(Schema):
     pre_requisito_arvore: dict[str, Any] | list[Any] | None = None
     co_requisito_arvore: dict[str, Any] | list[Any] | None = None
     equivalencia_arvore: dict[str, Any] | list[Any] | None = None
+    turmas: list[TurmaOut] = []
 
 
 class MateriaBuscaOut(Schema):
