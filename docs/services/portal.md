@@ -67,13 +67,16 @@ O portal é totalmente otimizado para celulares e tablets:
 
 | Arquivo | Responsabilidade |
 | :--- | :--- |
-| `src/services/api.ts` | Funções `buscarMaterias()` (termo, departamento e página), `listarDepartamentos()` e `getMateria(codigo, nivel)`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
+| `src/services/api.ts` | Funções `buscarMaterias()`, `listarDepartamentos()`, `getMateria()`, `getProfessor(identifier)` e `listarProfessores()`. A base vem de `EXPO_PUBLIC_API_URL` (padrão `http://localhost:8080/api`) e os erros do backend chegam como `ApiError` com a mensagem original. |
 | `src/hooks/useConsulta.ts` | Hook único de carregamento/erro, com cancelamento da requisição anterior e atraso opcional (debounce). |
-| `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API. |
+| `src/types/materia.ts` | Tipos TypeScript iguais às respostas da API de disciplinas. |
+| `src/types/professor.ts` | Tipos TypeScript do perfil do docente, métricas didáticas, turmas associadas e avaliações. |
 | `src/screens/home/sections/SearchSection.tsx` | Busca de matérias na home: termo (a partir de 3 caracteres, com 350 ms de debounce), filtro por departamento e paginação. |
 | `src/components/SeletorDepartamento.tsx` | Seletor de departamento reutilizável, com filtro por texto que ignora acentos. |
-| `src/screens/materia/MateriaScreen.tsx` | Página da matéria (layout do Figma): carrega a matéria por código + nível e trata carregando, erro e 404. |
-| `src/screens/materia/sections/` | Seções da página: `CabecalhoMateria` (código, nome, departamento, nível, créditos e horas), `EmentaSection` (ementa e panorama), `RequisitosSection` (árvore E/OU clicável) e `TurmasSection` (filtro por professor/turma e semestre). |
+| `src/screens/materia/MateriaScreen.tsx` | Página da matéria (layout do Figma): carrega a matéria por código + nível e trata carregando, erro e 404. Permite navegar para a página de professores associados. |
+| `src/screens/materia/sections/` | Seções da matéria: `CabecalhoMateria` (código, nome, departamento, nível, créditos e horas), `EmentaSection` (ementa e panorama), `RequisitosSection` (árvore E/OU clicável) e `TurmasSection` (filtro por professor/turma e semestre). |
+| `src/screens/professor/ProfessorScreen.tsx` | Página de perfil do professor (layout neobrutalista do Figma): cabeçalho com foto e contatos, métricas, turmas lecionadas e avaliações com dados da API e mock de demonstração. |
+| `src/screens/professor/sections/` | Seções do docente: `CabecalhoProfessor`, `MetricasResumoSection` (com wizard de avaliação interativo em 7 etapas), `TurmasDocenteSection`, `ComentariosSection` e `SidebarCardsSection`. |
 | `src/utils/horario.ts` | Converte o horário do SIGAA (`35M34` → "Terça e Quinta, 10h - 12h") e calcula o semestre atual. |
 | `src/utils/nivelEnsino.ts` | Níveis de ensino aceitos no `?nivel=` e conversão do nível vindo da API. |
 
@@ -83,7 +86,14 @@ O portal é totalmente otimizado para celulares e tablets:
 - **Turmas:** a página lê o campo opcional `turmas` da resposta (`id`, `codigo_turma`, `semestre`, `horario_bruto`, `local_sala`, `vagas_ofertadas`, `vagas_ocupadas`, `professor`). Sem esse campo, mostra "Ainda não há turmas cadastradas".
 - **Panorama e dificuldade** mostram "—" e "N/A" até o módulo de avaliações expor dados.
 
-A troca entre home e matéria é feita por estado em `App.tsx`, sem biblioteca de navegação. O botão voltar do navegador e links diretos (`/materia/MAT0025`) ainda não funcionam; quando houver mais telas, a recomendação é adotar `expo-router` ou React Navigation.
+### Página do professor
+
+- **Identificador e Endpoints:** Consome `GET /api/catalog/professores/{identifier}` (aceita UUID, slug como `charles-xavier` ou SIAPE). Na web, pode ser aberta por query param (`?prof=charles-xavier`), pelo botão `[👨‍🏫 Professor]` na barra flutuante de desenvolvimento ou clicando no nome do professor na lista de turmas da matéria.
+- **Resumo Didático e Badges:** Exibe notas médias de didática/dificuldade, percentual de frequência de presença, taxa de avaliação justa, badges acadêmicos oficiais e selos de análise UnBook.
+- **Wizard Interativo de Avaliação:** Modal em 7 etapas com interface neobrutalista, botões coloridos de resposta com zoom tátil sem símbolos confusos, perguntas sobre chamada obrigatória e monitoria ativa em sala, notas por estrelas e relato anônimo.
+- **Turmas do Semestre e Matérias:** Lista as disciplinas e turmas ativas ministradas pelo professor com suporte a navegação direta para a tela da respectiva matéria.
+
+A troca entre home, matéria e professor é feita por estado em `App.tsx`, com suporte a links diretos via query params (`?materia=...` e `?prof=...`) e barra flutuante de desenvolvimento.
 
 Para testar no celular, `localhost` não funciona: defina `EXPO_PUBLIC_API_URL` com o IP do computador (ver `frontend/.env.example`).
 
