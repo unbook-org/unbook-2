@@ -35,9 +35,11 @@ function normalizar(texto: string) {
 
 export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: TurmasSectionProps) {
   const { width } = useWindowDimensions();
-  const colunas = width >= 980 ? 3 : width >= 640 ? 2 : 1;
-  const larguraConteudo = Math.min(width - MARGEM_LATERAL * 2, LARGURA_MAXIMA);
-  const larguraCartao = (larguraConteudo - ESPACO_GRADE * (colunas - 1)) / colunas;
+  const larguraDisponivel = Math.min(width, LARGURA_MAXIMA);
+  const colunas = larguraDisponivel >= 980 ? 3 : larguraDisponivel >= 640 ? 2 : 1;
+  const paddingLateral = MARGEM_LATERAL * 2;
+  const larguraGrade = larguraDisponivel - paddingLateral;
+  const larguraCartao = (larguraGrade - ESPACO_GRADE * (colunas - 1)) / colunas;
 
   const semestres = useMemo(() => {
     const unicos = [...new Set(turmas.map((turma) => turma.semestre))];
@@ -45,12 +47,11 @@ export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: Tu
   }, [turmas]);
 
   const [termo, setTermo] = useState('');
-  const [termoAplicado, setTermoAplicado] = useState('');
   const [semestre, setSemestre] = useState(semestres[0]);
   const semestreSelecionado = semestres.includes(semestre) ? semestre : semestres[0];
 
   const turmasFiltradas = useMemo(() => {
-    const busca = normalizar(termoAplicado.trim());
+    const busca = normalizar(termo.trim());
     return turmas.filter((turma) => {
       if (turma.semestre !== semestreSelecionado) {
         return false;
@@ -61,7 +62,7 @@ export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: Tu
       const alvo = normalizar(`${turma.professor?.nome_completo ?? ''} turma ${turma.codigo_turma}`);
       return alvo.includes(busca);
     });
-  }, [turmas, termoAplicado, semestreSelecionado]);
+  }, [turmas, termo, semestreSelecionado]);
 
   return (
     <View style={styles.secao}>
@@ -72,13 +73,22 @@ export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: Tu
             <TextInput
               value={termo}
               onChangeText={setTermo}
-              onSubmitEditing={() => setTermoAplicado(termo)}
               placeholder="Digite aqui o nome do professor ou da turma..."
               placeholderTextColor={theme.colors.gray}
               style={styles.inputBusca}
               returnKeyType="search"
               accessibilityLabel="Buscar turma por professor ou código"
             />
+            {termo.length > 0 && (
+              <Pressable
+                onPress={() => setTermo('')}
+                style={styles.limparBuscaBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Limpar busca de turmas"
+              >
+                <Text style={styles.limparBuscaTexto}>✕</Text>
+              </Pressable>
+            )}
           </View>
           <View style={styles.acoesFiltro}>
             <SeletorSemestre
@@ -87,7 +97,7 @@ export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: Tu
               onChange={setSemestre}
             />
             <Pressable
-              onPress={() => setTermoAplicado(termo)}
+              onPress={() => {}}
               style={styles.botaoFiltrar}
               accessibilityRole="button"
             >
@@ -97,15 +107,24 @@ export function TurmasSection({ turmas, onAcessarTurma, onAcessarProfessor }: Tu
         </View>
       </View>
 
-      <View style={[styles.grade, { width: larguraConteudo }]}>
+      <View style={styles.cabecalhoTurmas}>
+        <View style={styles.badgeTotalTurmas}>
+          <Text style={styles.textoBadgeTotalTurmas}>
+            {turmasFiltradas.length}{' '}
+            {turmasFiltradas.length === 1 ? 'TURMA ENCONTRADA' : 'TURMAS ENCONTRADAS'} ({semestreSelecionado})
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.grade}>
         {turmas.length === 0 && (
           <AvisoTurmas
-            largura={larguraConteudo}
+            largura={larguraGrade}
             texto="Ainda não há turmas cadastradas para esta matéria."
           />
         )}
         {turmas.length > 0 && turmasFiltradas.length === 0 && (
-          <AvisoTurmas largura={larguraConteudo} texto="Nenhuma turma encontrada para esse filtro." />
+          <AvisoTurmas largura={larguraGrade} texto="Nenhuma turma encontrada para esse filtro." />
         )}
         {turmasFiltradas.map((turma, indice) => (
           <CartaoTurma
@@ -177,13 +196,17 @@ interface CartaoTurmaProps {
 
 function CartaoTurma({ turma, largura, corAvatar, onAcessarTurma, onAcessarProfessor }: CartaoTurmaProps) {
   const { professor } = turma;
-  // A dificuldade virá do módulo de avaliações; até lá a turma aparece como N/A.
-  const dificuldade = coresMateria.indefinido;
+  const inicial = professor?.nome_completo ? professor.nome_completo.trim()[0].toUpperCase() : '?';
+  const lotada = turma.vagas_ofertadas > 0 && turma.vagas_ocupadas >= turma.vagas_ofertadas;
+  const horarioFormatado = formatarHorario(turma.horario_bruto);
+  const vagasLivres = Math.max(0, turma.vagas_ofertadas - turma.vagas_ocupadas);
 
   return (
     <View style={[styles.cartao, { width: largura }]}>
       <View style={styles.cartaoTopo}>
-        <View style={[styles.avatar, { backgroundColor: corAvatar }]} />
+        <View style={[styles.avatar, { backgroundColor: corAvatar }]}>
+          <Text style={styles.textoAvatar}>{inicial}</Text>
+        </View>
         <View style={styles.cartaoTopoTexto}>
           <Text
             style={[styles.nomeProfessor, !professor && styles.professorIndefinido]}
@@ -196,24 +219,47 @@ function CartaoTurma({ turma, largura, corAvatar, onAcessarTurma, onAcessarProfe
       </View>
 
       <View style={styles.cartaoCorpo}>
-        <View style={styles.info}>
-          <IconeLocal />
-          <Text style={styles.textoInfo}>{turma.local_sala || 'Local a definir'}</Text>
+        {/* Bloco de destaque para Horário das aulas */}
+        <View style={styles.blocoHorario}>
+          <View style={styles.linhaRotuloHorario}>
+            <View style={styles.rotuloComIcone}>
+              <IconeRelogio tamanho={14} cor={theme.colors.secondary} />
+              <Text style={styles.rotuloSecao}>HORÁRIO DAS AULAS</Text>
+            </View>
+            {Boolean(turma.horario_bruto) && (
+              <View style={styles.badgeSigaa}>
+                <Text style={styles.textoBadgeSigaa}>{turma.horario_bruto}</Text>
+              </View>
+            )}
+          </View>
+          <Text style={styles.valorHorario} numberOfLines={2}>
+            {horarioFormatado || 'Horário a definir'}
+          </Text>
         </View>
-        <View style={styles.info}>
-          <IconeRelogio />
-          <Text style={styles.textoInfo}>{formatarHorario(turma.horario_bruto)}</Text>
-        </View>
+
+        {/* Métricas: Vagas e Sala/Local (substituindo Dificuldade) */}
         <View style={styles.metricas}>
-          <View style={[styles.metrica, { backgroundColor: theme.colors.beige }]}>
-            <Text style={styles.rotuloMetrica}>VAGAS</Text>
-            <Text style={styles.valorMetrica}>
+          <View style={[styles.metrica, { backgroundColor: lotada ? '#FBD5D5' : '#E8F8EE' }]}>
+            <Text style={[styles.rotuloMetrica, lotada && { color: theme.colors.danger }]}>
+              {lotada ? 'LOTADA' : 'VAGAS'}
+            </Text>
+            <Text style={[styles.valorMetrica, lotada && { color: theme.colors.danger }]}>
               {String(turma.vagas_ocupadas).padStart(2, '0')}/{turma.vagas_ofertadas}
             </Text>
+            <Text style={[styles.subMetrica, lotada && { color: theme.colors.danger }]}>
+              {lotada ? 'Sem vagas' : `${vagasLivres} livres`}
+            </Text>
           </View>
-          <View style={[styles.metrica, { backgroundColor: dificuldade.fundo }]}>
-            <Text style={styles.rotuloMetrica}>DIFICULDADE</Text>
-            <Text style={[styles.valorMetrica, { color: dificuldade.texto }]}>N/A</Text>
+
+          <View style={[styles.metrica, { backgroundColor: theme.colors.cream }]}>
+            <View style={styles.rotuloComIcone}>
+              <IconeLocal tamanho={13} cor={theme.colors.secondary} />
+              <Text style={styles.rotuloMetrica}>SALA / LOCAL</Text>
+            </View>
+            <Text style={styles.valorSala} numberOfLines={2}>
+              {turma.local_sala || 'A definir'}
+            </Text>
+            <Text style={styles.subMetrica}>Presencial</Text>
           </View>
         </View>
       </View>
@@ -332,6 +378,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.dark,
     paddingHorizontal: 12,
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   seletorTexto: {
     fontSize: 13,
@@ -355,9 +402,21 @@ const styles = StyleSheet.create({
   seletorOpcao: {
     paddingHorizontal: 12,
     paddingVertical: 8,
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   seletorOpcaoAtiva: {
     backgroundColor: theme.colors.beige,
+  },
+  limparBuscaBtn: {
+    padding: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
+  },
+  limparBuscaTexto: {
+    fontSize: 14,
+    fontWeight: '800',
+    color: theme.colors.gray,
   },
   botaoFiltrar: {
     minHeight: 40,
@@ -367,21 +426,51 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     paddingHorizontal: 18,
     ...sombra(3),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   textoBotaoFiltrar: {
     fontSize: 13,
     fontWeight: '600',
     color: theme.colors.white,
   },
+  cabecalhoTurmas: {
+    width: '100%',
+    maxWidth: LARGURA_MAXIMA,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    paddingHorizontal: MARGEM_LATERAL,
+    marginBottom: -12,
+  },
+  badgeTotalTurmas: {
+    backgroundColor: theme.colors.secondary,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    ...sombra(2.5),
+  },
+  textoBadgeTotalTurmas: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.white,
+    letterSpacing: 0.5,
+  },
   grade: {
+    width: '100%',
+    maxWidth: LARGURA_MAXIMA,
+    alignSelf: 'center',
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: ESPACO_GRADE,
+    paddingHorizontal: MARGEM_LATERAL,
   },
   cartao: {
     backgroundColor: theme.colors.cream,
     borderWidth: 2,
     borderColor: theme.colors.dark,
+    ...sombra(4),
   },
   cartaoTopo: {
     flexDirection: 'row',
@@ -396,13 +485,20 @@ const styles = StyleSheet.create({
     height: 38,
     borderWidth: 2,
     borderColor: theme.colors.dark,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  textoAvatar: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: theme.colors.dark,
   },
   cartaoTopoTexto: {
     flex: 1,
   },
   nomeProfessor: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
     color: theme.colors.dark,
   },
   professorIndefinido: {
@@ -410,46 +506,100 @@ const styles = StyleSheet.create({
   },
   codigoTurma: {
     fontSize: 11,
+    fontWeight: '600',
     color: theme.colors.darkCharcoal,
+    marginTop: 2,
   },
   cartaoCorpo: {
     backgroundColor: theme.colors.white,
     padding: 14,
-    gap: 10,
+    gap: 12,
     borderBottomWidth: 2,
     borderBottomColor: theme.colors.dark,
   },
-  info: {
+  blocoHorario: {
+    backgroundColor: theme.colors.cream,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    padding: 10,
+    gap: 4,
+    ...sombra(2),
+  },
+  linhaRotuloHorario: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
+    gap: 6,
   },
-  textoInfo: {
-    flex: 1,
-    fontSize: 12,
+  rotuloComIcone: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  rotuloSecao: {
+    fontSize: 10,
+    fontWeight: '800',
     color: theme.colors.darkCharcoal,
+    letterSpacing: 0.5,
+  },
+  badgeSigaa: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+  },
+  textoBadgeSigaa: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: theme.colors.dark,
+  },
+  valorHorario: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: theme.colors.dark,
+    lineHeight: 18,
   },
   metricas: {
     flexDirection: 'row',
     gap: 10,
-    marginTop: 6,
   },
   metrica: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
     borderColor: theme.colors.dark,
-    paddingVertical: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    minHeight: 74,
+    ...sombra(2),
   },
   rotuloMetrica: {
     fontSize: 9,
-    fontWeight: '600',
+    fontWeight: '800',
     color: theme.colors.darkCharcoal,
+    letterSpacing: 0.5,
+    marginBottom: 2,
   },
   valorMetrica: {
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: '900',
+    color: theme.colors.dark,
+    textAlign: 'center',
+  },
+  valorSala: {
+    fontSize: 12,
     fontWeight: '800',
     color: theme.colors.dark,
+    textAlign: 'center',
+    lineHeight: 16,
+  },
+  subMetrica: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: theme.colors.gray,
+    marginTop: 2,
   },
   cartaoRodape: {
     padding: 14,
@@ -466,14 +616,17 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   cartaoSigaa: {
-    minHeight: 260,
+    minHeight: 280,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
+    backgroundColor: theme.colors.white,
     borderWidth: 2,
     borderStyle: 'dashed',
     borderColor: theme.colors.dark,
     padding: 20,
+    ...sombra(3),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
   },
   tituloSigaa: {
     fontSize: 15,
@@ -491,6 +644,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.dark,
     padding: 20,
+    ...sombra(3),
   },
   textoAviso: {
     fontSize: 14,

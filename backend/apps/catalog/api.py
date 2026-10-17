@@ -62,8 +62,8 @@ def buscar_materias(
     response=MateriaDetalheOut,
     summary="Detalhes completos da matéria pelo código",
 )
-def get_materia(request, codigo: str):
-    """Retorna todos os dados da matéria, incluindo pré-requisitos com nome."""
+def get_materia(request, codigo: str, nivel: str | None = None):
+    """Retorna todos os dados da matéria, incluindo pré-requisitos com nome e turmas."""
     return fetch_materia_detalhe(codigo)
 
 
