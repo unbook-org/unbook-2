@@ -1,0 +1,17 @@
+<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Padrão repetível das linhas azuis do caderno a cada 44px -->
+    <pattern id="caderno-pautas" width="100%" height="44" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="43.5" x2="100%" y2="43.5" stroke="#39A7AF" stroke-width="1" stroke-opacity="0.35" />
+    </pattern>
+  </defs>
+
+  <!-- Fundo da folha do caderno (papel off-white da paleta) -->
+  <rect width="100%" height="100%" fill="#F6F6F5" />
+
+  <!-- Pautas horizontais repetidas infinitamente -->
+  <rect width="100%" height="100%" fill="url(#caderno-pautas)" />
+
+  <!-- Linha de margem vertical vermelha típica de caderno universitário -->
+  <line x1="72" y1="0" x2="72" y2="100%" stroke="#FE4141" stroke-width="1.5" stroke-opacity="0.45" />
+</svg>
