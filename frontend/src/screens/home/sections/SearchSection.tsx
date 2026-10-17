@@ -1,6 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -17,8 +19,10 @@ import {
   TAMANHO_MINIMO_BUSCA,
   buscarMaterias,
   listarDepartamentos,
+  listarProfessores,
 } from '../../../services/api';
 import type { MateriaResumo } from '../../../types/materia';
+import type { ProfessorListItem } from '../../../types/professor';
 import type { NivelEnsino } from '../../../utils/nivelEnsino';
 
 const ATRASO_BUSCA_MS = 350;
@@ -60,6 +64,7 @@ export function getCategoryColors(tab: SearchTab) {
 
 interface SearchSectionProps {
   onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
+  onSelectProfessor?: (identifier: string, origemNome?: string) => void;
 }
 
 // =========================================================================
@@ -154,6 +159,20 @@ function LightningIcon({ size = 15, color = '#1F1F1F' }: { size?: number; color?
   );
 }
 
+function ChevronLeftIcon({ size = 15, color = '#1F1F1F' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M15 18l-6-6 6-6"
+        stroke={color}
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
 function ChevronRightIcon({ size = 15, color = '#9CA3AF' }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
@@ -180,6 +199,29 @@ function SlidersIcon({ size = 13, color = '#1F1F1F' }: { size?: number; color?: 
       <Circle cx="4" cy="12" r="2" stroke={color} strokeWidth="2.4" fill="none" />
       <Circle cx="12" cy="10" r="2" stroke={color} strokeWidth="2.4" fill="none" />
       <Circle cx="20" cy="14" r="2" stroke={color} strokeWidth="2.4" fill="none" />
+    </Svg>
+  );
+}
+
+function MailIcon({ size = 13, color = '#4B5563' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Rect x="2" y="4" width="20" height="16" rx="2" stroke={color} strokeWidth="2.2" />
+      <Path d="M22 6L12 13 2 6" stroke={color} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+function TipBulbIcon({ size = 15, color = '#1F1F1F' }: { size?: number; color?: string }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      <Path
+        d="M9 18h6m-4 3h2M12 2a7 7 0 0 0-7 7c0 2.5 1.3 4.6 3.2 5.8.5.3.8.9.8 1.5v.7h6v-.7c0-.6.3-1.2.8-1.5C17.7 13.6 19 11.5 19 9a7 7 0 0 0-7-7z"
+        stroke={color}
+        strokeWidth="2.2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </Svg>
   );
 }
@@ -218,10 +260,9 @@ function GraphPaperBackground() {
 // COMPONENTE PRINCIPAL SEARCH SECTION
 // =========================================================================
 
-export function SearchSection({ onSelectMateria }: SearchSectionProps) {
+export function SearchSection({ onSelectMateria, onSelectProfessor }: SearchSectionProps) {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
-  const isTablet = width >= 640 && width < 1024;
 
   const inputRef = useRef<TextInput>(null);
 
@@ -231,6 +272,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
   const [activeTab, setActiveTab] = useState<SearchTab>('disciplinas');
   const [showDeptSelector, setShowDeptSelector] = useState(false);
   const [showFilterTray, setShowFilterTray] = useState(false);
+  const [exibirDicas, setExibirDicas] = useState(true);
 
   const [pesquisarHovered, setPesquisarHovered] = useState(false);
 
@@ -239,13 +281,35 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
   const emBusca = termoLimpo.length > 0 || departamentoId !== null;
   const buscaAtiva =
     activeTab === 'disciplinas' && (!termoCurto && (termoLimpo.length > 0 || departamentoId !== null));
+  const buscaDocentesAtiva =
+    activeTab === 'docentes' && (!termoCurto && (termoLimpo.length > 0 || departamentoId !== null));
 
   const departamentos = useConsulta((sinal) => listarDepartamentos(sinal), []);
   const { dados, carregando, erro } = useConsulta(
     buscaAtiva
       ? (sinal) => buscarMaterias({ termo: termoLimpo, departamentoId, pagina }, sinal)
       : null,
-    [termoLimpo, departamentoId, pagina],
+    [buscaAtiva, termoLimpo, departamentoId, pagina],
+    ATRASO_BUSCA_MS,
+  );
+  const {
+    dados: dadosDocentes,
+    carregando: carregandoDocentes,
+    erro: erroDocentes,
+  } = useConsulta(
+    buscaDocentesAtiva
+      ? (sinal) =>
+          listarProfessores(
+            {
+              busca: termoLimpo || undefined,
+              departamento: departamentoId ?? undefined,
+              pagina,
+              limite: 10,
+            },
+            sinal,
+          )
+      : null,
+    [buscaDocentesAtiva, termoLimpo, departamentoId, pagina],
     ATRASO_BUSCA_MS,
   );
 
@@ -268,12 +332,9 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
     setPagina(1);
   };
 
-  const handleCategoryCardClick = (tab: SearchTab) => {
+  const trocarAba = (tab: SearchTab) => {
     setActiveTab(tab);
-    setShowFilterTray(true);
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
+    setPagina(1);
   };
 
   const handleOpenCaptureDocs = () => {
@@ -387,7 +448,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
             <View style={[styles.filterTabsRow, isMobile && styles.filterTabsRowMobile]}>
               <Pressable
                 accessibilityRole="tab"
-                onPress={() => setActiveTab('disciplinas')}
+                onPress={() => trocarAba('disciplinas')}
                 style={({ pressed }) => [
                   styles.filterTab,
                   activeTab === 'disciplinas'
@@ -414,7 +475,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
 
               <Pressable
                 accessibilityRole="tab"
-                onPress={() => setActiveTab('docentes')}
+                onPress={() => trocarAba('docentes')}
                 style={({ pressed }) => [
                   styles.filterTab,
                   activeTab === 'docentes'
@@ -441,7 +502,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
 
               <Pressable
                 accessibilityRole="tab"
-                onPress={() => setActiveTab('artigos')}
+                onPress={() => trocarAba('artigos')}
                 style={({ pressed }) => [
                   styles.filterTab,
                   activeTab === 'artigos'
@@ -468,7 +529,7 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
 
               <Pressable
                 accessibilityRole="tab"
-                onPress={() => setActiveTab('ia')}
+                onPress={() => trocarAba('ia')}
                 style={({ pressed }) => [
                   styles.filterTab,
                   activeTab === 'ia'
@@ -840,79 +901,82 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
       </View>
 
         {/* ========================================================================= */}
-        {/* PESQUISAS RECENTES */}
+        {/* PESQUISAS RECENTES & CONTROLE DE DICAS */}
         {/* ========================================================================= */}
         <View style={[styles.recentSearchesRow, isMobile && styles.recentSearchesRowMobile]}>
-          <Text style={styles.recentSearchesLabel}>PESQUISAS RECENTES:</Text>
-          <View style={styles.recentPillsWrapper}>
-            {RECENT_SEARCHES.map((item, idx) => (
-              <Pressable
-                key={idx}
-                accessibilityRole="button"
-                onPress={() => handleRecentSearch(item.query, item.tab)}
-                style={({ pressed }) => [
-                  styles.recentPill,
-                  pressed && styles.recentPillPressed,
-                ]}
-              >
-                <Text style={styles.recentPillText}>{item.label}</Text>
-              </Pressable>
-            ))}
+          <View style={styles.recentSearchesLeft}>
+            <Text style={styles.recentSearchesLabel}>PESQUISAS RECENTES:</Text>
+            <View style={styles.recentPillsWrapper}>
+              {RECENT_SEARCHES.map((item, idx) => (
+                <Pressable
+                  key={idx}
+                  accessibilityRole="button"
+                  onPress={() => handleRecentSearch(item.query, item.tab)}
+                  style={({ pressed }) => [
+                    styles.recentPill,
+                    pressed && styles.recentPillPressed,
+                  ]}
+                >
+                  <Text style={styles.recentPillText}>{item.label}</Text>
+                </Pressable>
+              ))}
+            </View>
           </View>
+
+          {/* Botão para habilitar ou desabilitar as dicas */}
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityState={{ checked: exibirDicas }}
+            accessibilityLabel={exibirDicas ? "Ocultar dicas de pesquisa" : "Exibir dicas de pesquisa"}
+            onPress={() => setExibirDicas((prev) => !prev)}
+            style={({ pressed }) => [
+              styles.toggleDicasBtn,
+              exibirDicas ? styles.toggleDicasBtnAtivo : styles.toggleDicasBtnInativo,
+              pressed && styles.toggleDicasBtnPressed,
+            ]}
+          >
+            <TipBulbIcon size={12} color={exibirDicas ? "#009A5E" : "#6B7280"} />
+            <Text
+              style={[
+                styles.toggleDicasTexto,
+                exibirDicas ? styles.toggleDicasTextoAtivo : styles.toggleDicasTextoInativo,
+              ]}
+            >
+              {exibirDicas ? "DICAS: ATIVAS" : "DICAS: OCULTAS"}
+            </Text>
+            <View
+              style={[
+                styles.toggleDicasSwitch,
+                exibirDicas && styles.toggleDicasSwitchAtivo,
+              ]}
+            >
+              <View
+                style={[
+                  styles.toggleDicasThumb,
+                  exibirDicas && styles.toggleDicasThumbAtivo,
+                ]}
+              />
+            </View>
+          </Pressable>
         </View>
 
         {/* ========================================================================= */}
         {/* CONTEÚDO CONDICIONAL: CARDS OU RESULTADOS DA PESQUISA */}
         {/* ========================================================================= */}
         {!emBusca ? (
-          /* GRADE COM OS 4 CARDS DE ATALHOS / CATEGORIAS */
-          <View
-            style={[
-              styles.categoryGrid,
-              isMobile && styles.categoryGridMobile,
-              isTablet && styles.categoryGridTablet,
-            ]}
-          >
-            {/* Card 1: Disciplinas */}
-            <CategoryCard
-              icon={<BookIcon size={18} color="#FFFFFF" />}
-              iconBg="#009A5E"
-              title="Disciplinas"
-              description="Encontre ementas e horários"
-              isActive={activeTab === 'disciplinas'}
-              onPress={() => handleCategoryCardClick('disciplinas')}
+          exibirDicas ? (
+            /* FORMATO DE DICAS (TIPS) DE PESQUISA (SEM EMOJIS) */
+            <SearchTipsBox
+              activeTab={activeTab}
+              isMobile={isMobile}
+              onOpenFilters={() => setShowFilterTray(true)}
+              onSelectQuery={(q, tab) => {
+                if (tab) setActiveTab(tab);
+                alterarTermo(q);
+                if (inputRef.current) inputRef.current.focus();
+              }}
             />
-
-            {/* Card 2: Docentes */}
-            <CategoryCard
-              icon={<UserIcon size={18} color="#FFFFFF" />}
-              iconBg="#1349EB"
-              title="Docentes"
-              description="Perfis e contatos de professores"
-              isActive={activeTab === 'docentes'}
-              onPress={() => handleCategoryCardClick('docentes')}
-            />
-
-            {/* Card 3: Artigos */}
-            <CategoryCard
-              icon={<SparklesIcon size={18} color="#FFFFFF" />}
-              iconBg="#8B5CF6"
-              title="Artigos"
-              description="Palestras, workshops e mais"
-              isActive={activeTab === 'artigos'}
-              onPress={() => handleCategoryCardClick('artigos')}
-            />
-
-            {/* Card 4: Pesquisa Inteligente */}
-            <CategoryCard
-              icon={<LightningIcon size={18} color="#FFFFFF" />}
-              iconBg="#EA580C"
-              title="Pesquisa Inteligente"
-              description="Pesquise com nosso modelo de IA"
-              isActive={activeTab === 'ia'}
-              onPress={() => handleCategoryCardClick('ia')}
-            />
-          </View>
+          ) : null
         ) : (
           /* ÁREA DE RESULTADOS DA PESQUISA (SUBSTITUI OS CARDS) */
           <View style={styles.resultsArea}>
@@ -983,19 +1047,65 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
               </View>
             )}
 
-            {/* Feedback alternativo para abas de Docentes, Artigos ou IA */}
-            {activeTab === 'docentes' && termoLimpo.length > 0 && (
-              <View style={styles.categoryInfoBox}>
-                <View style={[styles.categoryInfoIconCircle, { backgroundColor: '#1349EB' }]}>
-                  <UserIcon size={20} color="#FFFFFF" />
-                </View>
-                <View style={styles.categoryInfoTexts}>
-                  <Text style={styles.categoryInfoTitle}>{`Busca de Docentes: "${termoLimpo}"`}</Text>
-                  <Text style={styles.categoryInfoDesc}>
-                    Exibindo professores da UnB correspondentes ao termo. Clique em Disciplinas para
-                    ver turmas associadas ou consulte avaliações anônimas de quem já cursou.
+            {/* RESULTADOS DA ABA DOCENTES */}
+            {buscaDocentesAtiva && carregandoDocentes && (
+              <View style={styles.loadingBox}>
+                <ActivityIndicator color="#1349EB" size="large" />
+                <Text style={styles.loadingText}>Buscando no corpo docente da UnB...</Text>
+              </View>
+            )}
+
+            {buscaDocentesAtiva && !carregandoDocentes && erroDocentes && (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{erroDocentes}</Text>
+              </View>
+            )}
+
+            {buscaDocentesAtiva && !carregandoDocentes && dadosDocentes && (
+              <View style={styles.resultsContainer}>
+                <View style={styles.resultsHeaderRow}>
+                  <Text style={styles.resultsTotalCount}>
+                    {dadosDocentes.meta.total_items === 0
+                      ? 'Nenhum docente encontrado.'
+                      : `${dadosDocentes.meta.total_items} ${
+                          dadosDocentes.meta.total_items === 1
+                            ? 'docente encontrado'
+                            : 'docentes encontrados'
+                        }`}
                   </Text>
+                  {termoLimpo.length > 0 && (
+                    <Text style={[styles.resultsQueryBadge, { backgroundColor: '#EEF4FF', color: '#1349EB' }]}>
+                      {`"${termoLimpo}"`}
+                    </Text>
+                  )}
                 </View>
+
+                {dadosDocentes.meta.total_items === 0 ? (
+                  <View style={styles.emptyStateBox}>
+                    <Text style={styles.emptyStateTitle}>Nenhum docente encontrado</Text>
+                    <Text style={styles.emptyStateDesc}>
+                      {`Não encontramos resultados para "${termoLimpo}". Tente buscar por parte do nome ou sem acentos.`}
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={styles.itemsList}>
+                    {dadosDocentes.items.map((professor) => (
+                      <ItemProfessorCard
+                        key={professor.id}
+                        professor={professor}
+                        onPress={() => onSelectProfessor?.(professor.slug || professor.id, 'pesquisa')}
+                      />
+                    ))}
+                  </View>
+                )}
+
+                {dadosDocentes.meta.total_pages > 1 && (
+                  <Paginacao
+                    pagina={dadosDocentes.meta.page}
+                    totalPaginas={dadosDocentes.meta.total_pages}
+                    onMudar={setPagina}
+                  />
+                )}
               </View>
             )}
 
@@ -1052,66 +1162,267 @@ export function SearchSection({ onSelectMateria }: SearchSectionProps) {
 // SUBCOMPONENTES
 // =========================================================================
 
-interface CategoryCardProps {
-  icon: React.ReactNode;
-  iconBg: string;
+interface TipSlideData {
+  id: string;
+  dicaNumero: string;
+  tagColor: string;
+  bgLight: string;
   title: string;
   description: string;
-  onPress: () => void;
-  isActive?: boolean;
+  chips?: { label: string; query: string; tab?: SearchTab }[];
+  actionBtn?: { label: string; action: 'filters' };
 }
 
-function CategoryCard({
-  icon,
-  iconBg,
-  title,
-  description,
-  onPress,
-  isActive = false,
-}: CategoryCardProps) {
-  const [hovered, setHovered] = useState(false);
+const DICAS_CATALOGO: TipSlideData[] = [
+  {
+    id: 'dica-1',
+    dicaNumero: 'DICA 01',
+    tagColor: '#009A5E',
+    bgLight: '#F0FDF4',
+    title: 'Código Oficial da Matéria',
+    description:
+      'Digite a sigla e o código da matéria (ex: IFD0071, MAT0025, CIC0004) para abrir ementa, créditos e turmas abertas.',
+    chips: [
+      { label: 'IFD0071', query: 'IFD0071', tab: 'disciplinas' },
+      { label: 'MAT0025', query: 'MAT0025', tab: 'disciplinas' },
+      { label: 'CIC0004', query: 'CIC0004', tab: 'disciplinas' },
+      { label: 'Cálculo 1', query: 'Cálculo 1', tab: 'disciplinas' },
+    ],
+  },
+  {
+    id: 'dica-2',
+    dicaNumero: 'DICA 02',
+    tagColor: '#1349EB',
+    bgLight: '#EFF6FF',
+    title: 'Docentes & Turmas Lecionadas',
+    description:
+      'Alterne para a aba Docentes ou busque o nome do professor para consultar e-mail institucional, SIAPE, Lattes e turmas que leciona.',
+    chips: [
+      { label: 'Charles Xavier', query: 'Charles Xavier', tab: 'docentes' },
+      { label: 'Filtrar Docentes', query: '', tab: 'docentes' },
+    ],
+  },
+  {
+    id: 'dica-3',
+    dicaNumero: 'DICA 03',
+    tagColor: '#854D0E',
+    bgLight: '#FEFCE8',
+    title: 'Horários, Salas & Filtros',
+    description:
+      'Identifique locais no Darcy Ribeiro (ICC, PAT, BSA) ou FGA/FCE/FUP, ou abra Filtros para restringir por departamento.',
+    actionBtn: { label: 'ABRIR FILTROS →', action: 'filters' },
+  },
+  {
+    id: 'dica-4',
+    dicaNumero: 'DICA 04',
+    tagColor: '#7C3AED',
+    bgLight: '#FAF5FF',
+    title: 'Pesquisa Inteligente & Grade',
+    description:
+      'Consulte a IA ou o simulador semanal para identificar choques de horários e organizar sua grade semestral da UnB.',
+    chips: [
+      { label: 'Pesquisa Inteligente', query: '', tab: 'ia' },
+      { label: 'Física 1', query: 'Física 1', tab: 'disciplinas' },
+    ],
+  },
+];
+
+interface SearchTipsBoxProps {
+  activeTab: SearchTab;
+  isMobile: boolean;
+  onOpenFilters: () => void;
+  onSelectQuery: (query: string, tab?: SearchTab) => void;
+}
+
+function SearchTipsBox({
+  isMobile,
+  onOpenFilters,
+  onSelectQuery,
+}: SearchTipsBoxProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [slideAnim] = useState(() => new Animated.Value(0));
+
+  // Auto-play que desliza o card a cada 5 segundos
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % DICAS_CATALOGO.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [isPaused]);
+
+  // Animação horizontal para deslizar o card para o lado
+  useEffect(() => {
+    if (containerWidth > 0) {
+      Animated.timing(slideAnim, {
+        toValue: -currentIndex * containerWidth,
+        duration: 380,
+        useNativeDriver: false,
+      }).start();
+    }
+  }, [currentIndex, containerWidth, slideAnim]);
+
+  const slideAnterior = () => {
+    setCurrentIndex((prev) => (prev - 1 + DICAS_CATALOGO.length) % DICAS_CATALOGO.length);
+  };
+
+  const proximoSlide = () => {
+    setCurrentIndex((prev) => (prev + 1) % DICAS_CATALOGO.length);
+  };
+
+  const irParaSlide = (index: number) => {
+    setCurrentIndex(index);
+  };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={`Abrir categoria ${title}`}
-      onPress={onPress}
-      onHoverIn={() => setHovered(true)}
-      onHoverOut={() => setHovered(false)}
-      style={({ pressed }) => [
-        styles.categoryCard,
-        isActive && {
-          borderColor: iconBg,
-          borderWidth: 2.5,
-          backgroundColor: '#FFFFFF',
-        },
-        hovered && styles.categoryCardHovered,
-        pressed && styles.categoryCardPressed,
-      ]}
+    <View
+      style={styles.tipsSingleCardContainer}
+      onLayout={(e) => {
+        const w = e.nativeEvent.layout.width;
+        if (w > 0 && w !== containerWidth) {
+          setContainerWidth(w);
+          slideAnim.setValue(-currentIndex * w);
+        }
+      }}
+      {...(Platform.OS === 'web'
+        ? ({
+            onMouseEnter: () => setIsPaused(true),
+            onMouseLeave: () => setIsPaused(false),
+          } as any)
+        : {})}
     >
-      {isActive && (
-        <View style={[styles.cardActivePill, { backgroundColor: iconBg }]}>
-          <Text style={styles.cardActivePillText}>● ATIVO</Text>
-        </View>
-      )}
+      <Animated.View
+        style={[
+          styles.tipsTrack,
+          {
+            transform: [{ translateX: slideAnim }],
+            width: containerWidth > 0 ? containerWidth * DICAS_CATALOGO.length : `${DICAS_CATALOGO.length * 100}%`,
+          },
+        ]}
+      >
+        {DICAS_CATALOGO.map((tip) => {
+          return (
+            <View
+              key={tip.id}
+              style={[
+                styles.tipSlideItem,
+                {
+                  width: containerWidth > 0 ? containerWidth : '100%',
+                  backgroundColor: tip.bgLight,
+                },
+              ]}
+            >
+              {/* Linha Superior: Tag DICA, Título e Controles de Deslizar */}
+              <View style={styles.tipSlideHeader}>
+                <View style={styles.tipSlideHeaderLeft}>
+                  <View style={[styles.tipSlideBadge, { backgroundColor: tip.tagColor }]}>
+                    <TipBulbIcon size={12} color="#FFFFFF" />
+                    <Text style={styles.tipSlideBadgeText}>{tip.dicaNumero}</Text>
+                  </View>
+                  <Text style={styles.tipSlideTitle} numberOfLines={1}>
+                    {tip.title}
+                  </Text>
+                </View>
 
-      <View style={styles.categoryCardTopRow}>
-        <View style={[styles.categoryIconBadge, { backgroundColor: iconBg }]}>
-          {icon}
-        </View>
-      </View>
+                {/* Controles de navegação (dots, contador e setas) */}
+                <View style={styles.tipSlideHeaderRight}>
+                  {/* Dots de navegação */}
+                  <View style={styles.tipDotsRow}>
+                    {DICAS_CATALOGO.map((_, dotIdx) => (
+                      <Pressable
+                        key={dotIdx}
+                        onPress={() => irParaSlide(dotIdx)}
+                        style={[
+                          styles.tipDot,
+                          dotIdx === currentIndex && [
+                            styles.tipDotActive,
+                            { backgroundColor: tip.tagColor },
+                          ],
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Ir para dica ${dotIdx + 1}`}
+                      />
+                    ))}
+                  </View>
 
-      <View style={styles.categoryCardBody}>
-        <Text style={[styles.categoryCardTitle, isActive && { color: iconBg }]}>
-          {title}
-        </Text>
-        <Text style={styles.categoryCardDesc}>{description}</Text>
-      </View>
+                  {/* Contador 1/4 */}
+                  <Text style={styles.tipCounterText}>
+                    {currentIndex + 1}/{DICAS_CATALOGO.length}
+                  </Text>
 
-      <View style={styles.categoryChevronWrapper}>
-        <ChevronRightIcon size={14} color={isActive ? iconBg : '#9CA3AF'} />
-      </View>
-    </Pressable>
+                  {/* Botões de avançar/voltar */}
+                  <View style={styles.tipNavButtonsRow}>
+                    <Pressable
+                      onPress={slideAnterior}
+                      style={({ pressed }) => [
+                        styles.tipNavBtn,
+                        pressed && styles.tipNavBtnPressed,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Dica anterior"
+                    >
+                      <ChevronLeftIcon size={12} color="#1F1F1F" />
+                    </Pressable>
+                    <Pressable
+                      onPress={proximoSlide}
+                      style={({ pressed }) => [
+                        styles.tipNavBtn,
+                        pressed && styles.tipNavBtnPressed,
+                      ]}
+                      accessibilityRole="button"
+                      accessibilityLabel="Próxima dica"
+                    >
+                      <ChevronRightIcon size={12} color="#1F1F1F" />
+                    </Pressable>
+                  </View>
+                </View>
+              </View>
+
+              {/* Descrição da Dica */}
+              <Text style={styles.tipSlideDesc}>{tip.description}</Text>
+
+              {/* Chips e Ações */}
+              <View style={styles.tipSlideFooter}>
+                {tip.chips && (
+                  <View style={styles.tipChipsRow}>
+                    {tip.chips.map((chip, cIdx) => (
+                      <Pressable
+                        key={cIdx}
+                        onPress={() => onSelectQuery(chip.query, chip.tab)}
+                        style={({ pressed }) => [
+                          styles.tipChip,
+                          pressed && styles.tipChipPressed,
+                        ]}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Buscar ${chip.label}`}
+                      >
+                        <Text style={styles.tipChipText}>{chip.label}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+
+                {tip.actionBtn && (
+                  <Pressable
+                    onPress={onOpenFilters}
+                    style={({ pressed }) => [
+                      styles.tipChipHighlight,
+                      pressed && styles.tipChipPressed,
+                    ]}
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir filtros de departamento"
+                  >
+                    <Text style={styles.tipChipHighlightText}>{tip.actionBtn.label}</Text>
+                  </Pressable>
+                )}
+              </View>
+            </View>
+          );
+        })}
+      </Animated.View>
+    </View>
   );
 }
 
@@ -1150,6 +1461,92 @@ function ItemMateriaCard({
 
       <View style={styles.materiaActionCol}>
         <Text style={styles.materiaVerText}>VER EMENTA →</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+function ItemProfessorCard({
+  professor,
+  onPress,
+}: {
+  professor: ProfessorListItem;
+  onPress: () => void;
+}) {
+  const [hovered, setHovered] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  const temFoto = Boolean(professor.url_foto) && !imgError;
+  const iniciais = professor.nome_completo
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0])
+    .join('')
+    .toUpperCase();
+
+  return (
+    <Pressable
+      onPress={onPress}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      style={({ pressed }) => [
+        styles.materiaCard,
+        hovered && styles.materiaCardHovered,
+        pressed && styles.materiaCardPressed,
+      ]}
+      accessibilityRole="button"
+      accessibilityLabel={`Ver perfil do docente ${professor.nome_completo}`}
+    >
+      <View style={styles.profCardAvatar}>
+        {temFoto ? (
+          <Image
+            source={{ uri: professor.url_foto! }}
+            style={styles.profCardAvatarImg}
+            resizeMode="cover"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <View style={styles.profCardAvatarFallback}>
+            <Text style={styles.profCardAvatarInitials}>{iniciais || 'DOC'}</Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.materiaDetailsCol}>
+        <Text style={styles.materiaNomeText} numberOfLines={1}>
+          {professor.nome_completo}
+        </Text>
+
+        {professor.departamento && (
+          <Text style={styles.materiaDeptText} numberOfLines={1}>
+            {professor.departamento.nome} ({professor.departamento.codigo})
+          </Text>
+        )}
+
+        <View style={styles.profCardMetaRow}>
+          {professor.total_turmas > 0 && (
+            <View style={styles.profTurmasBadge}>
+              <Text style={styles.profTurmasBadgeText}>
+                {professor.total_turmas} {professor.total_turmas === 1 ? 'TURMA' : 'TURMAS'}
+              </Text>
+            </View>
+          )}
+          {professor.email_institucional && (
+            <View style={styles.profEmailWrapper}>
+              <MailIcon size={12} color="#6B7280" />
+              <Text style={styles.profEmailText} numberOfLines={1}>
+                {professor.email_institucional}
+              </Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.materiaActionCol}>
+        <View style={styles.profVerBtn}>
+          <Text style={styles.profVerText}>VER PERFIL →</Text>
+        </View>
       </View>
     </Pressable>
   );
@@ -1554,18 +1951,29 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
 
-  // Linha 'PESQUISAS RECENTES'
+  // Linha 'PESQUISAS RECENTES' & Toggle de Dicas
   recentSearchesRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    justifyContent: 'space-between',
     width: '100%',
     maxWidth: 820,
-    marginBottom: 32,
+    marginBottom: 24,
     flexWrap: 'wrap',
+    gap: 12,
   },
   recentSearchesRowMobile: {
-    gap: 8,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 10,
+    marginBottom: 20,
+  },
+  recentSearchesLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flexWrap: 'wrap',
+    flexShrink: 1,
   },
   recentSearchesLabel: {
     fontSize: 11,
@@ -1607,94 +2015,262 @@ const styles = StyleSheet.create({
     color: '#1F1F1F',
   },
 
-  // Grade com 4 Cards de Categorias
-  categoryGrid: {
+  // Botão Toggle Habilitar/Desabilitar Dicas
+  toggleDicasBtn: {
     flexDirection: 'row',
-    gap: 16,
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 9,
+    paddingVertical: 4.5,
+    borderWidth: 1.5,
+    borderRadius: 2,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 1.5, height: 1.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 1,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '1.5px 1.5px 0px #1F1F1F',
+          transition: 'all 0.15s ease',
+        } as any)
+      : {}),
+  },
+  toggleDicasBtnAtivo: {
+    backgroundColor: '#FFFFFF',
+    borderColor: '#1F1F1F',
+  },
+  toggleDicasBtnInativo: {
+    backgroundColor: '#F3F4F6',
+    borderColor: '#9CA3AF',
+    shadowOpacity: 0.4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '1px 1px 0px rgba(31,31,31,0.3)',
+        } as any)
+      : {}),
+  },
+  toggleDicasBtnPressed: {
+    transform: [{ translateY: 1 }],
+  },
+  toggleDicasTexto: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  toggleDicasTextoAtivo: {
+    color: '#1F1F1F',
+  },
+  toggleDicasTextoInativo: {
+    color: '#6B7280',
+  },
+  toggleDicasSwitch: {
+    width: 22,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: '#E5E7EB',
+    borderWidth: 1,
+    borderColor: '#9CA3AF',
+    justifyContent: 'center',
+    paddingHorizontal: 1.5,
+  },
+  toggleDicasSwitchAtivo: {
+    backgroundColor: '#86EFAC',
+    borderColor: '#009A5E',
+  },
+  toggleDicasThumb: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#6B7280',
+    transform: [{ translateX: 0 }],
+  },
+  toggleDicasThumbAtivo: {
+    backgroundColor: '#009A5E',
+    transform: [{ translateX: 9 }],
+  },
+
+  // Card Único de Dica Deslizante (Slider / Carousel)
+  tipsSingleCardContainer: {
     width: '100%',
     maxWidth: 820,
-    marginBottom: 28,
-  },
-  categoryGridTablet: {
-    flexWrap: 'wrap',
-  },
-  categoryGridMobile: {
-    flexDirection: 'column',
-    gap: 12,
-  },
-  categoryCard: {
-    flex: 1,
-    minWidth: 180,
-    backgroundColor: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#1F1F1F',
     borderRadius: 3,
-    padding: 16,
-    position: 'relative',
+    marginBottom: 28,
+    overflow: 'hidden',
     shadowColor: '#1F1F1F',
     shadowOffset: { width: 3.5, height: 3.5 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 3,
-    justifyContent: 'space-between',
-    minHeight: 125,
     ...(Platform.OS === 'web'
       ? ({
           boxShadow: '3.5px 3.5px 0px #1F1F1F',
-          cursor: 'pointer',
-          transition: 'all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1)',
         } as any)
       : {}),
   },
-  categoryCardHovered: {
-    ...(Platform.OS === 'web'
-      ? ({
-          transform: 'translateY(-2px)',
-          boxShadow: '5px 5px 0px #1F1F1F',
-        } as any)
-      : {}),
+  tipsTrack: {
+    flexDirection: 'row',
   },
-  categoryCardPressed: {
-    shadowOffset: { width: 1, height: 1 },
-    elevation: 1,
-    ...(Platform.OS === 'web'
-      ? ({
-          transform: 'translate(2px, 2px)',
-          boxShadow: '1px 1px 0px #1F1F1F',
-        } as any)
-      : {}),
+  tipSlideItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    justifyContent: 'space-between',
+    minHeight: 125,
   },
-  categoryCardTopRow: {
-    marginBottom: 10,
-  },
-  categoryIconBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 3,
-    borderWidth: 1.5,
-    borderColor: '#1F1F1F',
+  tipSlideHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    flexWrap: 'wrap',
+    gap: 10,
   },
-  categoryCardBody: {
-    marginBottom: 6,
+  tipSlideHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 1,
   },
-  categoryCardTitle: {
+  tipSlideBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 2,
+  },
+  tipSlideBadgeText: {
+    color: '#FFFFFF',
+    fontWeight: '900',
+    fontSize: 10,
+    letterSpacing: 0.5,
+  },
+  tipSlideTitle: {
     fontSize: 13.5,
     fontWeight: '900',
     color: '#1F1F1F',
-    marginBottom: 3,
   },
-  categoryCardDesc: {
-    fontSize: 11,
+  tipSlideHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  tipDotsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  tipDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#D1D5DB',
+  },
+  tipDotActive: {
+    width: 16,
+    borderRadius: 3,
+  },
+  tipCounterText: {
+    fontSize: 10.5,
+    fontWeight: '800',
     color: '#6B7280',
-    lineHeight: 15,
-    fontWeight: '500',
+    letterSpacing: 0.5,
   },
-  categoryChevronWrapper: {
-    position: 'absolute',
-    bottom: 12,
-    right: 12,
+  tipNavButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  tipNavBtn: {
+    width: 24,
+    height: 24,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+        } as any)
+      : {}),
+  },
+  tipNavBtnPressed: {
+    transform: [{ translateY: 1 }],
+  },
+  tipSlideDesc: {
+    fontSize: 12,
+    color: '#4B5563',
+    lineHeight: 17,
+    fontWeight: '500',
+    marginBottom: 10,
+  },
+  tipSlideFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  tipChipsRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+  },
+  tipChip: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.2,
+    borderColor: '#1F1F1F',
+    borderRadius: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 1.5, height: 1.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 1,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '1.5px 1.5px 0px #1F1F1F',
+          cursor: 'pointer',
+        } as any)
+      : {}),
+  },
+  tipChipPressed: {
+    transform: [{ translateY: 1 }],
+  },
+  tipChipText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#1F1F1F',
+  },
+  tipChipHighlight: {
+    backgroundColor: '#F1C321',
+    borderWidth: 1.2,
+    borderColor: '#1F1F1F',
+    borderRadius: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 1.5, height: 1.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 1,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '1.5px 1.5px 0px #1F1F1F',
+          cursor: 'pointer',
+        } as any)
+      : {}),
+  },
+  tipChipHighlightText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    letterSpacing: 0.5,
   },
 
   // Link Inferior 'COMO FUNCIONA?'
@@ -2074,6 +2650,81 @@ const styles = StyleSheet.create({
     fontSize: 11.5,
     fontWeight: '900',
     color: '#1349EB',
+    letterSpacing: 0.5,
+  },
+
+  // Estilos do Card de Professor (Docente)
+  profCardAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 2,
+    borderWidth: 1.8,
+    borderColor: '#1F1F1F',
+    overflow: 'hidden',
+    backgroundColor: '#EEF4FF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profCardAvatarImg: {
+    width: '100%',
+    height: '100%',
+  },
+  profCardAvatarFallback: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#1349EB',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  profCardAvatarInitials: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  profCardMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 3,
+  },
+  profTurmasBadge: {
+    backgroundColor: '#EFECE6',
+    borderWidth: 1.2,
+    borderColor: '#1F1F1F',
+    borderRadius: 2,
+    paddingHorizontal: 5,
+    paddingVertical: 1.5,
+  },
+  profTurmasBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '800',
+    color: '#1F1F1F',
+    letterSpacing: 0.3,
+  },
+  profEmailWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  profEmailText: {
+    fontSize: 11,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  profVerBtn: {
+    backgroundColor: '#1349EB',
+    borderWidth: 1.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 2,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+  },
+  profVerText: {
+    fontSize: 11,
+    fontWeight: '900',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
 

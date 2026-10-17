@@ -40,9 +40,10 @@ import {
 
 interface HomeScreenProps {
   onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
+  onSelectProfessor?: (identifier: string, origemNome?: string) => void;
 }
 
-export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
+export function HomeScreen({ onSelectMateria, onSelectProfessor }: HomeScreenProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [searchLayoutY, setSearchLayoutY] = useState(0);
   const [featuresLayoutY, setFeaturesLayoutY] = useState(0);
@@ -128,7 +129,10 @@ export function HomeScreen({ onSelectMateria }: HomeScreenProps) {
         </View>
 
         <View onLayout={(e) => setSearchLayoutY(e.nativeEvent.layout.y)}>
-          <SearchSection onSelectMateria={onSelectMateria} />
+          <SearchSection
+            onSelectMateria={onSelectMateria}
+            onSelectProfessor={onSelectProfessor}
+          />
         </View>
 
         {/* Badges Oficiais da Aplicação (Só o ódio, Morri de paia, Soninho, etc.) */}

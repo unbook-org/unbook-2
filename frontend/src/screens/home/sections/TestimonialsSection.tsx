@@ -233,7 +233,7 @@ export function TestimonialsSection() {
 
             {feedbackSent ? (
               <View style={styles.successBox}>
-                <Text style={styles.successTitle}>Obrigado pela contribuição! ✨</Text>
+                <Text style={styles.successTitle}>Obrigado pela contribuição!</Text>
                 <Text style={styles.successSub}>
                   Seu feedback foi recebido pela equipe de estudantes mantenedores do UnBook.
                 </Text>

@@ -233,7 +233,7 @@ export function ScheduleSimulatorSection() {
             </View>
             <View style={styles.conflictBannerText}>
               <Text style={styles.conflictTitle}>
-                ⚠️ Choque de Horário Detectado ({conflicts.length})!
+                Choque de Horário Detectado ({conflicts.length})!
               </Text>
               <Text style={styles.conflictDesc}>
                 {conflicts[0].subjects.join(' e ')} ocupam o mesmo horário na{' '}
@@ -248,7 +248,7 @@ export function ScheduleSimulatorSection() {
             </View>
             <View style={styles.conflictBannerText}>
               <Text style={styles.successTitle}>
-                ✓ Grade Perfeita e Sem Conflitos!
+                Grade Perfeita e Sem Conflitos!
               </Text>
               <Text style={styles.successDesc}>
                 Todos os horários das turmas selecionadas estão livres de choques no SIGAA.
@@ -416,7 +416,7 @@ export function ScheduleSimulatorSection() {
         {/* Rodapé explicativo do simulador */}
         <View style={styles.simFooterNotice}>
           <Text style={styles.simFooterNoticeText}>
-            💡 Notação da UnB: Dias 2 = Seg, 3 = Ter, 4 = Qua, 5 = Qui, 6 = Sex. Turnos: M = Manhã, T = Tarde, N = Noite.
+            Nota: Notação da UnB: Dias 2 = Seg, 3 = Ter, 4 = Qua, 5 = Qui, 6 = Sex. Turnos: M = Manhã, T = Tarde, N = Noite.
           </Text>
         </View>
       </View>

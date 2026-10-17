@@ -13,7 +13,7 @@ export interface EmojiBadgeData {
   id: string;
   level: number;
   name: string;
-  emoji: string;
+  mencao: string;
   bgColor: string;
   description: string;
 }
@@ -23,7 +23,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'so-o-odio',
     level: 1,
     name: 'Só o ódio',
-    emoji: '😡',
+    mencao: 'SR',
     bgColor: '#FF6B6B',
     description: 'Cobrança desmedida, desorganização no SIGAA e provas pesadas. Gera revolta coletiva na turma.',
   },
@@ -31,7 +31,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'morri-de-paia',
     level: 2,
     name: 'Morri de paia',
-    emoji: '🫠',
+    mencao: 'II',
     bgColor: '#FFAAA6',
     description: 'Listas intermináveis, provas cheias de pegadinhas e desespero total antes da menção final.',
   },
@@ -39,7 +39,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'soninho',
     level: 3,
     name: 'Soninho',
-    emoji: '🥱',
+    mencao: 'MI',
     bgColor: '#FFE17D',
     description: 'Aulas teóricas extensas, slides sem fim às 08h e pouca dinâmica. Presença cobrada, mas a turma dorme.',
   },
@@ -47,7 +47,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'passavel',
     level: 4,
     name: 'Passável',
-    emoji: '🤔',
+    mencao: 'MM',
     bgColor: '#FFFFFF',
     description: 'Nem bom nem horrível, dá pra levar. Estudando o básico você garante sua menção sem sustos.',
   },
@@ -55,7 +55,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'tranquilo',
     level: 5,
     name: 'Tranquilo',
-    emoji: '🙂',
+    mencao: 'MS',
     bgColor: '#8CE8C5',
     description: 'Didática boa, prazos justos e sem estresse. Docente acessível, provas condizentes e clima leve.',
   },
@@ -63,7 +63,7 @@ export const BADGES: EmojiBadgeData[] = [
     id: 'ss-papai',
     level: 6,
     name: 'SS papai',
-    emoji: '😎',
+    mencao: 'SS',
     bgColor: '#6B8EFF',
     description: 'Didática brilhante, professor inspirador, metodologia prática e alto índice de aprovação com louvor.',
   },
@@ -167,9 +167,9 @@ export function BadgesSection() {
                     <Text style={styles.levelPillText}>NÍVEL {b.level}</Text>
                   </View>
 
-                  {/* Sticker Circular do Emoji */}
+                  {/* Sticker Circular da Menção UnB */}
                   <View style={styles.emojiSticker}>
-                    <Text style={styles.emojiText}>{b.emoji}</Text>
+                    <Text style={styles.mencaoText}>{b.mencao}</Text>
                   </View>
 
                   {/* Nome do Badge */}
@@ -465,8 +465,11 @@ const styles = StyleSheet.create({
         } as any)
       : {}),
   },
-  emojiText: {
-    fontSize: 34,
+  mencaoText: {
+    fontSize: 22,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    letterSpacing: -0.5,
   },
 
   // Nome do Badge

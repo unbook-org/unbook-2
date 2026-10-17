@@ -101,7 +101,6 @@ export function SidebarCardsSection({
         </View>
 
         <View style={styles.recLinhaDestaque}>
-          <Text style={styles.recEmoji}>🤝</Text>
           <Text style={styles.recTextoDestaque}>{recomendacaoPct}% RECOMENDAÇÃO</Text>
         </View>
 

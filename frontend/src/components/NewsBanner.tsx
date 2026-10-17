@@ -135,7 +135,7 @@ export function NewsBanner({
                 <View style={styles.modalTag}>
                   <Text style={styles.modalTagText}>NOVIDADES</Text>
                 </View>
-                <Text style={styles.modalTitle}>Boletim da Semana 1 ✨</Text>
+                <Text style={styles.modalTitle}>Boletim da Semana 1</Text>
               </View>
               <Pressable
                 onPress={() => setIsModalOpen(false)}
