@@ -1,8 +1,8 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../constants/theme';
 import type { ArvoreRequisito, MateriaDetalhe, Requisito } from '../../../types/materia';
-import { LARGURA_MAXIMA } from '../estilos';
+import { LARGURA_MAXIMA, sombra } from '../estilos';
 import { IconeRequisitos } from '../icones';
 
 interface RequisitosSectionProps {
@@ -57,12 +57,22 @@ interface GrupoRequisitosProps {
 
 function GrupoRequisitos({ titulo, arvore, requisitos, emLinha, onSelectMateria }: GrupoRequisitosProps) {
   const nomesPorCodigo = new Map(requisitos.map((requisito) => [requisito.codigo, requisito.nome]));
+  const total = requisitos.length;
 
   return (
     <View style={[styles.grupo, emLinha && styles.grupoEmLinha]}>
-      <Text style={styles.tituloGrupo}>{titulo.toUpperCase()}</Text>
+      <View style={styles.cabecalhoGrupo}>
+        <Text style={styles.tituloGrupo}>{titulo.toUpperCase()}</Text>
+        <View style={[styles.badgeContagem, total === 0 && styles.badgeContagemVazia]}>
+          <Text style={[styles.textoBadgeContagem, total === 0 && styles.textoBadgeContagemVazia]}>
+            {total}
+          </Text>
+        </View>
+      </View>
       {requisitos.length === 0 || !arvore ? (
-        <Text style={styles.vazio}>Nenhum.</Text>
+        <View style={styles.caixaVazia}>
+          <Text style={styles.vazio}>Nenhum cadastrado</Text>
+        </View>
       ) : (
         <NoRequisito
           arvore={arvore}
@@ -141,6 +151,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     padding: 20,
     gap: 16,
+    ...sombra(4),
   },
   tituloCartao: {
     flexDirection: 'row',
@@ -165,14 +176,47 @@ const styles = StyleSheet.create({
   grupoEmLinha: {
     flex: 1,
   },
+  cabecalhoGrupo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   tituloGrupo: {
     fontSize: 11,
     fontWeight: '800',
     color: theme.colors.secondary,
     letterSpacing: 0.6,
   },
+  badgeContagem: {
+    backgroundColor: theme.colors.secondary,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    borderRadius: 2,
+  },
+  badgeContagemVazia: {
+    backgroundColor: theme.colors.lightGray,
+  },
+  textoBadgeContagem: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: theme.colors.white,
+  },
+  textoBadgeContagemVazia: {
+    color: theme.colors.darkCharcoal,
+  },
+  caixaVazia: {
+    backgroundColor: theme.colors.cream,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: theme.colors.lightGray,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
   vazio: {
-    fontSize: 14,
+    fontSize: 13,
+    fontWeight: '600',
     color: theme.colors.gray,
   },
   arvore: {
@@ -205,6 +249,8 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     paddingHorizontal: 12,
     paddingVertical: 8,
+    ...sombra(2.5),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer', transition: 'all 0.15s ease' } as object) : {}),
   },
   requisitoPressionado: {
     backgroundColor: theme.colors.beige,

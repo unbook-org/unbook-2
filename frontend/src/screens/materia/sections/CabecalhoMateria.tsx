@@ -1,9 +1,9 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../constants/theme';
 import type { MateriaDetalhe } from '../../../types/materia';
 import { semestreAtual } from '../../../utils/horario';
-import { coresMateria, LARGURA_MAXIMA } from '../estilos';
+import { coresMateria, LARGURA_MAXIMA, sombra } from '../estilos';
 import { IconeCapelo, IconeVoltar } from '../icones';
 
 interface BarraSuperiorProps {
@@ -29,18 +29,37 @@ export function BarraSuperior({ onVoltar }: BarraSuperiorProps) {
   );
 }
 
-function Indicador({ rotulo, valor, cor }: { rotulo: string; valor: string; cor: string }) {
+function Indicador({
+  rotulo,
+  valor,
+  cor,
+  corTexto = theme.colors.dark,
+}: {
+  rotulo: string;
+  valor: string;
+  cor: string;
+  corTexto?: string;
+}) {
+  const textoClaro = corTexto === theme.colors.white;
   return (
     <View style={[styles.indicador, { backgroundColor: cor }]}>
-      <Text style={styles.rotuloIndicador}>{rotulo}</Text>
-      <Text style={styles.valorIndicador}>{valor}</Text>
+      <Text style={[styles.rotuloIndicador, textoClaro && styles.rotuloIndicadorClaro]}>
+        {rotulo}
+      </Text>
+      <Text style={[styles.valorIndicador, { color: corTexto }]}>{valor}</Text>
     </View>
   );
 }
 
-export function CabecalhoMateria({ materia }: { materia: MateriaDetalhe }) {
+interface CabecalhoMateriaProps {
+  materia: MateriaDetalhe;
+  onRolarParaSecao?: (secao: 'ementa' | 'requisitos' | 'turmas') => void;
+}
+
+export function CabecalhoMateria({ materia, onRolarParaSecao }: CabecalhoMateriaProps) {
   const { width } = useWindowDimensions();
   const compacto = width < 640;
+  const totalTurmas = materia.turmas?.length ?? 0;
 
   return (
     <View style={styles.cabecalho}>
@@ -55,6 +74,9 @@ export function CabecalhoMateria({ materia }: { materia: MateriaDetalhe }) {
                 <Text style={styles.textoSeloNivel}>{materia.nivel_de_ensino.toUpperCase()}</Text>
               </View>
             )}
+            <View style={styles.seloAtiva}>
+              <Text style={styles.textoSeloAtiva}>CATÁLOGO UNB</Text>
+            </View>
           </View>
           <Text style={[styles.titulo, compacto && styles.tituloCompacto]} accessibilityRole="header">
             [{materia.codigo_materia}] {materia.nome}
@@ -67,6 +89,33 @@ export function CabecalhoMateria({ materia }: { materia: MateriaDetalhe }) {
               </Text>
             </View>
           )}
+
+          {/* Atalhos Rápidos para as seções da página */}
+          <View style={styles.barraAtalhos}>
+            <Pressable
+              onPress={() => onRolarParaSecao?.('ementa')}
+              style={styles.botaoAtalho}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textoBotaoAtalho}>EMENTA</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => onRolarParaSecao?.('requisitos')}
+              style={styles.botaoAtalho}
+              accessibilityRole="button"
+            >
+              <Text style={styles.textoBotaoAtalho}>REQUISITOS</Text>
+            </Pressable>
+            <Pressable
+              onPress={() => onRolarParaSecao?.('turmas')}
+              style={[styles.botaoAtalho, styles.botaoAtalhoTurmas]}
+              accessibilityRole="button"
+            >
+              <Text style={[styles.textoBotaoAtalho, styles.textoBotaoAtalhoTurmas]}>
+                TURMAS ({totalTurmas})
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.indicadores}>
@@ -76,6 +125,12 @@ export function CabecalhoMateria({ materia }: { materia: MateriaDetalhe }) {
             cor={theme.colors.warning}
           />
           <Indicador rotulo="HORAS" valor={`${materia.carga_horaria}h`} cor={coresMateria.horas} />
+          <Indicador
+            rotulo="TURMAS"
+            valor={String(totalTurmas).padStart(2, '0')}
+            cor={theme.colors.secondary}
+            corTexto={theme.colors.white}
+          />
         </View>
       </View>
     </View>
@@ -104,6 +159,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 2,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer', transition: 'all 0.15s ease' } as object) : {}),
   },
   textoVoltar: {
     fontSize: 13,
@@ -126,6 +187,7 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     paddingHorizontal: 10,
     paddingVertical: 5,
+    ...sombra(2.5),
   },
   textoSeloSemestre: {
     fontSize: 12,
@@ -217,15 +279,60 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     paddingHorizontal: 16,
     paddingVertical: 10,
+    ...sombra(3),
   },
   rotuloIndicador: {
     fontSize: 10,
     fontWeight: '600',
     color: theme.colors.darkCharcoal,
   },
+  rotuloIndicadorClaro: {
+    color: theme.colors.white,
+    opacity: 0.9,
+  },
   valorIndicador: {
     fontSize: 22,
     fontWeight: '800',
     color: theme.colors.dark,
+  },
+  seloAtiva: {
+    backgroundColor: theme.colors.primary,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  textoSeloAtiva: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: theme.colors.white,
+    letterSpacing: 0.5,
+  },
+  barraAtalhos: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  botaoAtalho: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 2,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    ...sombra(2),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
+  },
+  textoBotaoAtalho: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: theme.colors.dark,
+    letterSpacing: 0.5,
+  },
+  botaoAtalhoTurmas: {
+    backgroundColor: theme.colors.secondary,
+  },
+  textoBotaoAtalhoTurmas: {
+    color: theme.colors.white,
   },
 });

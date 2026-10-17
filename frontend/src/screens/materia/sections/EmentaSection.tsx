@@ -15,25 +15,38 @@ export function EmentaSection({ materia }: { materia: MateriaDetalhe }) {
   return (
     <View style={[styles.linha, empilhado && styles.linhaEmpilhada]}>
       <View style={[styles.cartaoEmenta, !empilhado && styles.cartaoEmentaLargo]}>
-        <View style={styles.tituloCartao}>
-          <IconeDocumento />
-          <Text style={styles.textoTitulo}>Ementa</Text>
+        <View style={styles.barraTopoEmenta}>
+          <View style={styles.tituloCartao}>
+            <IconeDocumento />
+            <Text style={styles.textoTitulo}>EMENTA DA DISCIPLINA</Text>
+          </View>
+          <View style={styles.tagSigaa}>
+            <Text style={styles.textoTagSigaa}>SIGAA UNB</Text>
+          </View>
         </View>
-        <Text style={styles.ementa}>{materia.ementa || 'Ementa não informada.'}</Text>
+        <Text style={styles.ementa}>
+          {materia.ementa || 'Ementa não informada pelo departamento no SIGAA.'}
+        </Text>
       </View>
 
       <View style={[styles.cartaoPanorama, !empilhado && styles.cartaoPanoramaLargo]}>
         <View style={styles.tituloCartao}>
           <IconeGrafico />
-          <Text style={[styles.textoTitulo, styles.textoTituloClaro]}>Panorama</Text>
+          <Text style={[styles.textoTitulo, styles.textoTituloClaro]}>PANORAMA</Text>
+          <View style={styles.badgeEmBreve}>
+            <Text style={styles.textoBadgeEmBreve}>EM BREVE</Text>
+          </View>
         </View>
+        <Text style={styles.subtituloPanorama}>Métricas comunitárias</Text>
         {INDICADORES_PANORAMA.map((rotulo) => (
           <View key={rotulo} style={styles.indicador}>
             <Text style={styles.rotuloIndicador}>{rotulo}</Text>
             <Text style={styles.valorIndicador}>—</Text>
           </View>
         ))}
-        <Text style={styles.semAvaliacoes}>Ainda sem avaliações suficientes.</Text>
+        <View style={styles.rodapePanorama}>
+          <Text style={styles.semAvaliacoes}>Módulo de avaliações da comunidade UnB em breve.</Text>
+        </View>
       </View>
     </View>
   );
@@ -56,10 +69,33 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.dark,
     padding: 20,
-    gap: 12,
+    gap: 14,
+    ...sombra(4),
   },
   cartaoEmentaLargo: {
     flex: 1,
+  },
+  barraTopoEmenta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderBottomWidth: 1.5,
+    borderBottomColor: theme.colors.lightGray,
+    paddingBottom: 10,
+    gap: 12,
+  },
+  tagSigaa: {
+    backgroundColor: theme.colors.beige,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  textoTagSigaa: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: theme.colors.dark,
+    letterSpacing: 0.5,
   },
   tituloCartao: {
     flexDirection: 'row',
@@ -67,28 +103,37 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   textoTitulo: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '800',
     color: theme.colors.dark,
+    letterSpacing: 0.5,
   },
   textoTituloClaro: {
     color: theme.colors.white,
   },
   ementa: {
-    fontSize: 14,
-    lineHeight: 22,
+    fontSize: 14.5,
+    lineHeight: 23,
     color: theme.colors.darkCharcoal,
   },
   cartaoPanorama: {
     backgroundColor: theme.colors.secondary,
     borderWidth: 2,
     borderColor: theme.colors.dark,
-    padding: 16,
+    padding: 18,
     gap: 10,
     ...sombra(4),
   },
   cartaoPanoramaLargo: {
-    width: 260,
+    width: 280,
+  },
+  subtituloPanorama: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: theme.colors.white,
+    opacity: 0.85,
+    letterSpacing: 0.5,
+    marginTop: -4,
   },
   indicador: {
     flexDirection: 'row',
@@ -99,20 +144,43 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.dark,
     paddingHorizontal: 10,
     paddingVertical: 8,
+    ...sombra(2),
   },
   rotuloIndicador: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '800',
     color: theme.colors.dark,
+    letterSpacing: 0.5,
   },
   valorIndicador: {
     fontSize: 14,
     fontWeight: '800',
     color: theme.colors.gray,
   },
+  rodapePanorama: {
+    borderTopWidth: 1.5,
+    borderTopColor: 'rgba(255, 255, 255, 0.3)',
+    paddingTop: 8,
+    marginTop: 4,
+  },
   semAvaliacoes: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
     color: theme.colors.white,
+    lineHeight: 16,
+  },
+  badgeEmBreve: {
+    backgroundColor: theme.colors.white,
+    borderWidth: 1.5,
+    borderColor: theme.colors.dark,
+    paddingHorizontal: 6,
+    paddingVertical: 1,
+    marginLeft: 'auto',
+  },
+  textoBadgeEmBreve: {
+    fontSize: 9,
+    fontWeight: '800',
+    color: theme.colors.dark,
+    letterSpacing: 0.5,
   },
 });

@@ -1,9 +1,9 @@
 import { Platform } from 'react-native';
 import { theme } from '../../constants/theme';
 
-export const LARGURA_MAXIMA = 1180;
+export const LARGURA_MAXIMA = 1240;
 
-// Tons do Figma da página de matéria que não existem na paleta global.
+// Tons do design da página de matéria.
 export const coresMateria = {
   fundo: theme.colors.beige,
   horas: '#E0995E',
