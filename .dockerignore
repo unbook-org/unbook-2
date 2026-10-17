@@ -18,3 +18,5 @@ db.sqlite3
 .env.local
 .vscode/
 .idea/
+node_modules/
+.expo/

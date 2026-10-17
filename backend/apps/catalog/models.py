@@ -57,6 +57,10 @@ class Materia(models.Model):
     ementa = models.TextField(blank=True, null=True)
     creditos = models.PositiveIntegerField(default=4)
     carga_horaria = models.PositiveIntegerField(default=60)
+    nivel_de_ensino = models.CharField(max_length=50, blank=True, null=True)
+    pre_requisito = models.JSONField(blank=True, null=True)
+    co_requisito = models.JSONField(blank=True, null=True)
+    equivalencia = models.JSONField(blank=True, null=True)
 
     class Meta:
         db_table = "materias"

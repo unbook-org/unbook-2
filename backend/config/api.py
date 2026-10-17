@@ -1,3 +1,5 @@
+import logging
+
 from ninja import NinjaAPI
 
 from apps.catalog.api import router as catalog_router
@@ -14,13 +16,31 @@ api = NinjaAPI(
     description="Backend oficial do ecossistema acadêmico da UnB",
 )
 
+logger = logging.getLogger(__name__)
+
+
+def _registrar_erro_de_negocio(request, exc: UnBookException) -> None:
+    """Registra o erro de negócio: ERROR para 5xx, WARNING para os demais."""
+    logger.log(
+        logging.ERROR if exc.status_code >= 500 else logging.WARNING,
+        "%s em %s %s: %s",
+        type(exc).__name__,
+        request.method,
+        request.path,
+        exc.message,
+    )
+
+
 @api.exception_handler(UnBookException)
 def unbook_exception_handler(request, exc: UnBookException):
+    """Converte UnBookException em resposta JSON {error, status_code}."""
+    _registrar_erro_de_negocio(request, exc)
     return api.create_response(
         request,
         {"error": exc.message, "status_code": exc.status_code},
         status=exc.status_code,
     )
+
 
 api.add_router("/catalog", catalog_router, tags=["Catálogo & Matrizes Curriculares"])
 api.add_router("/perfil", perfil_router, tags=["Perfil do Estudante & Gamificação"])
