@@ -1,6 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   ActivityIndicator,
+  Platform,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -129,7 +130,7 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
     media_dificuldade: 3.8,
     total_avaliacoes: 128,
     resumo_executivo:
-      'Tem experiência na área de Física, com ênfase em Física -Matemática. Atuando principalmente nos seguintes temas:função de Wigner, grupos de Lie, produto de Weyl, operador-estrela.',
+      'Tem experiência na área de Física, com ênfase em Física-Matemática. Atuando principalmente nos seguintes temas: função de Wigner, grupos de Lie, produto de Weyl, operador-estrela.',
     badges: [
       '#exigente',
       '#atorDignoDeOscar',
@@ -206,33 +207,38 @@ export function ProfessorScreen({
   onVoltar,
   onSelectMateria,
 }: ProfessorScreenProps) {
+  const scrollRef = useRef<ScrollView>(null);
+
   const {
     dados: professorApi,
     carregando,
     erro,
   } = useConsulta((sinal) => buscarProfessor(identifier, sinal), [identifier]);
 
-  // Se for demo ou professor sem dados cadastrais completos, combina graciosamente
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [identifier]);
+
+  // Se for demo (Charles Xavier), utiliza os dados do mockup; se for docente real da API, preserva os dados reais
   const professor = useMemo(() => {
     if (!professorApi) return PERFIL_DEMO_CHARLES;
+    if (professorApi.slug === 'charles-xavier') {
+      return PERFIL_DEMO_CHARLES;
+    }
     return {
-      ...PERFIL_DEMO_CHARLES,
       ...professorApi,
-      // Se não houver matérias cadastradas para o professor no banco, utiliza as de demonstração
-      materias:
-        professorApi.materias && professorApi.materias.length > 0
-          ? professorApi.materias
-          : PERFIL_DEMO_CHARLES.materias,
-      turmas:
-        professorApi.turmas && professorApi.turmas.length > 0
-          ? professorApi.turmas
-          : PERFIL_DEMO_CHARLES.turmas,
+      url_foto: professorApi.url_foto || PERFIL_DEMO_CHARLES.url_foto,
+      materias: professorApi.materias ?? [],
+      turmas: professorApi.turmas ?? [],
       resumo_didatica: {
-        ...PERFIL_DEMO_CHARLES.resumo_didatica,
-        ...(professorApi.resumo_didatica || {}),
-        resumo_executivo:
-          professorApi.resumo_didatica?.resumo_executivo ||
-          PERFIL_DEMO_CHARLES.resumo_didatica.resumo_executivo,
+        media_didatica: professorApi.resumo_didatica?.media_didatica ?? null,
+        media_dificuldade: professorApi.resumo_didatica?.media_dificuldade ?? null,
+        total_avaliacoes: professorApi.resumo_didatica?.total_avaliacoes ?? 0,
+        resumo_executivo: professorApi.resumo_didatica?.resumo_executivo ?? null,
+        badges: professorApi.resumo_didatica?.badges ?? [],
       },
     };
   }, [professorApi]);
@@ -246,9 +252,13 @@ export function ProfessorScreen({
 
   return (
     <SafeAreaView style={styles.tela}>
-      <ScrollView contentContainerStyle={styles.conteudo}>
+      <ScrollView ref={scrollRef} contentContainerStyle={styles.conteudo}>
         <NewsBanner />
-        <Navbar onPressLogo={onVoltar} onPressExplore={onVoltar} />
+        <Navbar
+          onPressLogo={onVoltar}
+          onPressExplore={onVoltar}
+          onPressAbout={onVoltar}
+        />
 
         {carregando && (
           <ActivityIndicator

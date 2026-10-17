@@ -2,6 +2,10 @@ import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../constants/theme';
 import type { MateriaDetalhe } from '../../../types/materia';
+import {
+  formatarNomeDepartamentoLimpo,
+  formatarNomeProfessor,
+} from '../../../utils/formatadorTexto';
 import { semestreAtual } from '../../../utils/horario';
 import { coresMateria, LARGURA_MAXIMA, sombra } from '../estilos';
 import { IconeCapelo, IconeVoltar } from '../icones';
@@ -16,10 +20,10 @@ export function BarraSuperior({ onVoltar }: BarraSuperiorProps) {
       <View style={styles.barraConteudo}>
         <Pressable onPress={onVoltar} style={styles.voltar} accessibilityRole="button">
           <IconeVoltar />
-          <Text style={styles.textoVoltar}>Voltar</Text>
+          <Text style={styles.textoVoltar}>Voltar para a busca</Text>
         </Pressable>
         <View style={styles.barraDireita}>
-          <Text style={styles.atualizacao}>Última atualização: hoje</Text>
+          <Text style={styles.atualizacao}>Sincronizado com SIGAA</Text>
           <View style={styles.seloSemestre}>
             <Text style={styles.textoSeloSemestre}>SEMESTRE {semestreAtual()}</Text>
           </View>
@@ -60,6 +64,8 @@ export function CabecalhoMateria({ materia, onRolarParaSecao }: CabecalhoMateria
   const { width } = useWindowDimensions();
   const compacto = width < 640;
   const totalTurmas = materia.turmas?.length ?? 0;
+  const nomeMateriaFormatado = formatarNomeProfessor(materia.nome);
+  const nomeDeptoFormatado = formatarNomeDepartamentoLimpo(materia.departamento?.nome);
 
   return (
     <View style={styles.cabecalho}>
@@ -79,13 +85,13 @@ export function CabecalhoMateria({ materia, onRolarParaSecao }: CabecalhoMateria
             </View>
           </View>
           <Text style={[styles.titulo, compacto && styles.tituloCompacto]} accessibilityRole="header">
-            [{materia.codigo_materia}] {materia.nome}
+            [{materia.codigo_materia}] {nomeMateriaFormatado}
           </Text>
           {materia.departamento && (
             <View style={styles.departamento}>
               <IconeCapelo />
               <Text style={styles.textoDepartamento}>
-                {materia.departamento.codigo} - {materia.departamento.nome.toUpperCase()}
+                {materia.departamento.codigo} • {nomeDeptoFormatado}
               </Text>
             </View>
           )}

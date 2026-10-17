@@ -12,6 +12,7 @@ import {
 import type { ProfessorProfile, TurmaDocente } from '../../../types/professor';
 import {
   formatarDepartamentoCurto,
+  formatarNomeDepartamentoLimpo,
   formatarNomeProfessor,
 } from '../../../utils/formatadorTexto';
 import { coresProfessor, LARGURA_MAXIMA, sombra } from '../estilos';
@@ -44,7 +45,7 @@ export function CabecalhoProfessor({
       ? turmaAtiva.materia.nome
       : professor.materias[0]?.nome
       ? professor.materias[0].nome
-      : 'física 1');
+      : 'catálogo');
   const textoOrigem = formatarNomeProfessor(rawOrigem).toLowerCase();
 
   // Nome do professor em Title Case amigável
@@ -52,31 +53,45 @@ export function CabecalhoProfessor({
 
   // Departamento limpo e conciso
   const deptoFormatado = formatarDepartamentoCurto(professor.departamento);
+  const nomeDeptoLimpo =
+    formatarNomeDepartamentoLimpo(professor.departamento?.nome) || 'Ensino Superior';
+  const materiasPrincipais = professor.materias
+    .slice(0, 3)
+    .map((m) => formatarNomeProfessor(m.nome))
+    .join(', ');
 
   // Bio / Descrição de experiência acadêmica
   const bioDescricao =
     professor.resumo_didatica.resumo_executivo ??
     professor.resumo_ia?.resumo_executivo ??
-    `Tem experiência na área de ${
-      professor.departamento?.nome ?? 'Ciências Exatas'
-    }, com ênfase em ensino superior e pesquisa. Atuando principalmente nos seguintes temas: fundamentos teóricos, métodos analíticos e práticas de laboratório.`;
+    (materiasPrincipais
+      ? `Docente vinculado(a) a ${nomeDeptoLimpo} na Universidade de Brasília (UnB). Atua no ensino de graduação e pesquisa acadêmica, ministrando disciplinas como ${materiasPrincipais}.`
+      : `Tem experiência acadêmica na área de ${nomeDeptoLimpo} na Universidade de Brasília (UnB), com ênfase em ensino superior, pesquisa científica e projetos de extensão.`);
 
-  // Badges da análise ou padrões do mockup
+  // Badges da análise ou padrões adequados ao perfil
   const badges =
     professor.resumo_didatica.badges.length > 0
       ? professor.resumo_didatica.badges
-      : [
+      : professor.slug === 'charles-xavier'
+      ? [
           '#exigente',
           '#atorDignoDeOscar',
           '#genteboa',
           '#recomendo',
           '#fisicodoido',
+        ]
+      : [
+          '#docenteUnB',
+          '#didatica',
+          '#genteboa',
+          '#recomendo',
+          '#graduacao',
         ];
 
   // Cores personalizadas para as tags neobrutalistas
   const getCorTag = (tag: string) => {
     const limpo = tag.toLowerCase().replace(/[^a-z0-9]/g, '');
-    if (limpo.includes('oscar') || limpo.includes('ator')) {
+    if (limpo.includes('oscar') || limpo.includes('ator') || limpo.includes('didatica')) {
       return { fundo: '#F1C321', texto: '#1F1F1F' }; // Amarelo
     }
     if (limpo.includes('genteboa') || limpo.includes('amigo')) {

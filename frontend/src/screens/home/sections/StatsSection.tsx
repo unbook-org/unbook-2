@@ -197,14 +197,14 @@ export function StatsSection() {
             isMobile && styles.cardsGridMobile,
           ]}
         >
-          {/* Card 1 - 20 Departamentos (Nível 1 • 360px) */}
+          {/* Card 1 - Departamentos e Unidades (Nível 1 • 360px) */}
           <StatCard
-            endNumber={200}
+            endNumber={100}
             prefix="+"
             title="departamentos acadêmicos."
             subtitle="Faculdades e institutos da UnB."
             description="De Darcy Ribeiro a Ceilândia, Gama e Planaltina, englobando todas as faculdades e unidades acadêmicas."
-            pillText="20 departamentos integrados"
+            pillText="4 campi integrados (Darcy, FGA, FCE, FUP)"
             chartTag="HISTOGRAMA • NÍVEL 1"
             accentColor="#1349EB" // Azul vibrante da UnB
             index={0}

@@ -98,7 +98,7 @@ export function ComentariosSection({
         nota_didatica: 4,
         nota_dificuldade: 3,
         comentario: novoComentario.trim(),
-        emoji_vibe: 'top',
+        emoji_vibe: '😎',
         cobra_presenca: true,
         avaliacao_justa: true,
         upvotes: 1,

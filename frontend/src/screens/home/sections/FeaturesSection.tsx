@@ -188,7 +188,7 @@ function FeatureCard({
           isHovered && styles.iconContainerHovered,
         ]}
       >
-        {feature.icon(isMobile ? 22 : 24, '#FFFFFF')}
+        {feature.icon(isMobile ? 22 : 24, feature.id === 'horario' ? '#1F1F1F' : '#FFFFFF')}
       </View>
       <Text style={[styles.cardTitle, isMobile && styles.cardTitleMobile]}>
         {feature.title}
@@ -356,7 +356,7 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
     },
     {
       id: 'horario',
-      icon: (s, c) => <CalendarIcon size={s} color={c} />,
+      icon: (s, c) => <CalendarIcon size={s} color={c ?? '#1F1F1F'} />,
       iconBgColor: '#F1C321', // Amarelo
       title: 'Monte seu Horário',
       description:
@@ -377,7 +377,7 @@ export function FeaturesSection({ isPageReady }: FeaturesSectionProps = {}) {
   // Ativação da feat: os outros cards somem, o fundo da tela assume a cor dela
   // e o conteúdo aparece com fundo transparente e elementos em branco puro!
   const handleSelectFeature = (feat: FeatureItem) => {
-    setActiveColor(feat.iconBgColor);
+    setActiveColor(feat.id === 'horario' ? '#B45309' : feat.iconBgColor);
     setSelectedFeature(feat);
   };
 

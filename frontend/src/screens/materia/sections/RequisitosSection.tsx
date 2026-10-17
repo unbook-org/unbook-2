@@ -2,6 +2,7 @@ import React from 'react';
 import { Platform, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { theme } from '../../../constants/theme';
 import type { ArvoreRequisito, MateriaDetalhe, Requisito } from '../../../types/materia';
+import { formatarNomeProfessor } from '../../../utils/formatadorTexto';
 import { LARGURA_MAXIMA, sombra } from '../estilos';
 import { IconeRequisitos } from '../icones';
 
@@ -18,7 +19,7 @@ export function RequisitosSection({ materia, onSelectMateria }: RequisitosSectio
     <View style={styles.cartao}>
       <View style={styles.tituloCartao}>
         <IconeRequisitos />
-        <Text style={styles.textoTitulo}>Requisitos</Text>
+        <Text style={styles.textoTitulo}>REQUISITOS E EQUIVALÊNCIAS</Text>
       </View>
       <View style={[styles.grupos, emLinha && styles.gruposEmLinha]}>
         <GrupoRequisitos
@@ -105,6 +106,7 @@ function NoRequisito({ arvore, nomesPorCodigo, onSelectMateria, aninhado = false
 
   if ('codigo' in arvore) {
     const nome = nomesPorCodigo.get(arvore.codigo);
+    const nomeFormatado = nome ? formatarNomeProfessor(nome) : 'Matéria não cadastrada';
     return (
       <Pressable
         onPress={nome ? () => onSelectMateria(arvore.codigo) : undefined}
@@ -113,7 +115,7 @@ function NoRequisito({ arvore, nomesPorCodigo, onSelectMateria, aninhado = false
         accessibilityRole={nome ? 'link' : 'text'}
       >
         <Text style={styles.requisitoCodigo}>{arvore.codigo}</Text>
-        <Text style={styles.requisitoNome}>{nome ?? 'Matéria não cadastrada'}</Text>
+        <Text style={styles.requisitoNome}>{nomeFormatado}</Text>
       </Pressable>
     );
   }

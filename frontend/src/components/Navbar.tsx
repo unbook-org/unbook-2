@@ -7,8 +7,10 @@ import {
   Platform,
   useWindowDimensions,
   Modal,
+  ScrollView,
 } from 'react-native';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
+import { ScheduleSimulatorSection } from '../screens/home/sections/ScheduleSimulatorSection';
 import { UnbookLogo } from './UnbookLogo';
 
 // Ícone vetorial de Sol/Lua para alternar tema (estilo neo-brutalista)
@@ -63,7 +65,8 @@ export function Navbar({
   const isMobile = width < 768;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [authModal, setAuthModal] = useState<'login' | 'register' | null>(null);
+  const [authModal, setAuthModal] = useState<'login' | 'register' | 'theme' | null>(null);
+  const [gradeModalOpen, setGradeModalOpen] = useState(false);
 
   const [explorarHovered, setExplorarHovered] = useState(false);
   const [gradeHovered, setGradeHovered] = useState(false);
@@ -81,6 +84,14 @@ export function Navbar({
   const handleOpenRegister = () => {
     if (onPressRegister) onPressRegister();
     else setAuthModal('register');
+  };
+
+  const handleOpenGrade = () => {
+    if (onPressSchedule) {
+      onPressSchedule();
+    } else {
+      setGradeModalOpen(true);
+    }
   };
 
   return (
@@ -128,7 +139,7 @@ export function Navbar({
               </Pressable>
 
               <Pressable
-                onPress={onPressSchedule}
+                onPress={handleOpenGrade}
                 onHoverIn={() => setGradeHovered(true)}
                 onHoverOut={() => setGradeHovered(false)}
                 style={styles.linkItem}
@@ -166,7 +177,8 @@ export function Navbar({
             {/* Botão de Tema (Sol / Lua) */}
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Alternar tema visual"
+              accessibilityLabel="Modo visual caderno UnBook"
+              onPress={() => setAuthModal('theme')}
               onHoverIn={() => setThemeBtnHovered(true)}
               onHoverOut={() => setThemeBtnHovered(false)}
               style={({ pressed }) => [
@@ -267,7 +279,7 @@ export function Navbar({
                 style={styles.mobileLinkItem}
                 onPress={() => {
                   setMobileMenuOpen(false);
-                  onPressSchedule?.();
+                  handleOpenGrade();
                 }}
               >
                 <Text style={styles.mobileLinkText}>Simulador de Grade</Text>
@@ -309,7 +321,45 @@ export function Navbar({
         </Pressable>
       </Modal>
 
-      {/* Modal de Autenticação Rápido (Login / Cadastre-se) */}
+      {/* Modal do Simulador de Grade */}
+      <Modal
+        visible={gradeModalOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setGradeModalOpen(false)}
+      >
+        <Pressable
+          style={styles.mobileModalOverlay}
+          onPress={() => setGradeModalOpen(false)}
+        >
+          <Pressable
+            style={styles.gradeModalCard}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <View style={styles.gradeModalTopBar}>
+              <View style={styles.gradeModalTitleRow}>
+                <View style={styles.betaPill}>
+                  <Text style={styles.betaPillText}>FERRAMENTA DISCENTE UNB</Text>
+                </View>
+                <Text style={styles.authModalTitle}>Simulador de Grade Horária</Text>
+              </View>
+              <Pressable
+                onPress={() => setGradeModalOpen(false)}
+                style={styles.mobileCloseBtn}
+                accessibilityRole="button"
+                accessibilityLabel="Fechar simulador de grade"
+              >
+                <CloseIcon size={18} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.gradeModalScroll}>
+              <ScheduleSimulatorSection />
+            </ScrollView>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      {/* Modal de Autenticação / Tema Rápido */}
       <Modal
         visible={authModal !== null}
         transparent
@@ -326,7 +376,11 @@ export function Navbar({
           >
             <View style={styles.mobileMenuHeader}>
               <Text style={styles.authModalTitle}>
-                {authModal === 'login' ? 'Entrar no UnBook' : 'Criar Conta Discente'}
+                {authModal === 'theme'
+                  ? 'Estética Caderno Universitário'
+                  : authModal === 'login'
+                  ? 'Entrar no UnBook'
+                  : 'Criar Conta Discente'}
               </Text>
               <Pressable
                 onPress={() => setAuthModal(null)}
@@ -336,15 +390,25 @@ export function Navbar({
               </Pressable>
             </View>
 
+            <View style={styles.betaPill}>
+              <Text style={styles.betaPillText}>
+                {authModal === 'theme'
+                  ? 'TEMA NEO-BRUTALISTA ATIVO'
+                  : 'BETA ABERTO — ACESSO LIVRE SEM LOGIN'}
+              </Text>
+            </View>
+
             <Text style={styles.authModalDesc}>
-              A integração de autenticação com o SIGAA está em fase final de testes. Em breve você poderá salvar suas matérias e simular horários com sua conta acadêmica.
+              {authModal === 'theme'
+                ? 'O UnBook utiliza a identidade visual de Caderno Universitário de Alto Contraste (#FAF9F5) inspirada nas cores oficiais da UnB para leitura confortável de ementas e grades.'
+                : 'Durante o período de Beta Aberto na UnB, todas as funcionalidades de consulta de matérias, perfil de docentes e simulador de horários estão 100% liberadas sem necessidade de cadastro.'}
             </Text>
 
             <Pressable
               style={styles.authConfirmBtn}
               onPress={() => setAuthModal(null)}
             >
-              <Text style={styles.authConfirmBtnText}>Fechar</Text>
+              <Text style={styles.authConfirmBtnText}>Entendido</Text>
             </Pressable>
           </Pressable>
         </Pressable>
@@ -633,5 +697,60 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 14,
+  },
+  betaPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#EAF7F0',
+    borderWidth: 1.5,
+    borderColor: '#009A5E',
+    borderRadius: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 12,
+  },
+  betaPillText: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#009A5E',
+    letterSpacing: 0.6,
+  },
+  gradeModalCard: {
+    width: '100%',
+    maxWidth: 1120,
+    maxHeight: '90%',
+    backgroundColor: '#FAF9F5',
+    borderWidth: 2.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 6,
+    overflow: 'hidden',
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 6, height: 6 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 6,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '6px 6px 0px #1F1F1F',
+        } as any)
+      : {}),
+  },
+  gradeModalTopBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: 2,
+    borderBottomColor: '#1F1F1F',
+  },
+  gradeModalTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  gradeModalScroll: {
+    width: '100%',
   },
 });

@@ -23,7 +23,13 @@ import {
 } from '../../../services/api';
 import type { MateriaResumo } from '../../../types/materia';
 import type { ProfessorListItem } from '../../../types/professor';
-import type { NivelEnsino } from '../../../utils/nivelEnsino';
+import {
+  formatarDepartamentoCurto,
+  formatarNomeDepartamentoLimpo,
+  formatarNomeProfessor,
+  obterIniciaisDocente,
+} from '../../../utils/formatadorTexto';
+import { nivelDaApi, type NivelEnsino } from '../../../utils/nivelEnsino';
 
 const ATRASO_BUSCA_MS = 350;
 
@@ -654,7 +660,7 @@ export function SearchSection({ onSelectMateria, onSelectProfessor }: SearchSect
                       {departamentos.carregando
                         ? 'Carregando departamentos...'
                         : deptoSelecionado
-                        ? `${deptoSelecionado.codigo} — ${deptoSelecionado.nome}`
+                        ? `${deptoSelecionado.codigo} — ${formatarNomeDepartamentoLimpo(deptoSelecionado.nome)}`
                         : 'Filtrar por Departamento UnB ▾'}
                     </Text>
                     <Text style={styles.deptSelectorBtnArrow}>
@@ -1027,11 +1033,16 @@ export function SearchSection({ onSelectMateria, onSelectProfessor }: SearchSect
                   </View>
                 ) : (
                   <View style={styles.itemsList}>
-                    {dados.items.map((materia) => (
+                    {dados.items.map((materia, idx) => (
                       <ItemMateriaCard
-                        key={materia.codigo_materia}
+                        key={`${materia.codigo_materia}-${materia.nivel_de_ensino ?? idx}`}
                         materia={materia}
-                        onPress={() => onSelectMateria(materia.codigo_materia)}
+                        onPress={() =>
+                          onSelectMateria(
+                            materia.codigo_materia,
+                            nivelDaApi(materia.nivel_de_ensino) ?? undefined,
+                          )
+                        }
                       />
                     ))}
                   </View>
@@ -1434,6 +1445,10 @@ function ItemMateriaCard({
   onPress: () => void;
 }) {
   const [hovered, setHovered] = useState(false);
+  const nomeFormatado = formatarNomeProfessor(materia.nome);
+  const deptoFormatado = materia.departamento
+    ? formatarNomeDepartamentoLimpo(materia.departamento.nome)
+    : null;
 
   return (
     <Pressable
@@ -1446,16 +1461,18 @@ function ItemMateriaCard({
         pressed && styles.materiaCardPressed,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Ver detalhes de ${materia.codigo_materia} - ${materia.nome}`}
+      accessibilityLabel={`Ver detalhes de ${materia.codigo_materia} - ${nomeFormatado}`}
     >
       <View style={styles.materiaCodeBadge}>
         <Text style={styles.materiaCodeText}>{materia.codigo_materia}</Text>
       </View>
 
       <View style={styles.materiaDetailsCol}>
-        <Text style={styles.materiaNomeText}>{materia.nome}</Text>
-        {materia.departamento && (
-          <Text style={styles.materiaDeptText}>{materia.departamento.nome}</Text>
+        <Text style={styles.materiaNomeText}>{nomeFormatado}</Text>
+        {deptoFormatado && (
+          <Text style={styles.materiaDeptText}>
+            {deptoFormatado} ({materia.departamento!.codigo})
+          </Text>
         )}
       </View>
 
@@ -1477,13 +1494,9 @@ function ItemProfessorCard({
   const [imgError, setImgError] = useState(false);
 
   const temFoto = Boolean(professor.url_foto) && !imgError;
-  const iniciais = professor.nome_completo
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p) => p[0])
-    .join('')
-    .toUpperCase();
+  const nomeFormatado = formatarNomeProfessor(professor.nome_completo);
+  const iniciais = obterIniciaisDocente(professor.nome_completo);
+  const deptoFormatado = formatarDepartamentoCurto(professor.departamento);
 
   return (
     <Pressable
@@ -1496,7 +1509,7 @@ function ItemProfessorCard({
         pressed && styles.materiaCardPressed,
       ]}
       accessibilityRole="button"
-      accessibilityLabel={`Ver perfil do docente ${professor.nome_completo}`}
+      accessibilityLabel={`Ver perfil do docente ${nomeFormatado}`}
     >
       <View style={styles.profCardAvatar}>
         {temFoto ? (
@@ -1508,19 +1521,19 @@ function ItemProfessorCard({
           />
         ) : (
           <View style={styles.profCardAvatarFallback}>
-            <Text style={styles.profCardAvatarInitials}>{iniciais || 'DOC'}</Text>
+            <Text style={styles.profCardAvatarInitials}>{iniciais}</Text>
           </View>
         )}
       </View>
 
       <View style={styles.materiaDetailsCol}>
         <Text style={styles.materiaNomeText} numberOfLines={1}>
-          {professor.nome_completo}
+          {nomeFormatado}
         </Text>
 
         {professor.departamento && (
           <Text style={styles.materiaDeptText} numberOfLines={1}>
-            {professor.departamento.nome} ({professor.departamento.codigo})
+            {deptoFormatado}
           </Text>
         )}
 

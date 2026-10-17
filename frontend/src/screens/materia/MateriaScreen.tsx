@@ -1,8 +1,9 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
-  Alert,
+  Modal,
   Platform,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -17,6 +18,8 @@ import { theme } from '../../constants/theme';
 import { useConsulta } from '../../hooks/useConsulta';
 import { ApiError, getMateria } from '../../services/api';
 import type { MateriaDetalhe, Turma } from '../../types/materia';
+import { formatarNomeProfessor } from '../../utils/formatadorTexto';
+import { formatarHorario } from '../../utils/horario';
 import { nivelDaApi, type NivelEnsino } from '../../utils/nivelEnsino';
 import { coresMateria, LARGURA_MAXIMA, sombra } from './estilos';
 import {
@@ -57,6 +60,8 @@ export function MateriaScreen({
   onSelectProfessor,
 }: MateriaScreenProps) {
   const scrollRef = useRef<ScrollView>(null);
+  const [turmaSelecionada, setTurmaSelecionada] = useState<Turma | null>(null);
+  const [copiadoSucesso, setCopiadoSucesso] = useState(false);
 
   const { dados: materia, carregando, erro } = useConsulta(
     (sinal) => buscarMateria(codigo, nivel, sinal),
@@ -65,6 +70,9 @@ export function MateriaScreen({
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [codigo]);
 
   // Os requisitos guardam só o código: abrem no mesmo nível da matéria exibida.
@@ -82,28 +90,25 @@ export function MateriaScreen({
   };
 
   const handleAcessarTurma = (turma: Turma) => {
-    const texto = `${materia?.codigo_materia ?? ''} - Turma ${turma.codigo_turma} (${turma.semestre})\nDocente: ${turma.professor?.nome_completo ?? 'A definir'}\nHorário: ${turma.horario_bruto}\nLocal: ${turma.local_sala || 'Local a definir'}`;
+    setCopiadoSucesso(false);
+    setTurmaSelecionada(turma);
+  };
+
+  const handleCopiarTurma = (turma: Turma) => {
+    const horarioTexto = formatarHorario(turma.horario_bruto);
+    const nomeDocente = turma.professor ? formatarNomeProfessor(turma.professor.nome_completo) : 'Docente a definir';
+    const nomeMateria = materia ? formatarNomeProfessor(materia.nome) : '';
+    const texto = `${materia?.codigo_materia ?? ''} - ${nomeMateria}\nTurma ${turma.codigo_turma} (${turma.semestre})\nDocente: ${nomeDocente}\nHorário: ${horarioTexto}\nLocal: ${turma.local_sala || 'Local a definir'}`;
+
     if (Platform.OS === 'web' && typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(texto).catch(() => {});
     }
-    const mensagem = `Dados da Turma ${turma.codigo_turma} copiados!\n\n${texto}`;
-    if (Platform.OS === 'web') {
-      window.alert(mensagem);
-    } else {
-      Alert.alert('Turma Selecionada', mensagem);
-    }
+    setCopiadoSucesso(true);
   };
 
   const handleAcessarProfessor = (slugProfessor: string) => {
     if (onSelectProfessor) {
-      onSelectProfessor(slugProfessor, materia?.nome);
-      return;
-    }
-    const mensagem = `O perfil detalhado do docente (${slugProfessor}) estará disponível em breve com a integração do módulo de docentes!`;
-    if (Platform.OS === 'web') {
-      window.alert(mensagem);
-    } else {
-      Alert.alert('Docente UnB', mensagem);
+      onSelectProfessor(slugProfessor, materia ? formatarNomeProfessor(materia.nome) : undefined);
     }
   };
 
@@ -111,7 +116,7 @@ export function MateriaScreen({
     <SafeAreaView style={styles.tela}>
       <ScrollView ref={scrollRef} contentContainerStyle={styles.conteudo}>
         <NewsBanner />
-        <Navbar onPressLogo={onVoltar} onPressExplore={onVoltar} />
+        <Navbar onPressLogo={onVoltar} onPressExplore={onVoltar} onPressAbout={onVoltar} />
         <BarraSuperior onVoltar={onVoltar} />
 
         {carregando && (
@@ -164,6 +169,114 @@ export function MateriaScreen({
         <View style={styles.espacador} />
         <Footer />
       </ScrollView>
+
+      {/* Modal Neo-Brutalista de Detalhes da Turma */}
+      <Modal
+        visible={turmaSelecionada !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setTurmaSelecionada(null)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setTurmaSelecionada(null)}
+        >
+          {turmaSelecionada && (
+            <Pressable
+              style={styles.modalCard}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <View style={styles.modalHeader}>
+                <View style={styles.modalTitleGroup}>
+                  <View style={styles.modalCodigoPill}>
+                    <Text style={styles.modalCodigoPillText}>
+                      TURMA {turmaSelecionada.codigo_turma} • {turmaSelecionada.semestre}
+                    </Text>
+                  </View>
+                  <Text style={styles.modalMateriaTitle}>
+                    {materia?.codigo_materia} — {materia ? formatarNomeProfessor(materia.nome) : ''}
+                  </Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setTurmaSelecionada(null)}
+                  style={styles.modalCloseBtn}
+                  accessibilityRole="button"
+                  accessibilityLabel="Fechar detalhes da turma"
+                >
+                  <Text style={styles.modalCloseBtnText}>✕</Text>
+                </Pressable>
+              </View>
+
+              <View style={styles.modalBody}>
+                <View style={styles.modalInfoBox}>
+                  <Text style={styles.modalInfoLabel}>DOCENTE RESPONSÁVEL</Text>
+                  <Text style={styles.modalInfoValue}>
+                    {turmaSelecionada.professor
+                      ? formatarNomeProfessor(turmaSelecionada.professor.nome_completo)
+                      : 'Docente a definir pelo departamento'}
+                  </Text>
+                </View>
+
+                <View style={styles.modalInfoBox}>
+                  <Text style={styles.modalInfoLabel}>
+                    HORÁRIO SEMANAL (SIGAA: {turmaSelecionada.horario_bruto || 'A DEFINIR'})
+                  </Text>
+                  <Text style={styles.modalInfoValue}>
+                    {formatarHorario(turmaSelecionada.horario_bruto)}
+                  </Text>
+                </View>
+
+                <View style={styles.modalGridRow}>
+                  <View style={[styles.modalInfoBox, styles.modalGridCol]}>
+                    <Text style={styles.modalInfoLabel}>SALA / LOCAL</Text>
+                    <Text style={styles.modalInfoValue}>
+                      {turmaSelecionada.local_sala || 'A definir'}
+                    </Text>
+                  </View>
+                  <View style={[styles.modalInfoBox, styles.modalGridCol]}>
+                    <Text style={styles.modalInfoLabel}>VAGAS OCUPADAS</Text>
+                    <Text style={styles.modalInfoValue}>
+                      {turmaSelecionada.vagas_ocupadas} / {turmaSelecionada.vagas_ofertadas} vagas
+                    </Text>
+                  </View>
+                </View>
+              </View>
+
+              <View style={styles.modalActions}>
+                <Pressable
+                  onPress={() => handleCopiarTurma(turmaSelecionada)}
+                  style={[
+                    styles.modalActionPrimary,
+                    copiadoSucesso && styles.modalActionSuccess,
+                  ]}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.modalActionPrimaryText}>
+                    {copiadoSucesso ? 'DADOS COPIADOS PARA MATRÍCULA ✓' : 'COPIAR DADOS PARA MATRÍCULA'}
+                  </Text>
+                </Pressable>
+
+                {turmaSelecionada.professor && onSelectProfessor && (
+                  <Pressable
+                    onPress={() => {
+                      const slug = turmaSelecionada.professor!.slug;
+                      setTurmaSelecionada(null);
+                      handleAcessarProfessor(slug);
+                    }}
+                    style={styles.modalActionSecondary}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.modalActionSecondaryText}>
+                      VER PERFIL DO DOCENTE →
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
+            </Pressable>
+          )}
+        </Pressable>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -242,5 +355,141 @@ const styles = StyleSheet.create({
   },
   botaoAviso: {
     marginTop: 8,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 520,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 6,
+    padding: 24,
+    ...sombra(6),
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    borderBottomWidth: 2,
+    borderBottomColor: '#E5E7EB',
+    paddingBottom: 14,
+    marginBottom: 16,
+    gap: 12,
+  },
+  modalTitleGroup: {
+    flex: 1,
+    gap: 6,
+  },
+  modalCodigoPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#009A5E',
+    borderWidth: 1.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 3,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  modalCodigoPillText: {
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 0.6,
+  },
+  modalMateriaTitle: {
+    fontSize: 17,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    lineHeight: 23,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FAF9F5',
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as any) : {}),
+  },
+  modalCloseBtnText: {
+    fontSize: 14,
+    fontWeight: '900',
+    color: '#1F1F1F',
+  },
+  modalBody: {
+    gap: 12,
+    marginBottom: 20,
+  },
+  modalInfoBox: {
+    backgroundColor: '#FAF9F5',
+    borderWidth: 1.5,
+    borderColor: '#1F1F1F',
+    borderRadius: 4,
+    padding: 12,
+    gap: 4,
+  },
+  modalInfoLabel: {
+    fontSize: 10.5,
+    fontWeight: '900',
+    color: '#6B7280',
+    letterSpacing: 0.5,
+  },
+  modalInfoValue: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#1F1F1F',
+    lineHeight: 20,
+  },
+  modalGridRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalGridCol: {
+    flex: 1,
+  },
+  modalActions: {
+    gap: 10,
+  },
+  modalActionPrimary: {
+    backgroundColor: '#009A5E',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 4,
+    paddingVertical: 12,
+    alignItems: 'center',
+    ...sombra(3),
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as any) : {}),
+  },
+  modalActionSuccess: {
+    backgroundColor: '#1F1F1F',
+  },
+  modalActionPrimaryText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.4,
+  },
+  modalActionSecondary: {
+    backgroundColor: '#EEF4FF',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 4,
+    paddingVertical: 11,
+    alignItems: 'center',
+    ...(Platform.OS === 'web' ? ({ cursor: 'pointer' } as any) : {}),
+  },
+  modalActionSecondaryText: {
+    color: '#1349EB',
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.4,
   },
 });

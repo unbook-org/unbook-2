@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { theme } from '../constants/theme';
 import type { DepartamentoOpcao } from '../types/materia';
+import { formatarNomeDepartamentoLimpo } from '../utils/formatadorTexto';
 
 interface SeletorDepartamentoProps {
   departamentos: DepartamentoOpcao[] | null;
@@ -65,7 +66,7 @@ export function SeletorDepartamento({
               : erro
                 ? 'indisponível'
                 : selecionado
-                  ? `${selecionado.codigo} — ${selecionado.nome}`
+                  ? `${selecionado.codigo} — ${formatarNomeDepartamentoLimpo(selecionado.nome)}`
                   : 'Todos'}
           </Text>
           <Text style={styles.seta}>{aberto ? '▲' : '▼'}</Text>
@@ -99,7 +100,7 @@ export function SeletorDepartamento({
             {opcoes.map((departamento) => (
               <Opcao
                 key={departamento.id}
-                texto={`${departamento.codigo} — ${departamento.nome}`}
+                texto={`${departamento.codigo} — ${formatarNomeDepartamentoLimpo(departamento.nome)}`}
                 detalhe={`${departamento.total_materias} matérias`}
                 ativa={departamento.id === selecionadoId}
                 onPress={() => escolher(departamento.id)}

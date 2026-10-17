@@ -35,7 +35,7 @@ export function MetricasResumoSection({
 
   // Estados das respostas do Wizard
   const [statusDesfecho, setStatusDesfecho] = useState<'passei' | 'reprovei' | 'tranquei'>('passei');
-  const [emojiSelecionado, setEmojiSelecionado] = useState('MI');
+  const [emojiSelecionado, setEmojiSelecionado] = useState('🥱');
   const [cobrancaJusta, setCobrancaJusta] = useState<boolean | null>(true);
   const [disponibilizaMaterial, setDisponibilizaMaterial] = useState<boolean | null>(true);
   const [chamadaObrigatoria, setChamadaObrigatoria] = useState<'sim' | 'desconsidera' | 'nao'>('sim');
@@ -47,12 +47,12 @@ export function MetricasResumoSection({
   // Selo Padge atual
   const seloPadge = professor.resumo_didatica.selo_padge ?? professor.resumo_ia?.selo_padge ?? 'PADGE: SONO';
   const emojiExibido = seloPadge.includes('SONO')
-    ? 'MI'
+    ? '🥱'
     : seloPadge.includes('TANKEI') || seloPadge.includes('PAU')
-    ? 'SR'
+    ? '🤯'
     : seloPadge.includes('JUSTO')
-    ? 'MS'
-    : 'MM';
+    ? '😎'
+    : '🧐';
 
   // Cálculos das porcentagens das barras no card
   const chamadaPct = professor.resumo_didatica.cobra_presenca_percentual ?? 85;
@@ -97,14 +97,14 @@ export function MetricasResumoSection({
     }, 1800);
   };
 
-  // Sentimentos da Etapa 2 (Imagem 2)
+  // Emojis da Etapa 2 (Imagem 2)
   const listaEmojis = [
-    { emoji: 'SR', fundo: '#F87171', label: 'Revolta' },
-    { emoji: 'II', fundo: '#FDBA74', label: 'Derretendo' },
-    { emoji: 'MI', fundo: '#FDE047', label: 'Sono' },
-    { emoji: 'MM', fundo: '#FEF08A', label: 'Complexo' },
-    { emoji: 'MS', fundo: '#86EFAC', label: 'Tranquilo' },
-    { emoji: 'SS', fundo: '#93C5FD', label: 'Top' },
+    { emoji: '😡', fundo: '#F87171', label: 'Revolta' },
+    { emoji: '🫠', fundo: '#FDBA74', label: 'Derretendo' },
+    { emoji: '🥱', fundo: '#FDE047', label: 'Sono' },
+    { emoji: '🤔', fundo: '#FEF08A', label: 'Complexo' },
+    { emoji: '🙂', fundo: '#86EFAC', label: 'Tranquilo' },
+    { emoji: '😎', fundo: '#93C5FD', label: 'Top' },
   ];
 
   return (
@@ -130,19 +130,19 @@ export function MetricasResumoSection({
           onPress={() => abrirModalNaEtapa(2)}
           style={styles.blocoVibe}
           accessibilityRole="button"
-          accessibilityLabel="Escolher vibe da disciplina"
+          accessibilityLabel="Escolher emoji de vibe"
         >
           <View style={styles.emojiCard}>
             <Text style={styles.emojiGrande}>{emojiExibido}</Text>
           </View>
           <View style={styles.blocoVibeTexto}>
             <Text style={styles.vibeDescricao}>
-              A maioria das pessoas associaram essa menção a essa matéria
+              A maioria das pessoas avaliaram esse emoji a essa matéria
             </Text>
             <View style={styles.seloPadge}>
               <Text style={styles.textoSeloPadge}>{seloPadge.toUpperCase()}</Text>
             </View>
-            <Text style={styles.cliqueParaVotar}>Clique para votar no sentimento</Text>
+            <Text style={styles.cliqueParaVotar}>👆 Clique para votar na vibe</Text>
           </View>
         </Pressable>
 
@@ -271,7 +271,7 @@ export function MetricasResumoSection({
             <View style={styles.corpoJanela}>
               {enviadoSucesso ? (
                 <View style={styles.sucessoWrapper}>
-                  <Text style={styles.sucessoEmoji}>✓</Text>
+                  <Text style={styles.sucessoEmoji}>🎉</Text>
                   <Text style={styles.sucessoTitulo}>Avaliação Registrada!</Text>
                   <Text style={styles.sucessoSubtitulo}>
                     Seu voto foi computado com sucesso e ajuda toda a comunidade UnB.
@@ -322,11 +322,11 @@ export function MetricasResumoSection({
                     </View>
                   )}
 
-                  {/* ETAPA 2: Escolha de Vibe / Sentimento (Imagem 2) */}
+                  {/* ETAPA 2: Escolha de Emoji / Vibe (Imagem 2) */}
                   {etapaAtual === 2 && (
                     <View style={styles.etapaConteudo}>
                       <Text style={styles.perguntaEtapa}>
-                        SE VOCÊ PUDESSE ESCOLHER UMA MENÇÃO PARA DEFINIR O SENTIMENTO COM A MATÉRIA QUAL VOCÊ ESCOLHERIA?
+                        SE VOCÊ PUDESSE ESCOLHER UM EMOJI PARA DEFINIR A MATÉRIA QUAL VOCÊ ESCOLHERIA?
                       </Text>
 
                       <View style={styles.gradeEmojis}>
@@ -704,9 +704,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   emojiGrande: {
-    fontSize: 26,
-    fontWeight: '900',
-    color: coresProfessor.borda,
+    fontSize: 48,
   },
   blocoVibeTexto: {
     flex: 1,
@@ -968,9 +966,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   emojiItemGlifo: {
-    fontSize: 20,
-    fontWeight: '900',
-    color: '#1F1F1F',
+    fontSize: 32,
   },
 
   // Dupla de Botões (SIM / NÃO com cor viva no NÃO)

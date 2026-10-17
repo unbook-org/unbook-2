@@ -12,6 +12,10 @@ import {
 import { CartoonButton } from '../../../components/CartoonButton';
 import { theme } from '../../../constants/theme';
 import type { Turma } from '../../../types/materia';
+import {
+  formatarNomeProfessor,
+  obterIniciaisDocente,
+} from '../../../utils/formatadorTexto';
 import { formatarHorario, semestreAtual } from '../../../utils/horario';
 import { coresMateria, LARGURA_MAXIMA, sombra } from '../estilos';
 import { IconeBusca, IconeLocal, IconeMais, IconeRelogio } from '../icones';
@@ -196,14 +200,28 @@ interface CartaoTurmaProps {
 
 function CartaoTurma({ turma, largura, corAvatar, onAcessarTurma, onAcessarProfessor }: CartaoTurmaProps) {
   const { professor } = turma;
-  const inicial = professor?.nome_completo ? professor.nome_completo.trim()[0].toUpperCase() : '?';
+  const inicial = obterIniciaisDocente(professor?.nome_completo);
+  const nomeFormatado = professor?.nome_completo
+    ? formatarNomeProfessor(professor.nome_completo)
+    : 'A definir professor...';
   const lotada = turma.vagas_ofertadas > 0 && turma.vagas_ocupadas >= turma.vagas_ofertadas;
   const horarioFormatado = formatarHorario(turma.horario_bruto);
   const vagasLivres = Math.max(0, turma.vagas_ofertadas - turma.vagas_ocupadas);
 
   return (
     <View style={[styles.cartao, { width: largura }]}>
-      <View style={styles.cartaoTopo}>
+      <Pressable
+        disabled={!professor || !onAcessarProfessor}
+        onPress={
+          professor && onAcessarProfessor ? () => onAcessarProfessor(professor.slug) : undefined
+        }
+        style={[
+          styles.cartaoTopo,
+          Boolean(professor && onAcessarProfessor) &&
+            (Platform.OS === 'web' ? ({ cursor: 'pointer' } as object) : {}),
+        ]}
+        accessibilityRole={professor ? 'button' : 'none'}
+      >
         <View style={[styles.avatar, { backgroundColor: corAvatar }]}>
           <Text style={styles.textoAvatar}>{inicial}</Text>
         </View>
@@ -212,11 +230,11 @@ function CartaoTurma({ turma, largura, corAvatar, onAcessarTurma, onAcessarProfe
             style={[styles.nomeProfessor, !professor && styles.professorIndefinido]}
             numberOfLines={1}
           >
-            {professor?.nome_completo ?? 'A definir professor...'}
+            {nomeFormatado}
           </Text>
           <Text style={styles.codigoTurma}>Turma {turma.codigo_turma}</Text>
         </View>
-      </View>
+      </Pressable>
 
       <View style={styles.cartaoCorpo}>
         {/* Bloco de destaque para Horário das aulas */}
@@ -280,10 +298,14 @@ function CartaoTurma({ turma, largura, corAvatar, onAcessarTurma, onAcessarProfe
           onPress={
             professor && onAcessarProfessor ? () => onAcessarProfessor(professor.slug) : undefined
           }
-          style={[styles.botaoCartao, styles.botaoSemSombra]}
+          style={[
+            styles.botaoCartao,
+            styles.botaoSemSombra,
+            !professor && { opacity: 0.5 },
+          ]}
           textStyle={styles.textoBotaoCartao}
         >
-          Acessar professor
+          {professor ? 'Acessar professor' : 'Sem docente'}
         </CartoonButton>
       </View>
     </View>
@@ -348,7 +370,7 @@ const styles = StyleSheet.create({
     gap: 8,
     backgroundColor: theme.colors.white,
     borderWidth: 2,
-    borderColor: theme.colors.lightGray,
+    borderColor: theme.colors.dark,
     paddingHorizontal: 12,
     minHeight: 40,
   },
