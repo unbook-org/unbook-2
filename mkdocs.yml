@@ -74,7 +74,6 @@ nav:
       - Backend & Django Ninja: architecture/backend.md
       - Multi-Banco & Cache: architecture/database.md
       - Segurança & Anonimato: architecture/security.md
-      - Observabilidade & Logs: architecture/logging.md
   - Microsserviços & Squads:
       - Portal Web: services/portal.md
       - Search Engine: services/search.md
