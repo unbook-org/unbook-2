@@ -1,8 +1,9 @@
+from collections.abc import Iterable
 import logging
 import math
-from collections.abc import Iterable
-from typing import Any
+from typing import Any, Dict, Optional
 from uuid import UUID
+import uuid
 
 from catalog.models import Departamento, Materia, Professor
 from django.db.models import Avg, Case, Count, IntegerField, Q, QuerySet, Value, When
@@ -10,7 +11,6 @@ from django.db.models.functions import Lower
 from review.models import Avaliacao, ResumoIADocente
 
 from apps.catalog.schemas import (
-    AvaliacaoItemOut,
     CampusOut,
     DepartamentoOpcaoOut,
     DepartamentoOut,
@@ -33,6 +33,11 @@ from apps.core.pagination import PageMeta, paginar_consulta
 TAMANHO_MINIMO_BUSCA = 3
 
 logger = logging.getLogger(__name__)
+
+
+# ---------------------------------------------------------------------------
+# Serviços de Matérias e Departamentos
+# ---------------------------------------------------------------------------
 
 
 def _coletar_codigos(arvore: Any) -> list[str]:
@@ -253,14 +258,19 @@ def buscar_materias(
     }
 
 
+# ---------------------------------------------------------------------------
+# Serviços de Professores (Docentes)
+# ---------------------------------------------------------------------------
+
+
 def list_professores(
     page: int = 1,
     page_size: int = 20,
-    nome: str | None = None,
-    departamento: str | None = None,
-    busca: str | None = None,
-    search: str | None = None,
-) -> dict[str, Any]:
+    nome: Optional[str] = None,
+    departamento: Optional[str] = None,
+    busca: Optional[str] = None,
+    search: Optional[str] = None,
+) -> Dict[str, Any]:
     """Lista professores com filtros por nome/departamento e suporte a paginação."""
     page = max(1, page)
     page_size = max(1, min(100, page_size))
@@ -341,6 +351,13 @@ def list_professores(
             )
         )
 
+    logger.info(
+        "Listagem de professores: %d resultados (página %d de %d)",
+        total_items,
+        page,
+        total_pages,
+    )
+
     return {
         "items": items,
         "meta": PageMeta(
@@ -356,7 +373,7 @@ def get_professor_by_identifier(identifier: str) -> Professor:
     """Busca professor por UUID ou slug (com fallback para siape)."""
     professor = None
     try:
-        val = UUID(identifier)
+        val = uuid.UUID(identifier)
         professor = (
             Professor.objects.select_related("departamento__campus")
             .filter(id=val)
@@ -489,37 +506,6 @@ def get_professor_profile(identifier: str) -> ProfessorProfileOut:
         avaliacao_justa_percentual=avaliacao_justa_pct,
     )
 
-    # Lista de avaliações individuais / comentários da comunidade
-    avaliacoes_list = []
-    for av in (
-        avaliacoes_qs.select_related("turma")
-        .prefetch_related("reacoes")
-        .order_by("-criado_em")[:20]
-    ):
-        upvotes = sum(1 for r in av.reacoes.all() if r.tipo_reacao == "upvote")
-        downvotes = sum(1 for r in av.reacoes.all() if r.tipo_reacao == "downvote")
-        hash_curto = av.hash_anonimo[:4] if av.hash_anonimo else "2392"
-        autor = f"Anônimo #{hash_curto}"
-        semestre_av = av.turma.semestre if av.turma else None
-
-        avaliacoes_list.append(
-            AvaliacaoItemOut(
-                id=av.id,
-                autor_anonimo=autor,
-                curso_autor="Estudante UnB",
-                semestre=semestre_av,
-                nota_didatica=av.nota_didatica,
-                nota_dificuldade=av.nota_dificuldade,
-                comentario=av.comentario,
-                emoji_vibe=av.emoji_vibe or "😎",
-                cobra_presenca=av.cobra_presenca,
-                avaliacao_justa=av.avaliacao_justa,
-                upvotes=upvotes,
-                downvotes=downvotes,
-                criado_em=av.criado_em,
-            )
-        )
-
     # Departamento e Campus
     departamento_data = None
     if professor.departamento:
@@ -537,6 +523,8 @@ def get_professor_profile(identifier: str) -> ProfessorProfileOut:
             campus=campus_data,
         )
 
+    logger.info("Consulta ao perfil do professor: %s", professor.slug)
+
     return ProfessorProfileOut(
         id=professor.id,
         nome_completo=professor.nome_completo,
@@ -552,6 +540,4 @@ def get_professor_profile(identifier: str) -> ProfessorProfileOut:
         turmas=turmas_data,
         resumo_didatica=resumo_didatica_data,
         resumo_ia=resumo_ia_data,
-        avaliacoes=avaliacoes_list,
     )
-

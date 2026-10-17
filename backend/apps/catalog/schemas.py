@@ -1,7 +1,27 @@
-from typing import Any
+from datetime import datetime
+from typing import Any, List, Optional
 from uuid import UUID
 
 from ninja import Schema
+
+
+class CampusOut(Schema):
+    id: UUID
+    sigla: str
+    nome: str
+
+
+class DepartamentoOut(Schema):
+    id: UUID
+    codigo: str
+    nome: str
+    campus: Optional[CampusOut] = None
+
+
+class DepartamentoSimpleOut(Schema):
+    id: UUID
+    codigo: str
+    nome: str
 
 
 class DepartamentoResumoOut(Schema):
@@ -19,6 +39,15 @@ class DepartamentoOpcaoOut(Schema):
 class RequisitoOut(Schema):
     codigo: str
     nome: str | None = None
+
+
+class MateriaSimpleOut(Schema):
+    id: UUID
+    codigo_materia: str
+    nome: str
+    slug: str
+    creditos: int
+    carga_horaria: int
 
 
 class MateriaDetalheOut(Schema):
@@ -45,43 +74,12 @@ class MateriaBuscaOut(Schema):
     departamento: DepartamentoResumoOut | None = None
 
 
-# Schemas do módulo de Docentes / Professores
-
-
-class CampusOut(Schema):
-    id: UUID
-    sigla: str
-    nome: str
-
-
-class DepartamentoOut(Schema):
-    id: UUID
-    codigo: str
-    nome: str
-    campus: CampusOut | None = None
-
-
-class DepartamentoSimpleOut(Schema):
-    id: UUID
-    codigo: str
-    nome: str
-
-
-class MateriaSimpleOut(Schema):
-    id: UUID
-    codigo_materia: str
-    nome: str
-    slug: str
-    creditos: int
-    carga_horaria: int
-
-
 class TurmaOut(Schema):
     id: UUID
     codigo_turma: str
     semestre: str
     horario_bruto: str
-    local_sala: str | None = None
+    local_sala: Optional[str] = None
     vagas_ofertadas: int
     vagas_ocupadas: int
     materia: MateriaSimpleOut
@@ -90,51 +88,35 @@ class TurmaOut(Schema):
 class ResumoIADocenteOut(Schema):
     id: UUID
     resumo_executivo: str
-    badges: list[str] = []
-    selo_padge: str | None = None
-    atualizado_em: Any | None = None
+    badges: List[str] = []
+    selo_padge: Optional[str] = None
+    atualizado_em: Optional[datetime] = None
 
 
 class ResumoDidaticaOut(Schema):
-    media_didatica: float | None = None
-    media_dificuldade: float | None = None
+    media_didatica: Optional[float] = None
+    media_dificuldade: Optional[float] = None
     total_avaliacoes: int = 0
-    resumo_executivo: str | None = None
-    badges: list[str] = []
-    selo_padge: str | None = None
-    cobra_presenca_percentual: float | None = None
-    avaliacao_justa_percentual: float | None = None
-
-
-class AvaliacaoItemOut(Schema):
-    id: UUID
-    autor_anonimo: str
-    curso_autor: str | None = None
-    semestre: str | None = None
-    nota_didatica: int
-    nota_dificuldade: int
-    comentario: str | None = None
-    emoji_vibe: str = "😎"
-    cobra_presenca: bool = False
-    avaliacao_justa: bool = True
-    upvotes: int = 0
-    downvotes: int = 0
-    criado_em: Any | None = None
+    resumo_executivo: Optional[str] = None
+    badges: List[str] = []
+    selo_padge: Optional[str] = None
+    cobra_presenca_percentual: Optional[float] = None
+    avaliacao_justa_percentual: Optional[float] = None
 
 
 class ProfessorListItemOut(Schema):
     id: UUID
     nome_completo: str
     slug: str
-    siape: str | None = None
-    email_institucional: str | None = None
-    url_foto: str | None = None
-    titulo_academico: str | None = None
-    url_lattes: str | None = None
-    localizacao_gabinete: str | None = None
-    departamento: DepartamentoSimpleOut | None = None
+    siape: Optional[str] = None
+    email_institucional: Optional[str] = None
+    url_foto: Optional[str] = None
+    titulo_academico: Optional[str] = None
+    url_lattes: Optional[str] = None
+    localizacao_gabinete: Optional[str] = None
+    departamento: Optional[DepartamentoSimpleOut] = None
     total_turmas: int = 0
-    media_didatica: float | None = None
+    media_didatica: Optional[float] = None
     total_avaliacoes: int = 0
 
 
@@ -142,16 +124,14 @@ class ProfessorProfileOut(Schema):
     id: UUID
     nome_completo: str
     slug: str
-    siape: str | None = None
-    email_institucional: str | None = None
-    url_foto: str | None = None
-    titulo_academico: str | None = None
-    url_lattes: str | None = None
-    localizacao_gabinete: str | None = None
-    departamento: DepartamentoOut | None = None
-    materias: list[MateriaSimpleOut] = []
-    turmas: list[TurmaOut] = []
+    siape: Optional[str] = None
+    email_institucional: Optional[str] = None
+    url_foto: Optional[str] = None
+    titulo_academico: Optional[str] = None
+    url_lattes: Optional[str] = None
+    localizacao_gabinete: Optional[str] = None
+    departamento: Optional[DepartamentoOut] = None
+    materias: List[MateriaSimpleOut] = []
+    turmas: List[TurmaOut] = []
     resumo_didatica: ResumoDidaticaOut
-    resumo_ia: ResumoIADocenteOut | None = None
-    avaliacoes: list[AvaliacaoItemOut] = []
-
+    resumo_ia: Optional[ResumoIADocenteOut] = None
