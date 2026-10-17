@@ -1,4 +1,4 @@
-from catalog.models import Campus, Departamento, Materia
+from catalog.models import Campus, Departamento, Materia, Professor, Turma
 from django.test import Client, SimpleTestCase, TestCase
 
 from apps.catalog.services import extrair_codigos_requisito
@@ -115,6 +115,66 @@ class MateriaDetalheApiTestCase(CatalogoBaseTestCase):
             dados["departamento"],
             {"codigo": "MAT", "nome": "Departamento de Matemática"},
         )
+        self.assertEqual(dados["turmas"], [])
+
+    def test_retorna_turmas_da_materia_ordenadas_e_com_professor(self):
+        prof = Professor.objects.create(
+            nome_completo="Carlos Pereira",
+            slug="carlos-pereira",
+            departamento=self.departamento_mat,
+        )
+        turma_antiga = Turma.objects.create(
+            materia=self.materia,
+            professor=prof,
+            semestre="2025.2",
+            codigo_turma="01",
+            horario_bruto="24M34",
+            local_sala="PAT AT 01",
+            vagas_ofertadas=40,
+            vagas_ocupadas=38,
+        )
+        turma_recente_b = Turma.objects.create(
+            materia=self.materia,
+            professor=None,
+            semestre="2026.1",
+            codigo_turma="02",
+            horario_bruto="35T12",
+            local_sala=None,
+            vagas_ofertadas=30,
+            vagas_ocupadas=20,
+        )
+        turma_recente_a = Turma.objects.create(
+            materia=self.materia,
+            professor=prof,
+            semestre="2026.1",
+            codigo_turma="01",
+            horario_bruto="24M12",
+            local_sala="PAT AT 02",
+            vagas_ofertadas=40,
+            vagas_ocupadas=40,
+        )
+
+        dados = self.client.get("/api/catalog/materia/MAT0026").json()
+
+        self.assertEqual(len(dados["turmas"]), 3)
+        # Ordenado por -semestre e codigo_turma: 2026.1 turma 01, 2026.1 turma 02, 2025.2 turma 01
+        self.assertEqual(dados["turmas"][0]["id"], str(turma_recente_a.id))
+        self.assertEqual(dados["turmas"][0]["codigo_turma"], "01")
+        self.assertEqual(dados["turmas"][0]["semestre"], "2026.1")
+        self.assertEqual(dados["turmas"][0]["professor"]["nome_completo"], "Carlos Pereira")
+        self.assertEqual(dados["turmas"][0]["professor"]["slug"], "carlos-pereira")
+
+        self.assertEqual(dados["turmas"][1]["id"], str(turma_recente_b.id))
+        self.assertEqual(dados["turmas"][1]["codigo_turma"], "02")
+        self.assertIsNone(dados["turmas"][1]["professor"])
+
+        self.assertEqual(dados["turmas"][2]["id"], str(turma_antiga.id))
+        self.assertEqual(dados["turmas"][2]["semestre"], "2025.2")
+
+    def test_parametro_nivel_opcional_aceito(self):
+        response = self.client.get("/api/catalog/materia/MAT0026?nivel=graduacao")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["codigo_materia"], "MAT0026")
 
     def test_requisitos_trazem_codigo_e_nome_buscado_no_banco(self):
         dados = self.client.get("/api/catalog/materia/MAT0026").json()
