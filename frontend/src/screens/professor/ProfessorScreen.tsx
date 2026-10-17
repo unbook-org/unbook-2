@@ -1,11 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   ActivityIndicator,
   SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from 'react-native';
 import { CartoonButton } from '../../components/CartoonButton';
@@ -16,33 +15,32 @@ import { theme } from '../../constants/theme';
 import { useConsulta } from '../../hooks/useConsulta';
 import { getProfessor } from '../../services/api';
 import type {
-  AvaliacaoComentario,
   ProfessorProfile,
   TurmaDocente,
 } from '../../types/professor';
-import { coresProfessor, LARGURA_MAXIMA, sombra } from './estilos';
+import { coresProfessor, sombra } from './estilos';
 import {
   CabecalhoProfessor,
-  ComentariosSection,
-  MetricasResumoSection,
-  SidebarCardsSection,
-  TurmasDocenteSection,
+  MateriasLecionandoSection,
 } from './sections';
 
 interface ProfessorScreenProps {
   identifier: string;
+  origemNome?: string;
   onVoltar: () => void;
   onSelectMateria: (codigo: string) => void;
 }
 
-// Perfil Demo para o Professor Charles Xavier (conforme mockup do Figma)
+// Perfil Demo para o Professor Charles Xavier (fiel ao mockup real do Figma)
 const PERFIL_DEMO_CHARLES: ProfessorProfile = {
   id: '00000000-0000-0000-0000-000000000001',
   nome_completo: 'Charles Xavier',
   slug: 'charles-xavier',
   siape: '1984202',
-  email_institucional: 'charles.xavier@unb.br',
+  email_institucional: 'wagnerMoura@unb.br',
   titulo_academico: 'Dr.',
+  url_foto:
+    'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=600',
   url_lattes: 'http://lattes.cnpq.br/0000000000000000',
   localizacao_gabinete: 'BSA - A03',
   departamento: {
@@ -66,31 +64,14 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
     },
     {
       id: 'm2',
-      codigo_materia: 'IFD0120',
-      nome: 'Física Quântica',
-      slug: 'fisica-quantica',
-      creditos: 4,
-      carga_horaria: 60,
+      codigo_materia: 'IFD0073',
+      nome: 'Física Exp. 1',
+      slug: 'fisica-exp-1',
+      creditos: 2,
+      carga_horaria: 30,
     },
   ],
   turmas: [
-    {
-      id: 't2',
-      codigo_turma: '2',
-      semestre: '2026.2',
-      horario_bruto: '24T23',
-      local_sala: 'BSA - A03',
-      vagas_ofertadas: 20,
-      vagas_ocupadas: 6,
-      materia: {
-        id: 'm1',
-        codigo_materia: 'IFD0071',
-        nome: 'Física 1',
-        slug: 'fisica-1',
-        creditos: 4,
-        carga_horaria: 60,
-      },
-    },
     {
       id: 't1',
       codigo_turma: '1',
@@ -109,29 +90,46 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
       },
     },
     {
+      id: 't2',
+      codigo_turma: '2',
+      semestre: '2026.2',
+      horario_bruto: '24T23',
+      local_sala: 'BSA - A03',
+      vagas_ofertadas: 20,
+      vagas_ocupadas: 6,
+      materia: {
+        id: 'm1',
+        codigo_materia: 'IFD0071',
+        nome: 'Física 1',
+        slug: 'fisica-1',
+        creditos: 4,
+        carga_horaria: 60,
+      },
+    },
+    {
       id: 't3',
       codigo_turma: '1',
       semestre: '2026.2',
-      horario_bruto: '24T45',
+      horario_bruto: '4T45',
       local_sala: 'PAT - AT02',
       vagas_ofertadas: 15,
       vagas_ocupadas: 12,
       materia: {
         id: 'm2',
-        codigo_materia: 'IFD0120',
-        nome: 'Física Quântica',
-        slug: 'fisica-quantica',
-        creditos: 4,
-        carga_horaria: 60,
+        codigo_materia: 'IFD0073',
+        nome: 'Física Exp. 1',
+        slug: 'fisica-exp-1',
+        creditos: 2,
+        carga_horaria: 30,
       },
     },
   ],
   resumo_didatica: {
-    media_didatica: 4.0,
+    media_didatica: 3.25,
     media_dificuldade: 3.8,
-    total_avaliacoes: 40,
+    total_avaliacoes: 128,
     resumo_executivo:
-      'A matéria de física 1 ofertada por esse professor foi diagnosticada como poderosa e de caráter mutante, muitos alunos ressaltaram dizendo terem aprendido muito com a forma como as aulas são lecionadas.',
+      'Tem experiência na área de Física, com ênfase em Física -Matemática. Atuando principalmente nos seguintes temas:função de Wigner, grupos de Lie, produto de Weyl, operador-estrela.',
     badges: [
       '#exigente',
       '#atorDignoDeOscar',
@@ -153,7 +151,7 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
       nota_dificuldade: 4.5,
       comentario:
         'Aulas sensacionais, mas as provas do Xavier são em outro nível. Estudem os mutantes!',
-      emoji_vibe: '🥱',
+      emoji_vibe: 'sono',
       cobra_presenca: true,
       avaliacao_justa: false,
       upvotes: 24,
@@ -169,7 +167,7 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
       nota_dificuldade: 3.5,
       comentario:
         'Professor nota 10, gostei muito da forma como ele ensina a matéria!!',
-      emoji_vibe: '😎',
+      emoji_vibe: 'top',
       cobra_presenca: true,
       avaliacao_justa: true,
       upvotes: 24,
@@ -185,7 +183,7 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
       nota_dificuldade: 4.0,
       comentario:
         'Didática impecável e domínio absurdo de física experimental. Não falte as aulas de quarta.',
-      emoji_vibe: '🧐',
+      emoji_vibe: 'complexo',
       cobra_presenca: true,
       avaliacao_justa: true,
       upvotes: 18,
@@ -197,51 +195,52 @@ const PERFIL_DEMO_CHARLES: ProfessorProfile = {
 
 function buscarProfessor(identifier: string, sinal: AbortSignal) {
   return getProfessor(identifier, sinal).catch(() => {
-    // Se o backend estiver offline ou sem banco populado, carrega os dados demo completos do Figma
+    // Se o backend estiver offline ou sem dados desse slug, utiliza dados demo
     return PERFIL_DEMO_CHARLES;
   });
 }
 
 export function ProfessorScreen({
   identifier,
+  origemNome,
   onVoltar,
   onSelectMateria,
 }: ProfessorScreenProps) {
-  const { width } = useWindowDimensions();
-  const isDesktop = width >= 940;
-
   const {
     dados: professorApi,
     carregando,
     erro,
   } = useConsulta((sinal) => buscarProfessor(identifier, sinal), [identifier]);
 
-  // Sempre garante exibição do perfil completo para desenvolvimento visual
-  const professor = professorApi ?? PERFIL_DEMO_CHARLES;
-
-  // Turma selecionada para visualização das métricas e grade
-  const [turmaSelecionadaId, setTurmaSelecionadaId] = useState<string | null>(null);
+  // Se for demo ou professor sem dados cadastrais completos, combina graciosamente
+  const professor = useMemo(() => {
+    if (!professorApi) return PERFIL_DEMO_CHARLES;
+    return {
+      ...PERFIL_DEMO_CHARLES,
+      ...professorApi,
+      // Se não houver matérias cadastradas para o professor no banco, utiliza as de demonstração
+      materias:
+        professorApi.materias && professorApi.materias.length > 0
+          ? professorApi.materias
+          : PERFIL_DEMO_CHARLES.materias,
+      turmas:
+        professorApi.turmas && professorApi.turmas.length > 0
+          ? professorApi.turmas
+          : PERFIL_DEMO_CHARLES.turmas,
+      resumo_didatica: {
+        ...PERFIL_DEMO_CHARLES.resumo_didatica,
+        ...(professorApi.resumo_didatica || {}),
+        resumo_executivo:
+          professorApi.resumo_didatica?.resumo_executivo ||
+          PERFIL_DEMO_CHARLES.resumo_didatica.resumo_executivo,
+      },
+    };
+  }, [professorApi]);
 
   const turmaAtiva = useMemo<TurmaDocente | null>(() => {
     if (!professor || professor.turmas.length === 0) return null;
-    if (turmaSelecionadaId) {
-      const encontrada = professor.turmas.find((t) => t.id === turmaSelecionadaId);
-      if (encontrada) return encontrada;
-    }
     return professor.turmas[0];
-  }, [professor, turmaSelecionadaId]);
-
-  // Lista local de avaliações para permitir adição instantânea
-  const [avaliacoesLocais, setAvaliacoesLocais] = useState<AvaliacaoComentario[]>([]);
-
-  const listaAvaliacoes = useMemo(() => {
-    const base = professor?.avaliacoes ?? [];
-    return [...avaliacoesLocais, ...base];
-  }, [professor, avaliacoesLocais]);
-
-  const handleNovaAvaliacao = (nova: AvaliacaoComentario) => {
-    setAvaliacoesLocais((prev) => [nova, ...prev]);
-  };
+  }, [professor]);
 
   const naoEncontrado = !carregando && !erro && professor === null;
 
@@ -283,49 +282,21 @@ export function ProfessorScreen({
 
         {!carregando && professor && (
           <>
-            {/* Cabeçalho do Professor */}
+            {/* 1. SEÇÃO DO TOPO (Fiel ao design real):
+                Badge PROFESSOR, Nome, Bio, Tags, % Recomendação, Avaliações, Foto, Email e Status */}
             <CabecalhoProfessor
               professor={professor}
               turmaAtiva={turmaAtiva}
+              origemNome={origemNome}
               onVoltar={onVoltar}
             />
 
-            {/* Layout Principal: 2 Colunas no Desktop ou 1 Coluna no Mobile */}
-            <View style={styles.corpoPrincipal}>
-              <View style={[styles.gridContainer, isDesktop && styles.gridContainerDesktop]}>
-                {/* Coluna Esquerda: Métricas + Turmas + Comentários */}
-                <View style={[styles.colunaPrincipal, isDesktop && styles.colunaPrincipalDesktop]}>
-                  {/* Seção 1: Métricas de Desempenho e Perguntas Frequentes (Image 1 & 2) */}
-                  <MetricasResumoSection
-                    professor={professor}
-                    turmaAtiva={turmaAtiva}
-                    onNovaAvaliacao={handleNovaAvaliacao}
-                  />
-
-                  {/* Seção 2: Lista de Turmas & Disciplinas */}
-                  <TurmasDocenteSection
-                    professor={professor}
-                    turmaAtiva={turmaAtiva}
-                    onSelecionarTurma={(turma) => setTurmaSelecionadaId(turma.id)}
-                    onSelectMateria={onSelectMateria}
-                  />
-
-                  {/* Seção 3: Comentários e Avaliações Reais (Image 2 & 3) */}
-                  <ComentariosSection
-                    avaliacoes={listaAvaliacoes}
-                    onAdicionarComentario={handleNovaAvaliacao}
-                  />
-                </View>
-
-                {/* Coluna Direita: Cards de Destaque da Turma (Vagas, Local, Horário, Recomendação) */}
-                <View style={[styles.colunaLateral, isDesktop && styles.colunaLateralDesktop]}>
-                  <SidebarCardsSection
-                    professor={professor}
-                    turmaAtiva={turmaAtiva}
-                  />
-                </View>
-              </View>
-            </View>
+            {/* 2. MATÉRIAS QUE O PROFESSOR ESTÁ LECIONANDO (Fiel ao design real):
+                Caixa com busca rápida, seletor de semestre e lista de matérias com badge ABERTA */}
+            <MateriasLecionandoSection
+              professor={professor}
+              onSelectMateria={onSelectMateria}
+            />
           </>
         )}
 
@@ -347,35 +318,6 @@ const styles = StyleSheet.create({
   carregando: {
     marginVertical: 96,
   },
-  corpoPrincipal: {
-    paddingHorizontal: 16,
-    paddingTop: 20,
-    paddingBottom: 40,
-    width: '100%',
-    maxWidth: LARGURA_MAXIMA,
-    alignSelf: 'center',
-  },
-  gridContainer: {
-    flexDirection: 'column',
-    gap: 24,
-  },
-  gridContainerDesktop: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
-  colunaPrincipal: {
-    width: '100%',
-    gap: 24,
-  },
-  colunaPrincipalDesktop: {
-    flex: 1,
-  },
-  colunaLateral: {
-    width: '100%',
-  },
-  colunaLateralDesktop: {
-    width: 320,
-  },
   espacador: {
     flexGrow: 1,
   },
@@ -389,7 +331,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     backgroundColor: theme.colors.white,
     borderWidth: 2,
-    borderColor: coresProfessor.borda,
+    borderColor: theme.colors.dark,
     padding: 28,
     ...sombra(6),
   },

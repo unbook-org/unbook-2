@@ -46,15 +46,25 @@ class ProfessorResumoOut(Schema):
     slug: str
 
 
+class MateriaSimpleOut(Schema):
+    id: UUID
+    codigo_materia: str
+    nome: str
+    slug: str
+    creditos: int
+    carga_horaria: int
+
+
 class TurmaOut(Schema):
     id: UUID
     codigo_turma: str
     semestre: str
     horario_bruto: str
-    local_sala: str | None = None
+    local_sala: Optional[str] = None
     vagas_ofertadas: int
     vagas_ocupadas: int
-    professor: ProfessorResumoOut | None = None
+    professor: Optional[ProfessorResumoOut] = None
+    materia: Optional[MateriaSimpleOut] = None
 
 
 class MateriaDetalheOut(Schema):
@@ -80,17 +90,6 @@ class MateriaBuscaOut(Schema):
     codigo_materia: str
     nome: str
     departamento: DepartamentoResumoOut | None = None
-
-
-class TurmaOut(Schema):
-    id: UUID
-    codigo_turma: str
-    semestre: str
-    horario_bruto: str
-    local_sala: Optional[str] = None
-    vagas_ofertadas: int
-    vagas_ocupadas: int
-    materia: MateriaSimpleOut
 
 
 class ResumoIADocenteOut(Schema):

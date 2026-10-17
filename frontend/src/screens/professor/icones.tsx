@@ -197,3 +197,30 @@ export function IconeGrade({ cor = COR_PADRAO, tamanho = 18 }: { cor?: string; t
   );
 }
 
+export function IconeRaio({ cor = '#1F1F1F', tamanho = 16 }: { cor?: string; tamanho?: number }) {
+  return (
+    <Svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill={cor}>
+      <Path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#1F1F1F" strokeWidth="1.5" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function IconeCamadas({ cor = COR_PADRAO, tamanho = 18 }: { cor?: string; tamanho?: number }) {
+  return (
+    <Svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill="none">
+      <Path d="M12 2L2 7L12 12L22 7L12 2Z" stroke={cor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M2 17L12 22L22 17" stroke={cor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+      <Path d="M2 12L12 17L22 12" stroke={cor} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+    </Svg>
+  );
+}
+
+export function IconeBusca({ cor = COR_PADRAO, tamanho = 16 }: { cor?: string; tamanho?: number }) {
+  return (
+    <Svg width={tamanho} height={tamanho} viewBox="0 0 24 24" fill="none">
+      <Circle cx="11" cy="11" r="7" stroke={cor} strokeWidth="2.2" />
+      <Line x1="16.5" y1="16.5" x2="21" y2="21" stroke={cor} strokeWidth="2.2" strokeLinecap="round" />
+    </Svg>
+  );
+}
+

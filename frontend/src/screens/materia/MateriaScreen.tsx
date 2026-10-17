@@ -32,7 +32,7 @@ interface MateriaScreenProps {
   nivel: NivelEnsino;
   onVoltar: () => void;
   onSelectMateria: (codigo: string, nivel: NivelEnsino) => void;
-  onSelectProfessor?: (identifier: string) => void;
+  onSelectProfessor?: (identifier: string, origemNome?: string) => void;
 }
 
 // 404 vira `null` para a tela distinguir "não encontrada" de falhas de rede/servidor.
@@ -49,7 +49,13 @@ function buscarMateria(
   });
 }
 
-export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: MateriaScreenProps) {
+export function MateriaScreen({
+  codigo,
+  nivel,
+  onVoltar,
+  onSelectMateria,
+  onSelectProfessor,
+}: MateriaScreenProps) {
   const scrollRef = useRef<ScrollView>(null);
 
   const { dados: materia, carregando, erro } = useConsulta(
@@ -89,6 +95,10 @@ export function MateriaScreen({ codigo, nivel, onVoltar, onSelectMateria }: Mate
   };
 
   const handleAcessarProfessor = (slugProfessor: string) => {
+    if (onSelectProfessor) {
+      onSelectProfessor(slugProfessor, materia?.nome);
+      return;
+    }
     const mensagem = `O perfil detalhado do docente (${slugProfessor}) estará disponível em breve com a integração do módulo de docentes!`;
     if (Platform.OS === 'web') {
       window.alert(mensagem);

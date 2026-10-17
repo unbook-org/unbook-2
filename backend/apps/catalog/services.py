@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 from uuid import UUID
 import uuid
 
-from catalog.models import Departamento, Materia, Professor
+from catalog.models import Departamento, Materia, Professor, Turma
 from django.db.models import Avg, Case, Count, IntegerField, Q, QuerySet, Value, When
 from django.db.models.functions import Lower
 from review.models import Avaliacao, ResumoIADocente
@@ -18,8 +18,13 @@ from apps.catalog.schemas import (
     DepartamentoSimpleOut,
     MateriaBuscaOut,
     MateriaDetalheOut,
+    MateriaSimpleOut,
+    ProfessorListItemOut,
+    ProfessorProfileOut,
     ProfessorResumoOut,
     RequisitoOut,
+    ResumoDidaticaOut,
+    ResumoIADocenteOut,
     TurmaOut,
 )
 from apps.core.db import SemAcento

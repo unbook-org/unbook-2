@@ -81,7 +81,7 @@ export interface ProfessorProfile {
   turmas: TurmaDocente[];
   resumo_didatica: ResumoDidatica;
   resumo_ia?: ResumoIADocente | null;
-  avaliacoes: AvaliacaoComentario[];
+  avaliacoes?: AvaliacaoComentario[];
 }
 
 export interface ProfessorListItem {

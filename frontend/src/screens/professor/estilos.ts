@@ -5,7 +5,9 @@ export const LARGURA_MAXIMA = 1180;
 
 export const coresProfessor = {
   fundo: theme.colors.beige,
+  cardFundo: '#EFECE6',
   primaria: '#1349EB',
+  roxo: '#5B50E6',
   verde: '#009A5E',
   amarelo: '#F1C321',
   salmao: '#E0995E',
@@ -21,7 +23,7 @@ export const coresProfessor = {
     exigente: { fundo: '#FFFFFF', texto: '#1F1F1F' },
     oscar: { fundo: '#F1C321', texto: '#1F1F1F' },
     genteboa: { fundo: '#009A5E', texto: '#FFFFFF' },
-    recomendo: { fundo: '#A8B332', texto: '#FFFFFF' },
+    recomendo: { fundo: '#5B4F1B', texto: '#FFFFFF' },
     fisicodoido: { fundo: '#FFFFFF', texto: '#1F1F1F' },
     padrao: { fundo: '#EFEDE1', texto: '#1F1F1F' },
   },
