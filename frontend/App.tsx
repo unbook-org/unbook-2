@@ -4,6 +4,9 @@ import { StatusBar } from "expo-status-bar";
 import { HomeScreen } from "./src/screens/home/HomeScreen";
 import { MateriaScreen } from "./src/screens/materia/MateriaScreen";
 import { ProfessorScreen } from "./src/screens/professor/ProfessorScreen";
+import { SobreScreen } from "./src/screens/sobre/SobreScreen";
+import { ComoFuncionaScreen } from "./src/screens/como-funciona/ComoFuncionaScreen";
+import { ComoAjudarScreen } from "./src/screens/como-ajudar/ComoAjudarScreen";
 import { nivelDaApi, NIVEL_PADRAO, type NivelEnsino } from "./src/utils/nivelEnsino";
 
 interface MateriaSelecionada {
@@ -11,19 +14,43 @@ interface MateriaSelecionada {
   nivel: NivelEnsino;
 }
 
+export type TipoTela =
+  | "home"
+  | "sobre"
+  | "como-funciona"
+  | "como-ajudar"
+  | "materia"
+  | "professor";
+
 interface EstadoRota {
+  tipo: TipoTela;
   materia: MateriaSelecionada | null;
   professorIdentifier: string | null;
 }
 
 function lerRotaAtual(): EstadoRota {
   if (Platform.OS !== "web" || typeof window === "undefined") {
-    return { materia: null, professorIdentifier: null };
+    return { tipo: "home", materia: null, professorIdentifier: null };
   }
 
   const pathname = window.location.pathname;
   const params = new URLSearchParams(window.location.search);
   const nivelParam = nivelDaApi(params.get("nivel")) ?? NIVEL_PADRAO;
+
+  // Rota de Sobre: /sobre
+  if (pathname.match(/^\/sobre\/?$/i)) {
+    return { tipo: "sobre", materia: null, professorIdentifier: null };
+  }
+
+  // Rota de Como Funciona: /como-funciona
+  if (pathname.match(/^\/como-funciona\/?$/i)) {
+    return { tipo: "como-funciona", materia: null, professorIdentifier: null };
+  }
+
+  // Rota de Como Ajudar / Doações / Apoiar: /como-ajudar, /apoiar, /doar, /doacao
+  if (pathname.match(/^\/(como-ajudar|apoiar|doar|doacao)\/?$/i)) {
+    return { tipo: "como-ajudar", materia: null, professorIdentifier: null };
+  }
 
   // Rota de matéria: /materias/MAT123 ou /materia/MAT123 (e suporte opcional a /materias/:nivel/:codigo)
   const matchMateriaNivel = pathname.match(/^\/materias?\/([^/?#]+)\/([^/?#]+)\/?$/i);
@@ -33,6 +60,7 @@ function lerRotaAtual(): EstadoRota {
     const nivelExtraido = nivelDaApi(seg1);
     if (nivelExtraido) {
       return {
+        tipo: "materia",
         materia: { codigo: seg2.toUpperCase(), nivel: nivelExtraido },
         professorIdentifier: null,
       };
@@ -43,6 +71,7 @@ function lerRotaAtual(): EstadoRota {
   if (matchMateria) {
     const codigo = decodeURIComponent(matchMateria[1]).toUpperCase();
     return {
+      tipo: "materia",
       materia: { codigo, nivel: nivelParam },
       professorIdentifier: null,
     };
@@ -53,6 +82,7 @@ function lerRotaAtual(): EstadoRota {
   if (matchProfessor) {
     const identifier = decodeURIComponent(matchProfessor[1]);
     return {
+      tipo: "professor",
       materia: null,
       professorIdentifier: identifier,
     };
@@ -62,6 +92,7 @@ function lerRotaAtual(): EstadoRota {
   const matQuery = params.get("materia");
   if (matQuery) {
     return {
+      tipo: "materia",
       materia: { codigo: matQuery.toUpperCase(), nivel: nivelParam },
       professorIdentifier: null,
     };
@@ -70,12 +101,13 @@ function lerRotaAtual(): EstadoRota {
   const profQuery = params.get("prof") || params.get("professor");
   if (profQuery) {
     return {
+      tipo: "professor",
       materia: null,
       professorIdentifier: profQuery,
     };
   }
 
-  return { materia: null, professorIdentifier: null };
+  return { tipo: "home", materia: null, professorIdentifier: null };
 }
 
 function construirUrlMateria(codigo: string, nivel: NivelEnsino): string {
@@ -104,6 +136,7 @@ function atualizarUrlNavegador(novaUrl: string, substituir = false) {
 export default function App() {
   const rotaInicial = lerRotaAtual();
 
+  const [telaAtiva, setTelaAtiva] = useState<TipoTela>(rotaInicial.tipo);
   const [materia, setMateria] = useState<MateriaSelecionada | null>(rotaInicial.materia);
   const [professorIdentifier, setProfessorIdentifier] = useState<string | null>(
     rotaInicial.professorIdentifier,
@@ -114,7 +147,6 @@ export default function App() {
   useEffect(() => {
     if (Platform.OS !== "web" || typeof window === "undefined") return;
 
-    // Normaliza query params legados na primeira carga para URLs limpas (/materias/... ou /professores/...)
     if (rotaInicial.professorIdentifier) {
       atualizarUrlNavegador(construirUrlProfessor(rotaInicial.professorIdentifier), true);
     } else if (rotaInicial.materia) {
@@ -126,6 +158,7 @@ export default function App() {
 
     const aoMudarHistorico = () => {
       const novaRota = lerRotaAtual();
+      setTelaAtiva(novaRota.tipo);
       setMateria(novaRota.materia);
       setProfessorIdentifier(novaRota.professorIdentifier);
       if (!novaRota.professorIdentifier) {
@@ -137,8 +170,41 @@ export default function App() {
     return () => window.removeEventListener("popstate", aoMudarHistorico);
   }, []);
 
+  const voltarParaHome = useCallback(() => {
+    setTelaAtiva("home");
+    setProfessorIdentifier(null);
+    setOrigemProfessorNome(undefined);
+    setMateria(null);
+    atualizarUrlNavegador("/");
+  }, []);
+
+  const navegarParaSobre = useCallback(() => {
+    setTelaAtiva("sobre");
+    setProfessorIdentifier(null);
+    setOrigemProfessorNome(undefined);
+    setMateria(null);
+    atualizarUrlNavegador("/sobre");
+  }, []);
+
+  const navegarParaComoFunciona = useCallback(() => {
+    setTelaAtiva("como-funciona");
+    setProfessorIdentifier(null);
+    setOrigemProfessorNome(undefined);
+    setMateria(null);
+    atualizarUrlNavegador("/como-funciona");
+  }, []);
+
+  const navegarParaComoAjudar = useCallback(() => {
+    setTelaAtiva("como-ajudar");
+    setProfessorIdentifier(null);
+    setOrigemProfessorNome(undefined);
+    setMateria(null);
+    atualizarUrlNavegador("/como-ajudar");
+  }, []);
+
   const selecionarMateria = useCallback((codigo: string, nivel: NivelEnsino = NIVEL_PADRAO) => {
     const codigoFormatado = codigo.trim().toUpperCase();
+    setTelaAtiva("materia");
     setProfessorIdentifier(null);
     setOrigemProfessorNome(undefined);
     setMateria({ codigo: codigoFormatado, nivel });
@@ -146,30 +212,23 @@ export default function App() {
   }, []);
 
   const selecionarProfessor = useCallback((identifier: string, origemNome?: string) => {
+    setTelaAtiva("professor");
     setProfessorIdentifier(identifier);
     setOrigemProfessorNome(origemNome);
     atualizarUrlNavegador(construirUrlProfessor(identifier));
-  }, []);
-
-  const voltarParaHome = useCallback(() => {
-    setProfessorIdentifier(null);
-    setOrigemProfessorNome(undefined);
-    setMateria(null);
-    atualizarUrlNavegador("/");
   }, []);
 
   const voltarDoProfessor = useCallback(() => {
     setProfessorIdentifier(null);
     setOrigemProfessorNome(undefined);
     if (materia) {
+      setTelaAtiva("materia");
       atualizarUrlNavegador(construirUrlMateria(materia.codigo, materia.nivel));
     } else {
+      setTelaAtiva("home");
       atualizarUrlNavegador("/");
     }
   }, [materia]);
-
-  const telaAtiva =
-    professorIdentifier !== null ? "professor" : materia !== null ? "materia" : "home";
 
   return (
     <>
@@ -177,8 +236,38 @@ export default function App() {
         <HomeScreen
           onSelectMateria={selecionarMateria}
           onSelectProfessor={selecionarProfessor}
+          onNavigateSobre={navegarParaSobre}
+          onNavigateComoFunciona={navegarParaComoFunciona}
+          onNavigateComoAjudar={navegarParaComoAjudar}
         />
       </View>
+
+      {telaAtiva === "sobre" && (
+        <SobreScreen
+          onNavigateHome={voltarParaHome}
+          onNavigateComoFunciona={navegarParaComoFunciona}
+          onNavigateComoAjudar={navegarParaComoAjudar}
+          onNavigateExplore={voltarParaHome}
+        />
+      )}
+
+      {telaAtiva === "como-funciona" && (
+        <ComoFuncionaScreen
+          onNavigateHome={voltarParaHome}
+          onNavigateSobre={navegarParaSobre}
+          onNavigateComoAjudar={navegarParaComoAjudar}
+          onNavigateExplore={voltarParaHome}
+        />
+      )}
+
+      {telaAtiva === "como-ajudar" && (
+        <ComoAjudarScreen
+          onNavigateHome={voltarParaHome}
+          onNavigateSobre={navegarParaSobre}
+          onNavigateComoFunciona={navegarParaComoFunciona}
+          onNavigateExplore={voltarParaHome}
+        />
+      )}
 
       {telaAtiva === "materia" && materia !== null && (
         <MateriaScreen
@@ -212,4 +301,3 @@ const styles = StyleSheet.create({
     display: "none",
   },
 });
-
