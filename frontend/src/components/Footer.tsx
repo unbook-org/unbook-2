@@ -177,6 +177,14 @@ export function Footer() {
           <View style={styles.col}>
             <Text style={styles.colHeading}>COMUNIDADE</Text>
             <FooterLink
+              label="Documentação Técnica"
+              onPress={() => handleOpenUrl('/docs')}
+            />
+            <FooterLink
+              label="Painel Administrativo"
+              onPress={() => handleOpenUrl('/admin')}
+            />
+            <FooterLink
               label="Contribuir no Projeto"
               onPress={() => handleOpenUrl('https://github.com/unbook-org/unbook-2/blob/main/CONTRIBUTING.md')}
             />

@@ -22,6 +22,24 @@ function lerRotaAtual(): EstadoRota {
   }
 
   const pathname = window.location.pathname;
+
+  // Rota de documentação: redireciona para o MkDocs
+  if (pathname === "/docs" || pathname.startsWith("/docs/")) {
+    const docsUrl = process.env.EXPO_PUBLIC_DOCS_URL ?? "http://localhost:8000";
+    const subpath = pathname.replace(/^\/docs/, "");
+    const destino = subpath ? `${docsUrl.replace(/\/$/, "")}${subpath}${window.location.search}` : docsUrl;
+    window.location.replace(destino);
+    return { materia: null, professorIdentifier: null };
+  }
+
+  // Rota de administração: redireciona para o Django Admin
+  if (pathname === "/admin" || pathname.startsWith("/admin/")) {
+    const backendUrl = (process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080/api").replace(/\/api\/?$/, "");
+    const rotaFormatada = pathname.endsWith("/") ? pathname : `${pathname}/`;
+    window.location.replace(`${backendUrl}${rotaFormatada}${window.location.search}`);
+    return { materia: null, professorIdentifier: null };
+  }
+
   const params = new URLSearchParams(window.location.search);
   const nivelParam = nivelDaApi(params.get("nivel")) ?? NIVEL_PADRAO;
 
