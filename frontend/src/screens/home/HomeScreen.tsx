@@ -12,6 +12,7 @@ import { CartoonAnimationStyles } from '../../components/CartoonAnimationStyles'
 import { Navbar } from '../../components/Navbar';
 import { NewsBanner } from '../../components/NewsBanner';
 import type { NivelEnsino } from '../../utils/nivelEnsino';
+import type { ModoApoio } from '../como-ajudar';
 
 // Import das seções da Landing Page:
 // 1. HeroSection (com boas-vindas, logo oficial e Começar Agora direcionando à busca)
@@ -41,9 +42,18 @@ import {
 interface HomeScreenProps {
   onSelectMateria: (codigo: string, nivel?: NivelEnsino) => void;
   onSelectProfessor?: (identifier: string, origemNome?: string) => void;
+  onNavigateSobre?: () => void;
+  onNavigateComoFunciona?: () => void;
+  onNavigateComoAjudar?: (tab?: ModoApoio) => void;
 }
 
-export function HomeScreen({ onSelectMateria, onSelectProfessor }: HomeScreenProps) {
+export function HomeScreen({
+  onSelectMateria,
+  onSelectProfessor,
+  onNavigateSobre,
+  onNavigateComoFunciona,
+  onNavigateComoAjudar,
+}: HomeScreenProps) {
   const scrollViewRef = useRef<ScrollView>(null);
   const [searchLayoutY, setSearchLayoutY] = useState(0);
   const [featuresLayoutY, setFeaturesLayoutY] = useState(0);
@@ -115,7 +125,9 @@ export function HomeScreen({ onSelectMateria, onSelectProfessor }: HomeScreenPro
         <NewsBanner />
         <Navbar
           onPressExplore={handleScrollToSearch}
-          onPressAbout={handleScrollToFeatures}
+          onPressAbout={onNavigateSobre || handleScrollToFeatures}
+          onPressHowItWorks={onNavigateComoFunciona}
+          onPressDonate={() => onNavigateComoAjudar?.('doar')}
           onPressLogo={handleScrollToTop}
         />
 
@@ -144,7 +156,11 @@ export function HomeScreen({ onSelectMateria, onSelectProfessor }: HomeScreenPro
         <SecuritySection />
         <TestimonialsSection />
         <FaqSection />
-        <Footer />
+        <Footer
+          onPressAbout={onNavigateSobre}
+          onPressHowItWorks={onNavigateComoFunciona}
+          onPressDonate={() => onNavigateComoAjudar?.('doar')}
+        />
       </ScrollView>
     </SafeAreaView>
   );
