@@ -48,7 +48,13 @@ function FooterLink({ label, onPress }: FooterLinkProps) {
   );
 }
 
-export function Footer() {
+export interface FooterProps {
+  onPressAbout?: () => void;
+  onPressHowItWorks?: () => void;
+  onPressDonate?: () => void;
+}
+
+export function Footer({ onPressAbout, onPressHowItWorks, onPressDonate }: FooterProps = {}) {
   const { width } = useWindowDimensions();
   const isMobile = width < 640;
   const isTablet = width >= 640 && width < 1024;
@@ -98,6 +104,16 @@ export function Footer() {
             <GithubIcon size={18} color="#FFFFFF" />
             <Text style={styles.githubActionBtnText}>REPOSITÓRIO NO GITHUB</Text>
           </Pressable>
+          {onPressDonate && (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Apoiar o UnBook com um café"
+              onPress={onPressDonate}
+              style={styles.donateFooterBtn}
+            >
+              <Text style={styles.donateFooterBtnText}>☕ DOE UM CAFÉ</Text>
+            </Pressable>
+          )}
         </View>
 
         <View style={styles.divider} />
@@ -113,6 +129,18 @@ export function Footer() {
           {/* Coluna 1: Plataforma */}
           <View style={styles.col}>
             <Text style={styles.colHeading}>PLATAFORMA</Text>
+            <FooterLink
+              label="Sobre o UnBook"
+              onPress={() => onPressAbout ? onPressAbout() : handleOpenUrl('/sobre')}
+            />
+            <FooterLink
+              label="Como Funciona"
+              onPress={() => onPressHowItWorks ? onPressHowItWorks() : handleOpenUrl('/como-funciona')}
+            />
+            <FooterLink
+              label="Como Ajudar / Apoiar ☕"
+              onPress={() => onPressDonate ? onPressDonate() : handleOpenUrl('/como-ajudar')}
+            />
             <FooterLink
               label="Catálogo SIGAA UnB"
               onPress={() => handleOpenUrl('https://sigaa.unb.br/sigaa/')}
@@ -289,6 +317,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#1349EB',
     transform: [{ translateY: -2 }],
     boxShadow: '4.5px 4.5px 0px #1F1F1F',
+  },
+  donateFooterBtn: {
+    backgroundColor: '#F1C321',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginLeft: 12,
+    shadowColor: '#000000',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+  },
+  donateFooterBtnText: {
+    color: '#1F1F1F',
+    fontWeight: '900',
+    fontSize: 12,
+    letterSpacing: 0.5,
   },
   githubActionBtnPressed: {
     transform: [{ translateX: 2 }, { translateY: 2 }],

@@ -48,6 +48,8 @@ export interface NavbarProps {
   onPressExplore?: () => void;
   onPressSchedule?: () => void;
   onPressAbout?: () => void;
+  onPressHowItWorks?: () => void;
+  onPressDonate?: () => void;
   onPressLogin?: () => void;
   onPressRegister?: () => void;
   onPressLogo?: () => void;
@@ -57,6 +59,8 @@ export function Navbar({
   onPressExplore,
   onPressSchedule,
   onPressAbout,
+  onPressHowItWorks,
+  onPressDonate,
   onPressLogin,
   onPressRegister,
   onPressLogo,
@@ -70,7 +74,9 @@ export function Navbar({
 
   const [explorarHovered, setExplorarHovered] = useState(false);
   const [gradeHovered, setGradeHovered] = useState(false);
+  const [comoFuncionaHovered, setComoFuncionaHovered] = useState(false);
   const [sobreHovered, setSobreHovered] = useState(false);
+  const [apoiarHovered, setApoiarHovered] = useState(false);
 
   const [themeBtnHovered, setThemeBtnHovered] = useState(false);
   const [loginBtnHovered, setLoginBtnHovered] = useState(false);
@@ -155,6 +161,22 @@ export function Navbar({
               </Pressable>
 
               <Pressable
+                onPress={onPressHowItWorks}
+                onHoverIn={() => setComoFuncionaHovered(true)}
+                onHoverOut={() => setComoFuncionaHovered(false)}
+                style={styles.linkItem}
+              >
+                <Text
+                  style={[
+                    styles.linkText,
+                    comoFuncionaHovered && styles.linkTextHovered,
+                  ]}
+                >
+                  Como Funciona
+                </Text>
+              </Pressable>
+
+              <Pressable
                 onPress={onPressAbout}
                 onHoverIn={() => setSobreHovered(true)}
                 onHoverOut={() => setSobreHovered(false)}
@@ -167,6 +189,22 @@ export function Navbar({
                   ]}
                 >
                   Sobre
+                </Text>
+              </Pressable>
+
+              <Pressable
+                onPress={onPressDonate}
+                onHoverIn={() => setApoiarHovered(true)}
+                onHoverOut={() => setApoiarHovered(false)}
+                style={styles.linkItem}
+              >
+                <Text
+                  style={[
+                    styles.linkText,
+                    apoiarHovered && styles.linkTextHovered,
+                  ]}
+                >
+                  Apoiar ☕
                 </Text>
               </Pressable>
             </View>
@@ -289,10 +327,30 @@ export function Navbar({
                 style={styles.mobileLinkItem}
                 onPress={() => {
                   setMobileMenuOpen(false);
+                  onPressHowItWorks?.();
+                }}
+              >
+                <Text style={styles.mobileLinkText}>Como Funciona</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.mobileLinkItem}
+                onPress={() => {
+                  setMobileMenuOpen(false);
                   onPressAbout?.();
                 }}
               >
                 <Text style={styles.mobileLinkText}>Sobre o UnBook</Text>
+              </Pressable>
+
+              <Pressable
+                style={styles.mobileLinkItem}
+                onPress={() => {
+                  setMobileMenuOpen(false);
+                  onPressDonate?.();
+                }}
+              >
+                <Text style={styles.mobileLinkText}>Como Ajudar / Apoiar ☕</Text>
               </Pressable>
             </View>
 
