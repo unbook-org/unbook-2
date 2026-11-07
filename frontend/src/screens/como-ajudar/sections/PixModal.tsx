@@ -7,8 +7,8 @@ import {
   Modal,
   Platform,
 } from 'react-native';
-import Svg, { Rect, Path, Line } from 'react-native-svg';
-import { theme } from '../../../constants/theme';
+import Svg, { Rect, Line } from 'react-native-svg';
+import { IconeCheck, IconeEscudo } from '../../../components/UnbookIcons';
 
 interface PixModalProps {
   visible: boolean;
@@ -72,7 +72,7 @@ export function PixModal({
             </Pressable>
           </View>
 
-          {/* Valor Selecionado */}
+          {/* Opções de Valor Selecionado */}
           <View style={styles.amountSelectorRow}>
             {amountOptions.map((amt) => {
               const isSelected = selectedAmount === amt;
@@ -127,7 +127,7 @@ export function PixModal({
               <Text style={styles.qrValueLabel}>VALOR SUGERIDO</Text>
               <Text style={styles.qrValueText}>{selectedAmount}</Text>
               <Text style={styles.qrHint}>
-                Abra o app do seu banco e escaneie o QR Code ou copie a chave PIX abaixo:
+                Abra o app do seu banco e aponte a câmera para o QR Code ou copie a chave PIX abaixo:
               </Text>
             </View>
           </View>
@@ -144,16 +144,20 @@ export function PixModal({
               onPress={handleCopy}
               style={[styles.copyBtn, copied && styles.copyBtnSuccess]}
             >
+              {copied && <IconeCheck size={14} color="#FFFFFF" />}
               <Text style={[styles.copyBtnText, copied && styles.copyBtnTextSuccess]}>
-                {copied ? '✓ COPIADO!' : 'COPIAR CHAVE'}
+                {copied ? 'CHAVE COPIADA!' : 'COPIAR CHAVE'}
               </Text>
             </Pressable>
           </View>
 
-          {/* Feedback ou aviso de incentivo */}
+          {/* Feedback de transparência sem emojis */}
           <View style={styles.encouragementBox}>
+            <View style={styles.encouragementIconBox}>
+              <IconeEscudo size={18} color="#009A5E" />
+            </View>
             <Text style={styles.encouragementText}>
-              ☕ <Text style={styles.bold}>Transparência UnBook:</Text> Todo recurso é usado para cobrir infraestrutura de servidores, custos de domínio e consumo da API de IA acadêmica. Muito obrigado por apoiar os estudantes da UnB!
+              <Text style={styles.bold}>Transparência UnBook:</Text> Todo recurso é aplicado na manutenção dos servidores em nuvem, custos de domínio e consumo das APIs de IA acadêmica. Muito obrigado pelo apoio!
             </Text>
           </View>
 
@@ -170,20 +174,20 @@ export function PixModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(31, 31, 31, 0.75)',
-    justifyContent: 'center',
+    backgroundColor: 'rgba(31, 31, 31, 0.72)',
     alignItems: 'center',
+    justifyContent: 'center',
     padding: 16,
   },
   modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 3,
-    borderColor: '#1F1F1F',
-    borderRadius: 16,
-    padding: 24,
-    maxWidth: 540,
     width: '100%',
-    shadowColor: '#000000',
+    maxWidth: 480,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    borderWidth: 2.5,
+    borderColor: '#1F1F1F',
+    padding: 24,
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 6, height: 6 },
     shadowOpacity: 1,
     shadowRadius: 0,
@@ -196,35 +200,41 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   pixBadge: {
-    backgroundColor: '#009A5E',
     alignSelf: 'flex-start',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 4,
+    backgroundColor: '#009A5E',
     borderWidth: 1.5,
     borderColor: '#1F1F1F',
+    borderRadius: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
     marginBottom: 6,
   },
   pixBadgeText: {
     color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.5,
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.6,
   },
   title: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '900',
     color: '#1F1F1F',
+    letterSpacing: 0.2,
   },
   closeBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    borderWidth: 2,
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    borderWidth: 1.5,
     borderColor: '#1F1F1F',
+    backgroundColor: '#FAF9F5',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#EFEDE1',
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+        } as any)
+      : {}),
   },
   amountSelectorRow: {
     flexDirection: 'row',
@@ -233,140 +243,188 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   amountChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 8,
+    flex: 1,
+    minWidth: 70,
+    backgroundColor: '#FAF9F5',
     borderWidth: 2,
     borderColor: '#1F1F1F',
-    backgroundColor: '#F6F6F5',
+    borderRadius: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    alignItems: 'center',
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          transition: 'all 0.15s ease',
+        } as any)
+      : {}),
   },
   amountChipSelected: {
     backgroundColor: '#F1C321',
-    transform: [{ translateY: -2 }],
   },
   amountChipText: {
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '900',
     color: '#1F1F1F',
   },
   amountChipTextSelected: {
-    fontWeight: '900',
+    color: '#1F1F1F',
   },
   qrContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#FCFAEC',
     borderWidth: 2,
     borderColor: '#1F1F1F',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 10,
+    padding: 14,
     gap: 16,
+    alignItems: 'center',
     marginBottom: 18,
   },
   qrBox: {
     backgroundColor: '#FFFFFF',
-    padding: 8,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#1F1F1F',
-    borderRadius: 8,
+    borderRadius: 6,
+    padding: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qrInfo: {
     flex: 1,
   },
   qrValueLabel: {
-    fontSize: 11,
-    fontWeight: '800',
+    fontSize: 10,
+    fontWeight: '900',
     color: '#707070',
     letterSpacing: 0.5,
   },
   qrValueText: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: '900',
     color: '#009A5E',
     marginBottom: 6,
   },
   qrHint: {
     fontSize: 12,
-    color: '#272725',
+    color: '#555555',
     lineHeight: 16,
   },
   keyBox: {
+    backgroundColor: '#FAF9F5',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 8,
+    padding: 12,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#F6F6F5',
-    borderWidth: 2,
-    borderColor: '#1F1F1F',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
-    gap: 10,
+    gap: 12,
+    marginBottom: 18,
   },
   keyTextWrapper: {
     flex: 1,
   },
   keyLabel: {
-    fontSize: 10,
-    fontWeight: '800',
+    fontSize: 9.5,
+    fontWeight: '900',
     color: '#707070',
-    marginBottom: 2,
+    letterSpacing: 0.5,
   },
   keyValue: {
-    fontSize: 14,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: '900',
     color: '#1F1F1F',
-    fontFamily: 'monospace',
+    marginTop: 2,
   },
   copyBtn: {
     backgroundColor: '#1349EB',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#1F1F1F',
-    shadowColor: '#000000',
+    borderRadius: 6,
+    paddingVertical: 9,
+    paddingHorizontal: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 2,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '2px 2px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   copyBtnSuccess: {
     backgroundColor: '#009A5E',
   },
   copyBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 12,
+    fontWeight: '900',
+    fontSize: 11,
+    letterSpacing: 0.5,
   },
   copyBtnTextSuccess: {
     color: '#FFFFFF',
   },
   encouragementBox: {
-    backgroundColor: '#EFEDE1',
+    flexDirection: 'row',
+    backgroundColor: '#FAF9F5',
     borderWidth: 1.5,
-    borderColor: '#1F1F1F',
+    borderColor: '#E8E2D5',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 18,
+    gap: 10,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  encouragementIconBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: '#E6F8F0',
+    borderWidth: 1.5,
+    borderColor: '#009A5E',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   encouragementText: {
-    fontSize: 12,
-    color: '#272725',
-    lineHeight: 18,
+    flex: 1,
+    fontSize: 11.5,
+    color: '#555555',
+    lineHeight: 16,
   },
   bold: {
     fontWeight: '800',
+    color: '#1F1F1F',
   },
   doneBtn: {
     backgroundColor: '#1F1F1F',
-    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
     borderRadius: 8,
+    paddingVertical: 12,
     alignItems: 'center',
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '3px 3px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   doneBtnText: {
     color: '#FFFFFF',
-    fontWeight: '800',
-    fontSize: 14,
-    letterSpacing: 0.5,
+    fontWeight: '900',
+    fontSize: 12.5,
+    letterSpacing: 0.8,
   },
 });
-

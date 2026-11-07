@@ -19,7 +19,7 @@ export function MarqueeApoio() {
             <View style={styles.badgePill}>
               <Text style={styles.badgeText}>{item}</Text>
             </View>
-            <Text style={styles.separator}>✦</Text>
+            <Text style={styles.separator}>•</Text>
           </React.Fragment>
         ))}
       </View>

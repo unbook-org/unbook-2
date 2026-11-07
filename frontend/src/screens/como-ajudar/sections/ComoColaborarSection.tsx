@@ -8,16 +8,14 @@ import {
   Platform,
   useWindowDimensions,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { NotebookBackground } from '../../../components/NotebookBackground';
 
 interface ComoColaborarSectionProps {
-  onPressDonate?: () => void;
   onPressExplore?: () => void;
   onPressDiscord?: () => void;
 }
 
 export function ComoColaborarSection({
-  onPressDonate,
   onPressExplore,
   onPressDiscord,
 }: ComoColaborarSectionProps) {
@@ -37,21 +35,21 @@ export function ComoColaborarSection({
   const actions = [
     {
       id: 1,
-      icon: '⭐',
-      title: 'Avalie uma disciplina ou professor',
+      num: '01',
+      title: 'Avalie matérias e professores que você já cursou',
       action: () => onPressExplore?.(),
     },
     {
       id: 2,
-      icon: '📖',
-      title: 'Envie provas e resumos para o repositório',
+      num: '02',
+      title: 'Compartilhe provas e resumos de semestres anteriores',
       action: () =>
         handleOpenUrl('https://github.com/unbook-org/unbook-2/issues'),
     },
     {
       id: 3,
-      icon: '💡',
-      title: 'Sugira ideias e reporte bugs no nosso Discord',
+      num: '03',
+      title: 'Sugira novos recursos ou reporte melhorias no Discord',
       action: () =>
         onPressDiscord
           ? onPressDiscord()
@@ -59,8 +57,8 @@ export function ComoColaborarSection({
     },
     {
       id: 4,
-      icon: '👥',
-      title: 'Indique o UnBook nos grupos de WhatsApp da UnB',
+      num: '04',
+      title: 'Apresente o UnBook nos grupos de curso e calouros da UnB',
       action: () => {
         if (
           Platform.OS === 'web' &&
@@ -69,67 +67,72 @@ export function ComoColaborarSection({
         ) {
           navigator
             .share({
-              title: 'UnBook - Guia Acadêmico UnB',
-              text: 'Conheça o UnBook: avaliações anônimas de professores e montador de grade da UnB!',
+              title: 'UnBook - Guia Acadêmico da UnB',
+              text: 'Conheça o UnBook: avaliações anônimas de disciplinas e catálogo de turmas para a UnB!',
               url: window.location.origin,
             })
             .catch(() => {});
         } else {
           handleOpenUrl(
-            'https://api.whatsapp.com/send?text=Conhe%C3%A7a%20o%20UnBook%20para%20planejar%20sua%20grade%20da%20UnB%3A%20https%3A%2F%2Funbook.com.br'
+            'https://api.whatsapp.com/send?text=Conhe%C3%A7a%20o%20UnBook%20para%20consultar%20professores%20e%20disciplinas%20da%20UnB%3A%20https%3A%2F%2Funbook.com.br'
           );
         }
       },
     },
   ];
 
-  const techStack = ['React', 'TypeScript', 'Python', 'FastAPI', 'Figma', 'PostgreSQL'];
+  const techStack = [
+    'React Native',
+    'TypeScript',
+    'FastAPI',
+    'PostgreSQL',
+    'Meilisearch',
+    'Docker',
+  ];
 
   return (
-    <View style={styles.sectionWrapper}>
+    <NotebookBackground style={styles.sectionWrapper}>
       <View style={styles.container}>
-        <View style={styles.sectionTitleRow}>
-          <View style={styles.accentBar} />
-          <Text style={styles.sectionTitle}>COMO COLABORAR</Text>
+        <View style={styles.header}>
+          <View style={styles.badgePill}>
+            <Text style={styles.badgePillText}>COMUNIDADE ACADÊMICA</Text>
+          </View>
+          <Text style={styles.title}>Outras formas de somar ao projeto</Text>
+          <Text style={styles.subtitle}>
+            Nem todo apoio precisa ser financeiro. O UnBook vive da participação de estudantes de todos os cursos da Universidade de Brasília.
+          </Text>
         </View>
 
         <View style={[styles.cardsGrid, isMobile && styles.cardsGridMobile]}>
+          {/* Card Esquerdo: Para Devs e Designers */}
           <View style={styles.devCard}>
             <View style={styles.cardHeader}>
-              <View style={styles.devIconBox}>
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M16 18l6-6-6-6M8 6l-6 6 6 6"
-                    stroke="#1349EB"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+              <View style={styles.codeTag}>
+                <Text style={styles.codeTagText}>DEV & DESIGN</Text>
               </View>
-              <View>
-                <Text style={styles.cardMainHeading}>PARA DEVS & DESIGNERS</Text>
-                <Text style={styles.cardSubHeading}>Engenharia • UX/UI • Dados</Text>
-              </View>
+              <Text style={styles.cardMainHeading}>ENGENHARIA E DESIGN</Text>
+              <Text style={styles.cardSubHeading}>Código Aberto • Extensão Universitária</Text>
             </View>
 
             <Text style={styles.cardDescription}>
-              Quer <Text style={styles.boldWhite}>ganhar horas de extensão</Text>, enriquecer seu portfólio com código em produção e impactar positivamente milhares de estudantes da UnB? O UnBook é seu projeto.
+              Deseja enriquecer seu portfólio com código em produção e impactar positivamente a vida acadêmica de milhares de colegas? Junte-se ao time discente de desenvolvimento.
             </Text>
 
             <View style={styles.devActionsRow}>
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel="Abrir repositório no GitHub"
                 onPress={() =>
                   handleOpenUrl('https://github.com/unbook-org/unbook-2')
                 }
                 style={styles.devBtnGithub}
               >
-                <Text style={styles.devBtnGithubText}>GITHUB ↗</Text>
+                <Text style={styles.devBtnGithubText}>REPOSITÓRIO NO GITHUB ↗</Text>
               </Pressable>
 
               <Pressable
                 accessibilityRole="button"
+                accessibilityLabel="Entrar no servidor do Discord"
                 onPress={() =>
                   onPressDiscord
                     ? onPressDiscord()
@@ -137,7 +140,7 @@ export function ComoColaborarSection({
                 }
                 style={styles.devBtnDiscord}
               >
-                <Text style={styles.devBtnDiscordText}>COMUNIDADE</Text>
+                <Text style={styles.devBtnDiscordText}>DISCORD DA COMUNIDADE ↗</Text>
               </Pressable>
             </View>
 
@@ -150,27 +153,20 @@ export function ComoColaborarSection({
             </View>
           </View>
 
+          {/* Card Direito: Para Todo Estudante */}
           <View style={styles.studentCard}>
             <View style={styles.cardHeader}>
-              <View style={styles.studentIconBox}>
-                <Svg width={22} height={22} viewBox="0 0 24 24" fill="none">
-                  <Path
-                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                    stroke="#009A5E"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </Svg>
+              <View style={[styles.codeTag, { backgroundColor: '#009A5E' }]}>
+                <Text style={styles.codeTagText}>QUALQUER CURSO</Text>
               </View>
-              <View>
-                <Text style={styles.cardMainHeading}>PARA TODO ESTUDANTE</Text>
-                <Text style={styles.cardSubHeadingGreen}>Não precisa saber programar!</Text>
-              </View>
+              <Text style={styles.cardMainHeading}>PARA TODO ESTUDANTE</Text>
+              <Text style={styles.cardSubHeadingGreen}>
+                Não precisa programar para fortalecer o ecossistema!
+              </Text>
             </View>
 
-            <Text style={styles.cardDescription}>
-              Não é da área de TI? Sem problema! Você pode colaborar avaliando professores das suas turmas passadas, compartilhando provas antigas ou sugerindo novas ideias.
+            <Text style={styles.cardDescriptionDark}>
+              Você fortalece o UnBook sempre que avalia com sinceridade uma matéria concluída, sugere melhorias ou apresenta a ferramenta para os calouros do seu instituto.
             </Text>
 
             <View style={styles.actionsList}>
@@ -185,191 +181,203 @@ export function ComoColaborarSection({
                     // @ts-ignore
                     onMouseLeave={() => setHoveredAction(null)}
                     style={[
-                      styles.actionItem,
-                      isHovered && styles.actionItemHovered,
+                      styles.actionRowCard,
+                      isHovered && styles.actionRowCardHovered,
                     ]}
                   >
-                    <View style={styles.actionItemLeft}>
-                      <Text style={styles.actionIcon}>{act.icon}</Text>
-                      <Text style={styles.actionItemText}>{act.title}</Text>
+                    <View style={styles.actionNumBox}>
+                      <Text style={styles.actionNumText}>{act.num}</Text>
                     </View>
-                    <Text style={styles.actionArrow}>›</Text>
+                    <Text style={styles.actionTitleText}>{act.title}</Text>
+                    <Text style={styles.actionArrow}>→</Text>
                   </Pressable>
                 );
               })}
             </View>
           </View>
         </View>
-
-        <View style={[styles.coffeeBanner, isMobile && styles.coffeeBannerMobile]}>
-          <View style={styles.coffeeBannerContent}>
-            <Text style={styles.coffeeBannerIcon}>☕</Text>
-            <View style={styles.coffeeBannerTextWrap}>
-              <Text style={styles.coffeeBannerTitle}>APOIE COM UM CAFÉ</Text>
-              <Text style={styles.coffeeBannerSubtitle}>
-                Infraestrutura, domínio e APIs custam dinheiro real. Todo centavo ajuda a manter a plataforma no ar!
-              </Text>
-            </View>
-          </View>
-
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Doar um café via PIX"
-            onPress={onPressDonate}
-            style={({ pressed }) => [
-              styles.coffeeBannerBtn,
-              pressed && styles.coffeeBannerBtnPressed,
-            ]}
-          >
-            <Text style={styles.coffeeBannerBtnText}>☕ DOE UM CAFÉ</Text>
-          </Pressable>
-        </View>
       </View>
-    </View>
+    </NotebookBackground>
   );
 }
 
 const styles = StyleSheet.create({
   sectionWrapper: {
-    backgroundColor: '#1F1F1F',
-    paddingVertical: 64,
-    paddingHorizontal: 20,
-    borderTopWidth: 3,
+    paddingVertical: 72,
+    paddingHorizontal: 24,
+    borderBottomWidth: 3,
     borderColor: '#1F1F1F',
+    width: '100%',
   },
   container: {
     maxWidth: 1120,
     width: '100%',
     marginHorizontal: 'auto',
   },
-  sectionTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 32,
+  header: {
+    marginBottom: 44,
+    maxWidth: 820,
   },
-  accentBar: {
-    width: 6,
-    height: 28,
-    backgroundColor: '#F1C321',
-    borderRadius: 3,
+  badgePill: {
+    backgroundColor: '#1F1F1F',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    alignSelf: 'flex-start',
+    marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 26,
-    fontWeight: '900',
+  badgePillText: {
     color: '#FFFFFF',
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+  title: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    marginBottom: 14,
+    letterSpacing: -0.5,
+    lineHeight: 40,
+  },
+  subtitle: {
+    fontSize: 15,
+    color: '#4A4A4A',
+    lineHeight: 25,
   },
   cardsGrid: {
     flexDirection: 'row',
     gap: 24,
-    marginBottom: 32,
   },
   cardsGridMobile: {
     flexDirection: 'column',
   },
   devCard: {
     flex: 1,
-    backgroundColor: '#232A39',
-    borderRadius: 14,
+    backgroundColor: '#1F1F1F',
     borderWidth: 2.5,
-    borderColor: '#39435B',
-    padding: 24,
+    borderColor: '#1F1F1F',
+    borderRadius: 14,
+    padding: 26,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
     justifyContent: 'space-between',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   studentCard: {
     flex: 1,
-    backgroundColor: '#163124',
-    borderRadius: 14,
+    backgroundColor: '#FFFFFF',
     borderWidth: 2.5,
-    borderColor: '#24513B',
-    padding: 24,
+    borderColor: '#1F1F1F',
+    borderRadius: 14,
+    padding: 26,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
     justifyContent: 'space-between',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 14,
     marginBottom: 16,
   },
-  devIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#1F1F1F',
+  codeTag: {
+    backgroundColor: '#1349EB',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 10,
   },
-  studentIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#1F1F1F',
+  codeTagText: {
+    color: '#FFFFFF',
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
   cardMainHeading: {
-    fontSize: 17,
+    fontSize: 18,
     fontWeight: '900',
     color: '#FFFFFF',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    marginBottom: 4,
   },
   cardSubHeading: {
     fontSize: 12,
-    color: '#A0AEC0',
-    marginTop: 2,
+    color: '#B0B0B0',
+    fontWeight: '600',
   },
   cardSubHeadingGreen: {
     fontSize: 12,
-    color: '#68D391',
-    marginTop: 2,
+    color: '#009A5E',
     fontWeight: '700',
   },
   cardDescription: {
     fontSize: 13,
-    color: '#CBD5E0',
+    color: '#D0D0D0',
     lineHeight: 20,
     marginBottom: 20,
   },
-  boldWhite: {
-    color: '#FFFFFF',
-    fontWeight: '800',
+  cardDescriptionDark: {
+    fontSize: 13,
+    color: '#4A4A4A',
+    lineHeight: 20,
+    marginBottom: 20,
   },
   devActionsRow: {
     flexDirection: 'row',
     gap: 12,
+    flexWrap: 'wrap',
     marginBottom: 20,
   },
   devBtnGithub: {
-    backgroundColor: '#1F1F1F',
+    backgroundColor: '#FFFFFF',
     borderWidth: 2,
-    borderColor: '#FFFFFF',
+    borderColor: '#1F1F1F',
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+        } as any)
+      : {}),
   },
   devBtnGithubText: {
-    color: '#FFFFFF',
-    fontSize: 12,
+    color: '#1F1F1F',
+    fontSize: 11.5,
     fontWeight: '900',
     letterSpacing: 0.5,
   },
   devBtnDiscord: {
-    backgroundColor: 'transparent',
-    borderWidth: 2,
-    borderColor: '#4A7C94',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: 1.5,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
     borderRadius: 8,
     paddingVertical: 10,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+        } as any)
+      : {}),
   },
   devBtnDiscordText: {
-    color: '#63B3ED',
-    fontSize: 12,
-    fontWeight: '900',
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
     letterSpacing: 0.5,
   },
   techPillsRow: {
@@ -380,119 +388,62 @@ const styles = StyleSheet.create({
   techPill: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 6,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    paddingHorizontal: 8,
   },
   techPillText: {
+    color: '#D8D8D8',
     fontSize: 11,
-    color: '#E2E8F0',
-    fontWeight: '600',
+    fontWeight: '700',
   },
   actionsList: {
     gap: 10,
   },
-  actionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
-    borderWidth: 1.5,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+  actionRowCard: {
+    backgroundColor: '#FAF9F5',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 12,
-  },
-  actionItemHovered: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderColor: '#009A5E',
-  },
-  actionItemLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    flex: 1,
+    gap: 12,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          transition: 'transform 0.15s ease, background-color 0.15s ease',
+        } as any)
+      : {}),
   },
-  actionIcon: {
-    fontSize: 14,
+  actionRowCardHovered: {
+    transform: [{ translateX: 4 }],
+    backgroundColor: '#FCFAEC',
   },
-  actionItemText: {
+  actionNumBox: {
+    backgroundColor: '#1F1F1F',
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  actionNumText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  actionTitleText: {
     flex: 1,
+    fontSize: 12.5,
+    fontWeight: '800',
+    color: '#1F1F1F',
   },
   actionArrow: {
-    color: '#A0AEC0',
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  coffeeBanner: {
-    backgroundColor: '#323620',
-    borderWidth: 2.5,
-    borderColor: '#F1C321',
-    borderRadius: 14,
-    padding: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 4, height: 4 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  coffeeBannerMobile: {
-    flexDirection: 'column',
-    alignItems: 'stretch',
-    gap: 16,
-  },
-  coffeeBannerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 16,
-    flex: 1,
-  },
-  coffeeBannerIcon: {
-    fontSize: 34,
-  },
-  coffeeBannerTextWrap: {
-    flex: 1,
-  },
-  coffeeBannerTitle: {
-    fontSize: 18,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  coffeeBannerSubtitle: {
-    fontSize: 13,
-    color: '#E2E8F0',
-    lineHeight: 18,
-  },
-  coffeeBannerBtn: {
-    backgroundColor: '#F1C321',
-    borderWidth: 2.5,
-    borderColor: '#1F1F1F',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 22,
-    alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  coffeeBannerBtnPressed: {
-    transform: [{ translateY: 2 }],
-    shadowOffset: { width: 1, height: 1 },
-  },
-  coffeeBannerBtnText: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: '900',
     color: '#1F1F1F',
-    letterSpacing: 0.5,
   },
 });
-
