@@ -6,6 +6,7 @@ import { NewsBanner } from '../../components/NewsBanner';
 import { Footer } from '../../components/Footer';
 import {
   TicketsDoacaoSection,
+  TermometroMetaSection,
   ChequeredDivider,
   ParaOndeVaiDinheiroSection,
   ComoColaborarSection,
@@ -13,11 +14,14 @@ import {
   PixModal,
 } from './sections';
 
+export type ModoApoio = 'doacao' | 'doar' | 'colaborar';
+
 interface ComoAjudarScreenProps {
   onNavigateHome: () => void;
   onNavigateSobre: () => void;
   onNavigateComoFunciona: () => void;
   onNavigateExplore?: () => void;
+  initialTab?: ModoApoio;
 }
 
 export function ComoAjudarScreen({
@@ -37,8 +41,14 @@ export function ComoAjudarScreen({
   };
 
   const handleSelectReitorTicket = () => {
-    setModalTitle('PIX do Reitor - Valor Livre');
+    setModalTitle('Ingresso Patrono Livre - Valor Personalizado');
     setModalAmount('R$ 10,00');
+    setModalVisible(true);
+  };
+
+  const handlePressMetaDoar = () => {
+    setModalTitle('Apoio à Meta de Infraestrutura');
+    setModalAmount('R$ 4,50');
     setModalVisible(true);
   };
 
@@ -58,22 +68,23 @@ export function ComoAjudarScreen({
           onPressDonate={() => {}}
         />
 
-        <TicketsDoacaoSection onSelectTicket={handleSelectTicket} />
 
-        <ChequeredDivider />
-
-        <ParaOndeVaiDinheiroSection
-          onSelectReitorTicket={handleSelectReitorTicket}
+        {/* Hero: Vales & Ingressos de Apoio (Fundo escuro como na foto) */}
+        <TicketsDoacaoSection
+          onSelectTicket={handleSelectTicket}
+          onSelectCustomAmount={handleSelectReitorTicket}
         />
 
+        {/* Estrutura: Para onde vai o apoio (Caderno com linhas e espaços) */}
+        <ParaOndeVaiDinheiroSection />
+
+        {/* Outras Formas de Colaborar */}
         <ComoColaborarSection
-          onPressDonate={() => {
-            setModalTitle('Apoie com um Café');
-            setModalAmount('R$ 4,50');
-            setModalVisible(true);
-          }}
           onPressExplore={onNavigateExplore || onNavigateHome}
         />
+
+        {/* Termômetro da Infraestrutura (posicionado depois da estrutura) */}
+        <TermometroMetaSection onPressDoar={handlePressMetaDoar} />
 
         <MarqueeApoio />
 

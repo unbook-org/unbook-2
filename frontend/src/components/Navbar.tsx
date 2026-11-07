@@ -10,7 +10,6 @@ import {
   ScrollView,
 } from 'react-native';
 import Svg, { Path, Circle, Line } from 'react-native-svg';
-import { ScheduleSimulatorSection } from '../screens/home/sections/ScheduleSimulatorSection';
 import { UnbookLogo } from './UnbookLogo';
 
 // Ícone vetorial de Sol/Lua para alternar tema (estilo neo-brutalista)
@@ -204,7 +203,7 @@ export function Navbar({
                     apoiarHovered && styles.linkTextHovered,
                   ]}
                 >
-                  Apoiar ☕
+                  Apoiar
                 </Text>
               </Pressable>
             </View>
@@ -410,9 +409,6 @@ export function Navbar({
                 <CloseIcon size={18} />
               </Pressable>
             </View>
-            <ScrollView style={styles.gradeModalScroll}>
-              <ScheduleSimulatorSection />
-            </ScrollView>
           </Pressable>
         </Pressable>
       </Modal>
@@ -481,9 +477,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderBottomColor: '#1F1F1F',
     width: '100%',
-    zIndex: 90,
+    zIndex: 999,
     ...(Platform.OS === 'web'
       ? ({
+          position: 'sticky',
+          top: 0,
           animationKeyframes: 'navSlideDown',
           animationDuration: '450ms',
           animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',

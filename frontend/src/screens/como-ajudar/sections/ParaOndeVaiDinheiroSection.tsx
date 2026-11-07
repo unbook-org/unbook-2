@@ -3,431 +3,278 @@ import {
   View,
   Text,
   StyleSheet,
-  Pressable,
   useWindowDimensions,
+  Platform,
 } from 'react-native';
-import Svg, { Path, Rect, Circle } from 'react-native-svg';
-import { TicketBarcode } from './TicketBarcode';
-import {
-  MegaphoneDoodle,
-  CoffeeDoodle,
-  MagnifierDoodle,
-  MoneyDoodle,
-} from './ChequeredDivider';
+import { NotebookBackground } from '../../../components/NotebookBackground';
 
 interface ParaOndeVaiDinheiroSectionProps {
-  onSelectReitorTicket: () => void;
+  onSelectReitorTicket?: () => void;
 }
 
-function ServerIcon({ size = 32 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Rect x="2" y="3" width="20" height="5" rx="2" stroke="#FFFFFF" strokeWidth="2" />
-      <Rect x="2" y="10" width="20" height="5" rx="2" stroke="#FFFFFF" strokeWidth="2" />
-      <Rect x="2" y="17" width="20" height="5" rx="2" stroke="#FFFFFF" strokeWidth="2" />
-      <Circle cx="6" cy="5.5" r="1" fill="#FFFFFF" />
-      <Circle cx="6" cy="12.5" r="1" fill="#FFFFFF" />
-      <Circle cx="6" cy="19.5" r="1" fill="#FFFFFF" />
-    </Svg>
-  );
+interface InfraCard {
+  id: string;
+  tag: string;
+  tagBg: string;
+  tagTextColor?: string;
+  title: string;
+  tech: string;
+  description: string;
 }
 
-function AiIcon({ size = 32 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"
-        stroke="#FFFFFF"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      <Circle cx="12" cy="12" r="4" stroke="#FFFFFF" strokeWidth="2" fill="#1349EB" />
-    </Svg>
-  );
-}
+const INFRA_CARDS: InfraCard[] = [
+  {
+    id: 'servidores',
+    tag: 'COMPUTAÇÃO',
+    tagBg: '#009A5E',
+    tagTextColor: '#FFFFFF',
+    title: 'Servidores & Containers Docker',
+    tech: 'FastAPI • Uvicorn • 2 vCPU • 4GB RAM',
+    description:
+      'Garante que mais de 12.000 estudantes consigam consultar disciplinas, turmas e históricos simultaneamente sem travamentos nas semanas de matrícula.',
+  },
+  {
+    id: 'database',
+    tag: 'PRIVACIDADE',
+    tagBg: '#1349EB',
+    tagTextColor: '#FFFFFF',
+    title: 'Banco de Dados & Criptografia',
+    tech: 'PostgreSQL • Hashing com Salt • Backups',
+    description:
+      'Armazena com isolamento absoluto 8.200+ avaliações e comentários acadêmicos, garantindo que nenhum docente ou mantenedor rastreie quem avaliou.',
+  },
+  {
+    id: 'busca',
+    tag: 'VELOCIDADE',
+    tagBg: '#F1C321',
+    tagTextColor: '#1F1F1F',
+    title: 'Engine de Busca Instantânea',
+    tech: 'Meilisearch Cluster • Indexação Semântica',
+    description:
+      'Processa buscas em milissegundos por nome de matéria, código do departamento (ex: MAT0025, CIC0004) ou professor com tolerância a erros.',
+  },
+  {
+    id: 'seguranca',
+    tag: 'PROTEÇÃO',
+    tagBg: '#FE4141',
+    tagTextColor: '#FFFFFF',
+    title: 'Domínio unbook.org & SSL',
+    tech: 'Cloudflare • CDN Global • Escudo Anti-DDoS',
+    description:
+      'Protege o portal contra instabilidades, ataques automatizados e viabiliza navegação criptografada de ponta a ponta sem vender dados.',
+  },
+];
 
-function LightbulbIcon({ size = 32 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M9 18h6M10 22h4M12 2a7 7 0 0 0-7 7c0 2.5 1.5 4.5 3 6h8c1.5-1.5 3-3.5 3-6a7 7 0 0 0-7-7z"
-        stroke="#FFFFFF"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-export function ParaOndeVaiDinheiroSection({
-  onSelectReitorTicket,
-}: ParaOndeVaiDinheiroSectionProps) {
+export function ParaOndeVaiDinheiroSection({}: ParaOndeVaiDinheiroSectionProps) {
   const { width } = useWindowDimensions();
-  const isMobile = width < 860;
+  const isMobile = width < 768;
+  const isTablet = width >= 768 && width < 1024;
 
   return (
-    <View style={styles.sectionWrapper}>
-      <View style={styles.stickerMegaphone} pointerEvents="none">
-        <MegaphoneDoodle size={52} />
-      </View>
-      <View style={styles.stickerMagnifier} pointerEvents="none">
-        <MagnifierDoodle size={52} />
-      </View>
-      <View style={styles.stickerCoffee} pointerEvents="none">
-        <CoffeeDoodle size={48} />
-      </View>
-      <View style={styles.stickerMoney} pointerEvents="none">
-        <MoneyDoodle size={52} />
-      </View>
-
+    <NotebookBackground style={styles.sectionWrapper}>
       <View style={styles.container}>
-        <View style={[styles.twoColumns, isMobile && styles.twoColumnsMobile]}>
-          <View style={styles.leftCol}>
-            <Text style={styles.sectionHeading}>Como funcionam as doações?</Text>
-            <Text style={styles.bodyParagraph}>
-              O UnBook é um projeto Open Source feito por estudantes para estudantes. Para mantermos a plataforma ativa e gratuita, contamos com a colaboração da nossa comunidade — seja através de novas ideias ou de contribuições financeiras voluntárias.
-            </Text>
-            <Text style={styles.bodyParagraph}>
-              O processo de apoio funciona via PIX, direcionado aos responsáveis pela manutenção e gerenciamento da infraestrutura do site. Além de cobrir custos de hospedagem e domínio, investimos em novas tecnologias, como o sistema de busca inteligente por Inteligência Artificial, que requer recursos para processamento e API.
-            </Text>
-
-            <View style={styles.destinationBox}>
-              <Text style={styles.destinationTitle}>Para aonde vai seu dinheiro?</Text>
-
-              <View style={styles.blueCardsRow}>
-                <View style={styles.blueCard}>
-                  <Text style={styles.blueCardTitle}>Servidores e banco de dados.</Text>
-                  <View style={styles.iconCenter}>
-                    <ServerIcon size={34} />
-                  </View>
-                </View>
-
-                <View style={styles.blueCard}>
-                  <Text style={styles.blueCardTitle}>Inteligência Artificial</Text>
-                  <View style={styles.iconCenter}>
-                    <AiIcon size={34} />
-                  </View>
-                </View>
-
-                <View style={styles.blueCard}>
-                  <Text style={styles.blueCardTitle}>Produtividade</Text>
-                  <View style={styles.iconCenter}>
-                    <LightbulbIcon size={34} />
-                  </View>
-                </View>
-              </View>
-
-              <Text style={styles.cafeFooterText}>e uns cafés também...</Text>
-            </View>
+        {/* Cabeçalho Limpo e Espaçoso */}
+        <View style={styles.header}>
+          <View style={styles.badgePill}>
+            <Text style={styles.badgePillText}>TRANSPARÊNCIA FINANCEIRA</Text>
           </View>
+          <Text style={styles.title}>
+            Para onde vai o seu apoio?
+          </Text>
+          <Text style={styles.subtitle}>
+            O UnBook é um projeto de código aberto mantido por estudantes da UnB para a comunidade discente. Não colocamos anúncios invasivos, não vendemos dados de navegação e aplicamos cada centavo exclusivamente na infraestrutura técnica da plataforma.
+          </Text>
+        </View>
 
-          <View style={styles.rightCol}>
-            <View style={styles.reitorTicket}>
-              <View style={styles.ticketTeethRow}>
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <View key={i} style={styles.tooth} />
-                ))}
-              </View>
-
-              <View style={styles.ticketContent}>
-                <Text style={styles.reitorTitle}>PIX do Reitor</Text>
-
-                <View style={styles.reitorPill}>
-                  <Text style={styles.reitorPillText}>
-                    Valor: R$ O que seu coração mandar
-                  </Text>
-                </View>
-
-                <Text style={styles.reitorDesc}>
-                  Quer investir pesado no futuro da UnBook? Escolha qualquer valor e envie junto com uma mensagem de incentivo. Seu nome pode aparecer no nosso mural de agradecimentos!
-                </Text>
-
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Abrir PIX do Reitor"
-                  onPress={onSelectReitorTicket}
-                  style={({ pressed }) => [
-                    styles.reitorBtn,
-                    pressed && styles.reitorBtnPressed,
+        {/* Grade de 4 Pilares de Infraestrutura */}
+        <View
+          style={[
+            styles.infraGrid,
+            isTablet && styles.infraGridTablet,
+            isMobile && styles.infraGridMobile,
+          ]}
+        >
+          {INFRA_CARDS.map((card) => (
+            <View key={card.id} style={styles.infraCard}>
+              <View style={styles.cardHeaderRow}>
+                <View
+                  style={[
+                    styles.tagBadge,
+                    { backgroundColor: card.tagBg },
                   ]}
                 >
-                  <Text style={styles.reitorBtnText}>E o pix? nada ainda?</Text>
-                </Pressable>
+                  <Text
+                    style={[
+                      styles.tagBadgeText,
+                      { color: card.tagTextColor || '#FFFFFF' },
+                    ]}
+                  >
+                    {card.tag}
+                  </Text>
+                </View>
+                <Text style={styles.techText}>{card.tech}</Text>
               </View>
 
-              <View style={styles.dashedDividerWrapper}>
-                <View style={styles.cutoutLeft} />
-                <View style={styles.dashedLine} />
-                <View style={styles.cutoutRight} />
-              </View>
-
-              <View style={styles.barcodeArea}>
-                <TicketBarcode code="UNB-PIX-DO-REITOR" height={50} color="#1F1F1F" />
-              </View>
+              <Text style={styles.cardTitle}>{card.title}</Text>
+              <Text style={styles.cardDesc}>{card.description}</Text>
             </View>
-          </View>
+          ))}
+        </View>
+
+        {/* Banner de Compromisso Estudantil */}
+        <View style={styles.commitmentBanner}>
+          <Text style={styles.commitmentTitle}>
+            Compromisso Estudantil de Independência
+          </Text>
+          <Text style={styles.commitmentBody}>
+            Nossa prestação de contas é 100% aberta no repositório do GitHub. Qualquer estudante pode auditar a arquitetura do backend, as chamadas de rede e conferir como a plataforma é operada de forma autônoma e sem fins lucrativos.
+          </Text>
         </View>
       </View>
-    </View>
+    </NotebookBackground>
   );
 }
 
 const styles = StyleSheet.create({
   sectionWrapper: {
-    backgroundColor: '#FFFFFF',
-    paddingVertical: 56,
-    paddingHorizontal: 20,
-    position: 'relative',
-    overflow: 'hidden',
+    paddingVertical: 72,
+    paddingHorizontal: 24,
+    borderBottomWidth: 3,
+    borderColor: '#1F1F1F',
+    width: '100%',
   },
   container: {
     maxWidth: 1120,
     width: '100%',
     marginHorizontal: 'auto',
-    zIndex: 2,
   },
-  twoColumns: {
-    flexDirection: 'row',
-    gap: 40,
-    alignItems: 'flex-start',
+  header: {
+    marginBottom: 44,
+    maxWidth: 820,
   },
-  twoColumnsMobile: {
-    flexDirection: 'column',
-    gap: 36,
-  },
-  leftCol: {
-    flex: 1.2,
-  },
-  rightCol: {
-    flex: 0.9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  sectionHeading: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#1F1F1F',
+  badgePill: {
+    backgroundColor: '#1F1F1F',
+    borderRadius: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    alignSelf: 'flex-start',
     marginBottom: 16,
   },
-  bodyParagraph: {
-    fontSize: 14,
-    color: '#4A4A4A',
-    lineHeight: 22,
-    marginBottom: 16,
-  },
-  destinationBox: {
-    backgroundColor: '#1349EB',
-    borderRadius: 16,
-    borderWidth: 3,
-    borderColor: '#1F1F1F',
-    padding: 22,
-    marginTop: 18,
-    shadowColor: '#000000',
-    shadowOffset: { width: 5, height: 5 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  destinationTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#FFFFFF',
-    marginBottom: 18,
-    textAlign: 'center',
-  },
-  blueCardsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    justifyContent: 'space-between',
-  },
-  blueCard: {
-    flex: 1,
-    backgroundColor: '#0F3CC4',
-    borderWidth: 2,
-    borderColor: '#FFFFFF',
-    borderRadius: 10,
-    padding: 12,
-    alignItems: 'center',
-    minHeight: 110,
-    justifyContent: 'space-between',
-  },
-  blueCardTitle: {
+  badgePillText: {
     color: '#FFFFFF',
     fontSize: 11,
-    fontWeight: '800',
-    textAlign: 'center',
-    lineHeight: 14,
+    fontWeight: '900',
+    letterSpacing: 0.8,
   },
-  iconCenter: {
-    marginVertical: 4,
+  title: {
+    fontSize: 34,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    marginBottom: 14,
+    letterSpacing: -0.5,
+    lineHeight: 40,
   },
-  cafeFooterText: {
-    color: '#FCFAEC',
-    fontSize: 12,
-    fontStyle: 'italic',
-    textAlign: 'right',
-    marginTop: 14,
-    opacity: 0.9,
+  subtitle: {
+    fontSize: 15,
+    color: '#4A4A4A',
+    lineHeight: 25,
   },
-  reitorTicket: {
-    backgroundColor: '#F5CD47',
-    borderRadius: 16,
-    borderWidth: 3,
+  infraGrid: {
+    flexDirection: 'row',
+    gap: 20,
+    marginBottom: 36,
+  },
+  infraGridTablet: {
+    flexWrap: 'wrap',
+  },
+  infraGridMobile: {
+    flexDirection: 'column',
+  },
+  infraCard: {
+    flex: 1,
+    minWidth: 240,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2.5,
     borderColor: '#1F1F1F',
-    overflow: 'hidden',
-    width: '100%',
-    maxWidth: 360,
-    shadowColor: '#000000',
-    shadowOffset: { width: 6, height: 6 },
+    borderRadius: 14,
+    padding: 22,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 3.5, height: 3.5 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 8,
+    elevation: 3,
+    justifyContent: 'space-between',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '3.5px 3.5px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
-  ticketTeethRow: {
+  cardHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    marginTop: -8,
-    marginBottom: 10,
-  },
-  tooth: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#1F1F1F',
-  },
-  ticketContent: {
-    paddingHorizontal: 22,
-    paddingBottom: 20,
-    alignItems: 'center',
-  },
-  reitorTitle: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#1F1F1F',
-    textAlign: 'center',
-    marginBottom: 14,
-  },
-  reitorPill: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#1F1F1F',
-    borderRadius: 8,
-    paddingVertical: 9,
-    paddingHorizontal: 12,
-    width: '100%',
     alignItems: 'center',
     marginBottom: 14,
-    shadowColor: '#000000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
+    flexWrap: 'wrap',
+    gap: 8,
   },
-  reitorPillText: {
-    fontSize: 13,
-    fontWeight: '900',
-    color: '#1F1F1F',
-    textAlign: 'center',
-  },
-  reitorDesc: {
-    fontSize: 12,
-    lineHeight: 18,
-    color: '#1F1F1F',
-    textAlign: 'center',
-    marginBottom: 18,
-  },
-  reitorBtn: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2.5,
-    borderColor: '#1F1F1F',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    width: '100%',
-    alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  reitorBtnPressed: {
-    transform: [{ translateY: 2 }],
-    shadowOffset: { width: 1, height: 1 },
-  },
-  reitorBtnText: {
-    fontSize: 14,
-    fontWeight: '900',
-    color: '#1F1F1F',
-  },
-  dashedDividerWrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
-    position: 'relative',
-    height: 20,
-  },
-  cutoutLeft: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2.5,
-    borderColor: '#1F1F1F',
-    marginLeft: -10,
-  },
-  cutoutRight: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2.5,
-    borderColor: '#1F1F1F',
-    marginRight: -10,
-  },
-  dashedLine: {
-    flex: 1,
-    height: 2,
+  tagBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 4,
     borderWidth: 1.5,
     borderColor: '#1F1F1F',
-    borderStyle: 'dashed',
-    marginHorizontal: 4,
   },
-  barcodeArea: {
+  tagBadgeText: {
+    fontSize: 9.5,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  techText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#707070',
+    letterSpacing: 0.2,
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    marginBottom: 10,
+    lineHeight: 22,
+  },
+  cardDesc: {
+    fontSize: 12.5,
+    color: '#4A4A4A',
+    lineHeight: 19,
+  },
+  commitmentBanner: {
     backgroundColor: '#FFFFFF',
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 8,
-    borderWidth: 2,
+    borderWidth: 2.5,
     borderColor: '#1F1F1F',
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    borderRadius: 12,
+    padding: 24,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
-  stickerMegaphone: {
-    position: 'absolute',
-    top: -24,
-    left: 24,
-    zIndex: 1,
+  commitmentTitle: {
+    fontSize: 16,
+    fontWeight: '900',
+    color: '#1F1F1F',
+    marginBottom: 8,
+    letterSpacing: -0.2,
   },
-  stickerMagnifier: {
-    position: 'absolute',
-    top: 10,
-    right: '48%',
-    zIndex: 1,
-  },
-  stickerCoffee: {
-    position: 'absolute',
-    bottom: 24,
-    right: 32,
-    zIndex: 1,
-  },
-  stickerMoney: {
-    position: 'absolute',
-    bottom: 30,
-    left: '38%',
-    zIndex: 1,
+  commitmentBody: {
+    fontSize: 13.5,
+    color: '#4A4A4A',
+    lineHeight: 22,
   },
 });
-

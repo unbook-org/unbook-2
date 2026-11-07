@@ -6,18 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Instala dependências de sistema essenciais
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copia e instala as dependências Python (aproveitando cache de camadas)
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Copia e instala as dependências Python (camada em cache e sem verificação de versão do pip)
+COPY requirements.txt ./
+RUN pip install --no-cache-dir --disable-pip-version-check -r requirements.txt
 
 # Copia o código da aplicação
-COPY . /app/
+COPY . ./
 
 # Porta padrão de exposição
 EXPOSE 8080

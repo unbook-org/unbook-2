@@ -1,7 +1,9 @@
-export * from './CampusMapGraphic';
 export * from './SobreHeroSection';
 export * from './ManifestoSection';
+export * from './CampiCarteirinhasSection';
+export * from './MuralMinhocaoSection';
+export * from './EquipeListaSection';
 export * from './PilaresSection';
 export * from './VinculoAcademicoSection';
+export * from './CampusMapGraphic';
 export * from './EquipeSection';
-

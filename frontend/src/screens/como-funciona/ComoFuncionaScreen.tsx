@@ -4,6 +4,7 @@ import { theme } from '../../constants/theme';
 import { Navbar } from '../../components/Navbar';
 import { NewsBanner } from '../../components/NewsBanner';
 import { Footer } from '../../components/Footer';
+import { VidaUniversitariaStyles } from '../../components/vida-universitaria';
 import {
   ComoFuncionaHeroSection,
   ModulosSection,
@@ -27,6 +28,7 @@ export function ComoFuncionaScreen({
 }: ComoFuncionaScreenProps) {
   return (
     <SafeAreaView style={styles.safeArea}>
+      <VidaUniversitariaStyles />
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -43,12 +45,11 @@ export function ComoFuncionaScreen({
 
         <ComoFuncionaHeroSection
           onPressExplore={onNavigateExplore || onNavigateHome}
-          onPressGrade={onNavigateHome}
         />
 
         <ModulosSection
           onSelectModulo={(modId) => {
-            if (modId === 'grade' || modId === 'busca') {
+            if (modId === 'catalogo' || modId === 'busca') {
               onNavigateHome();
             } else if (onNavigateExplore) {
               onNavigateExplore();
@@ -59,7 +60,6 @@ export function ComoFuncionaScreen({
         <FluxoAnonimatoSection />
 
         <GuiaRecursosSection
-          onPressGrade={onNavigateHome}
           onPressExplore={onNavigateExplore || onNavigateHome}
         />
 

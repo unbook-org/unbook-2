@@ -2,6 +2,7 @@
 .gitignore
 venv/
 env/
+.venv/
 __pycache__/
 *.pyc
 *.pyo
@@ -18,3 +19,8 @@ db.sqlite3
 .env.local
 .vscode/
 .idea/
+.ruff_cache/
+.mypy_cache/
+*.log
+.DS_Store
+*.swp

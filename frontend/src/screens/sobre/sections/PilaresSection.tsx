@@ -1,67 +1,16 @@
-import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
-
-function ShieldIcon({ size = 26, color = '#1349EB' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Path
-        d="M9 12l2 2 4-4"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-function CommunityIcon({ size = 26, color = '#009A5E' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <Circle cx="9" cy="7" r="4" stroke={color} strokeWidth="2.2" />
-      <Path
-        d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
-
-function OpenCodeIcon({ size = 26, color = '#E67E22' }: { size?: number; color?: string }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path
-        d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"
-        stroke={color}
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import {
+  IconeEscudo,
+  IconeComunidade,
+  IconeCodigoAberto,
+  IconeCheck,
+} from '../../../components/UnbookIcons';
 
 export function PilaresSection() {
   const { width } = useWindowDimensions();
   const isMobile = width < 900;
+  const [hoveredPilar, setHoveredPilar] = useState<string | null>(null);
 
   const pilares = [
     {
@@ -69,27 +18,30 @@ export function PilaresSection() {
       title: 'ANONIMATO POR DESIGN',
       tag: 'PRIVACIDADE',
       tagBg: '#1349EB',
-      icon: <ShieldIcon size={26} color="#1349EB" />,
-      text: 'Sua voz importa, sua identidade é sua. Utilizamos autenticação via e-mail institucional @aluno.unb.br apenas para validar que você é um estudante real. O sistema separa criptograficamente seu login da sua avaliação antes de salvar no banco de dados.',
-      footerTag: '🛡️ Autenticação via @aluno.unb.br',
+      icon: <IconeEscudo size={24} color="#1349EB" />,
+      text: 'Sua voz importa, e sua identidade é protegida. A autenticação via e-mail institucional @aluno.unb.br serve apenas para validar que você estuda na UnB. O sistema separa matematicamente seu login da sua avaliação antes de registrar no banco de dados.',
+      footerTag: 'Autenticação exclusiva via @aluno.unb.br',
+      footerIcon: <IconeCheck size={14} color="#009A5E" />,
     },
     {
       id: 'comunidade',
       title: 'ESPÍRITO COLABORATIVO',
       tag: 'COMUNIDADE',
       tagBg: '#009A5E',
-      icon: <CommunityIcon size={26} color="#009A5E" />,
-      text: 'Tudo o que está aqui é construído coletivamente. Das avaliações às provas antigas compartilhadas no módulo de materiais, a comunidade se ajuda mutuamente — de calouro a veterano.',
-      footerTag: '👥 +12.400 contribuições este semestre',
+      icon: <IconeComunidade size={24} color="#009A5E" />,
+      text: 'Tudo o que existe aqui é construído coletivamente. Das avaliações sinceras de matérias aos arquivos de provas antigas e resumos compartilhados, calouros e veteranos fortalecem o mesmo ambiente.',
+      footerTag: 'Mais de 12.400 contribuições registradas',
+      footerIcon: <IconeCheck size={14} color="#009A5E" />,
     },
     {
       id: 'opensource',
-      title: 'ABERTURA & OPEN SOURCE',
+      title: 'TRANSPARÊNCIA TOTAL',
       tag: 'CÓDIGO ABERTO',
-      tagBg: '#E67E22',
-      icon: <OpenCodeIcon size={26} color="#E67E22" />,
-      text: 'Código transparente e infraestrutura aberta. O UnBook é um bem público para a comunidade universitária, sem fins lucrativos. Qualquer estudante pode contribuir, auditar ou replicar o projeto.',
-      footerTag: '⚖️ MIT License • GitHub público',
+      tagBg: '#F1C321',
+      icon: <IconeCodigoAberto size={24} color="#1F1F1F" />,
+      text: 'Código aberto e infraestrutura transparente. O UnBook é um bem público estudantil, sem fins lucrativos. Qualquer aluno pode auditar as linhas de código, sugerir melhorias ou colaborar diretamente no GitHub.',
+      footerTag: 'Licença MIT aberta • Repositório público',
+      footerIcon: <IconeCheck size={14} color="#009A5E" />,
     },
   ];
 
@@ -102,28 +54,51 @@ export function PilaresSection() {
             <Text style={styles.sectionTitle}>OS 3 PILARES FUNDAMENTAIS</Text>
           </View>
           <Text style={styles.subtitle}>
-            Princípios inegociáveis que guiam cada decisão do projeto
+            Princípios indispensáveis que guiam cada decisão da plataforma
           </Text>
         </View>
 
         <View style={[styles.cardsGrid, isMobile && styles.cardsGridMobile]}>
-          {pilares.map((pilar) => (
-            <View key={pilar.id} style={styles.card}>
-              <View style={styles.cardHeader}>
-                <View style={styles.iconContainer}>{pilar.icon}</View>
-                <View style={[styles.tagPill, { backgroundColor: pilar.tagBg }]}>
-                  <Text style={styles.tagPillText}>{pilar.tag}</Text>
+          {pilares.map((pilar) => {
+            const isHovered = hoveredPilar === pilar.id;
+            return (
+              <View
+                key={pilar.id}
+                // @ts-ignore
+                onMouseEnter={() => setHoveredPilar(pilar.id)}
+                // @ts-ignore
+                onMouseLeave={() => setHoveredPilar(null)}
+                style={[
+                  styles.card,
+                  isHovered && styles.cardHovered,
+                ]}
+              >
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>{pilar.icon}</View>
+                  <View style={[styles.tagPill, { backgroundColor: pilar.tagBg }]}>
+                    <Text
+                      style={[
+                        styles.tagPillText,
+                        pilar.tagBg === '#F1C321' && styles.tagPillTextDark,
+                      ]}
+                    >
+                      {pilar.tag}
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={styles.cardTitle}>{pilar.title}</Text>
+                <Text style={styles.cardText}>{pilar.text}</Text>
+
+                <View style={styles.cardFooter}>
+                  <View style={styles.footerRow}>
+                    {pilar.footerIcon}
+                    <Text style={styles.footerTagText}>{pilar.footerTag}</Text>
+                  </View>
                 </View>
               </View>
-
-              <Text style={styles.cardTitle}>{pilar.title}</Text>
-              <Text style={styles.cardText}>{pilar.text}</Text>
-
-              <View style={styles.cardFooter}>
-                <Text style={styles.footerTagText}>{pilar.footerTag}</Text>
-              </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </View>
     </View>
@@ -184,13 +159,28 @@ const styles = StyleSheet.create({
     borderColor: '#1F1F1F',
     borderRadius: 14,
     padding: 24,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 6,
+    elevation: 5,
     justifyContent: 'space-between',
     minHeight: 300,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '5px 5px 0px #1F1F1F',
+          transition:
+            'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease',
+        } as any)
+      : {}),
+  },
+  cardHovered: {
+    transform: [{ translateY: -4 }],
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '7px 7px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   cardHeader: {
     flexDirection: 'row',
@@ -221,15 +211,18 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: 0.5,
   },
+  tagPillTextDark: {
+    color: '#1F1F1F',
+  },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '900',
     color: '#1F1F1F',
     marginBottom: 12,
     letterSpacing: 0.3,
   },
   cardText: {
-    fontSize: 13,
+    fontSize: 13.5,
     color: '#4A4A4A',
     lineHeight: 22,
     marginBottom: 24,
@@ -239,10 +232,14 @@ const styles = StyleSheet.create({
     borderColor: '#EFEDE1',
     paddingTop: 14,
   },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   footerTagText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#707070',
+    color: '#555555',
   },
 });
-
