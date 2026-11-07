@@ -408,6 +408,33 @@ const CSS_ANIMATIONS = `
   box-shadow: 7px 7px 0px #1F1F1F !important;
 }
 
+/* Classes UnBook para Interatividade e Fluidez */
+.unbook-interactive-card {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  cursor: pointer !important;
+}
+.unbook-interactive-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 6px 6px 0px #1F1F1F !important;
+}
+.unbook-interactive-card:active {
+  transform: translateY(2px) !important;
+  box-shadow: 2px 2px 0px #1F1F1F !important;
+}
+
+.unbook-ticket-hover {
+  transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.24s ease !important;
+  cursor: pointer !important;
+}
+.unbook-ticket-hover:hover {
+  transform: translateY(-6px) scale(1.015) !important;
+  box-shadow: 8px 8px 0px #1F1F1F !important;
+}
+
+.unbook-fade-up {
+  animation: cartoonFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 /* Efeito de fita adesiva */
 .washi-tape {
   position: relative;

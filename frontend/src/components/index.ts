@@ -13,3 +13,5 @@ export * from './FeaturesTornPaper';
 export * from './FloatingQuickNav';
 export * from './SeletorDepartamento';
 export * from './CubeTransition';
+export * from './UnbookIcons';
+export * from './vida-universitaria';

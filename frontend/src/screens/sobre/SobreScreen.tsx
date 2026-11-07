@@ -1,14 +1,17 @@
-import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet } from 'react-native';
+import React, { useRef } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
 import { theme } from '../../constants/theme';
 import { Navbar } from '../../components/Navbar';
 import { NewsBanner } from '../../components/NewsBanner';
 import { Footer } from '../../components/Footer';
 import {
+  VidaUniversitariaStyles,
+} from '../../components/vida-universitaria';
+import {
   SobreHeroSection,
   ManifestoSection,
-  PilaresSection,
-  VinculoAcademicoSection,
+  CampiCarteirinhasSection,
+  MuralMinhocaoSection,
   EquipeSection,
 } from './sections';
 
@@ -25,8 +28,22 @@ export function SobreScreen({
   onNavigateComoAjudar,
   onNavigateExplore,
 }: SobreScreenProps) {
+  const historiaRef = useRef<View>(null);
+
+  const handleScrollToHistoria = () => {
+    // Rolagem suave até a história se disponível
+    if (typeof document !== 'undefined') {
+      const el = document.getElementById('secao-historia');
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
+      <VidaUniversitariaStyles />
+
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -41,18 +58,18 @@ export function SobreScreen({
           onPressDonate={onNavigateComoAjudar}
         />
 
-        <SobreHeroSection
-          onPressColaborar={onNavigateComoAjudar}
-          onPressAvaliar={onNavigateExplore || onNavigateHome}
-          onPressGrade={onNavigateHome}
-        />
+        {/* 1. OS 4 CAMPI — Carteirinhas de Estudante com Darcy, FGA, FCE, FAL */}
+        <CampiCarteirinhasSection />
 
-        <ManifestoSection />
+        {/* 2. NOSSA HISTÓRIA — Linha do Tempo com Fundo em Mosaico Athos Bulcão */}
+        <View nativeID="secao-historia" ref={historiaRef}>
+          <ManifestoSection />
+        </View>
 
-        <PilaresSection />
+        {/* 3. CULTURA ACADÊMICA — Mural do Minhocão (Quadro de Cortiça & Post-its) */}
+        <MuralMinhocaoSection />
 
-        <VinculoAcademicoSection />
-
+        {/* 4. QUEM CONSTRÓI O UNBOOK — Primeira Versão com Departamentos e Redes */}
         <EquipeSection onPressJoinTeam={onNavigateComoAjudar} />
 
         <Footer
@@ -77,4 +94,3 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 });
-

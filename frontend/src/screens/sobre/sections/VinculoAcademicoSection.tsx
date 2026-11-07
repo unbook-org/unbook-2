@@ -1,16 +1,20 @@
 import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
-import Svg, { Path, Circle } from 'react-native-svg';
+import { View, Text, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import {
+  IconeCheck,
+  IconeAlerta,
+  IconeCadeado,
+} from '../../../components/UnbookIcons';
 
 export function VinculoAcademicoSection() {
   const { width } = useWindowDimensions();
   const isMobile = width < 900;
 
   const transparenciaRows = [
-    { label: 'Tipo:', value: 'Projeto de extensão universitária independente' },
-    { label: 'Vínculo SIGAA:', value: 'Nenhum vínculo administrativo formal' },
-    { label: 'Financiamento:', value: 'Voluntário — sem fins lucrativos' },
-    { label: 'Licença:', value: 'MIT License — código 100% aberto' },
+    { label: 'Natureza:', value: 'Iniciativa independente organizada por estudantes da UnB' },
+    { label: 'Relação com SIGAA:', value: 'Consulta dados públicos abertos • Sem vínculo institucional' },
+    { label: 'Financiamento:', value: 'Totalmente voluntário • Sem fins lucrativos ou anúncios' },
+    { label: 'Licença:', value: 'MIT License • Código-fonte 100% aberto e auditável' },
   ];
 
   return (
@@ -18,19 +22,17 @@ export function VinculoAcademicoSection() {
       <View style={styles.container}>
         <View style={styles.titleRow}>
           <View style={styles.accentBar} />
-          <Text style={styles.sectionTitle}>VÍNCULO ACADÊMICO & EXTENSÃO</Text>
+          <Text style={styles.sectionTitle}>VÍNCULO ACADÊMICO & TRANSPARÊNCIA</Text>
         </View>
 
         <View style={[styles.contentRow, isMobile && styles.contentRowMobile]}>
+          {/* Card Esquerdo: Transparência Institucional */}
           <View style={styles.leftCard}>
             <View style={styles.cardHeaderRow}>
               <View style={styles.greenCheckIcon}>
-                <Svg width={18} height={18} viewBox="0 0 24 24" fill="none">
-                  <Circle cx="12" cy="12" r="10" stroke="#009A5E" strokeWidth="2.5" />
-                  <Path d="M8 12l3 3 5-5" stroke="#009A5E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                </Svg>
+                <IconeCheck size={16} color="#009A5E" />
               </View>
-              <Text style={styles.cardTitle}>TRANSPARÊNCIA INSTITUCIONAL</Text>
+              <Text style={styles.cardTitle}>COMPROMISSO ÉTICO E TRANSPARÊNCIA</Text>
             </View>
 
             <View style={styles.rowsList}>
@@ -45,24 +47,30 @@ export function VinculoAcademicoSection() {
             </View>
           </View>
 
+          {/* Cards Direitos: Isenção e Privacidade */}
           <View style={styles.rightCardsColumn}>
             <View style={styles.warningCard}>
               <View style={styles.cardHeaderSmall}>
-                <Text style={styles.warningIcon}>⚠️</Text>
-                <Text style={styles.warningCardTitle}>AVISO DE ISENÇÃO</Text>
+                <View style={styles.warningIconBox}>
+                  <IconeAlerta size={15} color="#FE4141" />
+                </View>
+                <Text style={styles.warningCardTitle}>NOTA DE ISENÇÃO DE RESPONSABILIDADE</Text>
               </View>
               <Text style={styles.warningCardText}>
-                Não representamos posições oficiais da <Text style={styles.boldDark}>Universidade de Brasília (UnB)</Text>. Nosso foco é o apoio mútuo entre os estudantes no âmbito acadêmico. As informações exibidas têm caráter informativo e são extraídas de dados públicos do catálogo institucional ou fornecidas pelos próprios estudantes.
+                O UnBook é uma plataforma autônoma e não representa canais ou posições oficiais da{' '}
+                <Text style={styles.boldDark}>Universidade de Brasília (UnB)</Text>. Nosso objetivo é facilitar a colaboração e a organização do semestre entre colegas de curso.
               </Text>
             </View>
 
             <View style={styles.privacyCard}>
               <View style={styles.cardHeaderSmall}>
-                <Text style={styles.privacyIcon}>🔒</Text>
-                <Text style={styles.privacyCardTitle}>DADOS & PRIVACIDADE</Text>
+                <View style={styles.privacyIconBox}>
+                  <IconeCadeado size={15} color="#1349EB" />
+                </View>
+                <Text style={styles.privacyCardTitle}>PROTEÇÃO DE DADOS & ANONIMATO</Text>
               </View>
               <Text style={styles.privacyCardText}>
-                Avaliações são <Text style={styles.boldDark}>desvinculadas criptograficamente</Text> do usuário no momento do salvamento através de hashing irreversível. Nenhum dado pessoal sensível além da validação do domínio @aluno.unb.br é armazenado.
+                As avaliações são <Text style={styles.boldDark}>desacopladas criptograficamente</Text> do e-mail no momento do envio com chave hash irreversível. Nenhum professor, coordenador ou colega tem acesso à sua identidade.
               </Text>
             </View>
           </View>
@@ -94,7 +102,7 @@ const styles = StyleSheet.create({
   accentBar: {
     width: 6,
     height: 28,
-    backgroundColor: '#FF7A00',
+    backgroundColor: '#009A5E',
     borderRadius: 3,
   },
   sectionTitle: {
@@ -118,12 +126,17 @@ const styles = StyleSheet.create({
     borderColor: '#1F1F1F',
     borderRadius: 14,
     padding: 24,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 5, height: 5 },
     shadowOpacity: 1,
     shadowRadius: 0,
-    elevation: 6,
+    elevation: 5,
     justifyContent: 'space-between',
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '5px 5px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   cardHeaderRow: {
     flexDirection: 'row',
@@ -142,10 +155,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
     color: '#1F1F1F',
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   rowsList: {
     gap: 14,
@@ -160,13 +173,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     color: '#555555',
-    width: 110,
+    width: 120,
   },
   rowValuePill: {
     flex: 1,
-    backgroundColor: '#F3EFE6',
+    backgroundColor: '#FCFAEC',
     borderWidth: 1.5,
-    borderColor: '#E2DCD2',
+    borderColor: '#1F1F1F',
     borderRadius: 6,
     paddingVertical: 8,
     paddingHorizontal: 12,
@@ -175,6 +188,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     color: '#1F1F1F',
+    lineHeight: 16,
   },
   rightCardsColumn: {
     flex: 1,
@@ -183,47 +197,75 @@ const styles = StyleSheet.create({
   warningCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 2.5,
-    borderColor: '#FF7A00',
+    borderColor: '#1F1F1F',
     borderRadius: 14,
     padding: 20,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        } as any)
+      : {}),
   },
   privacyCard: {
     backgroundColor: '#FFFFFF',
     borderWidth: 2.5,
-    borderColor: '#1349EB',
+    borderColor: '#1F1F1F',
     borderRadius: 14,
     padding: 20,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        } as any)
+      : {}),
   },
   cardHeaderSmall: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     marginBottom: 10,
   },
-  warningIcon: {
-    fontSize: 14,
+  warningIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    backgroundColor: '#FFF0F0',
+    borderWidth: 1.5,
+    borderColor: '#FE4141',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   warningCardTitle: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#FF7A00',
+    color: '#1F1F1F',
     letterSpacing: 0.5,
   },
   warningCardText: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: '#4A4A4A',
-    lineHeight: 18,
+    lineHeight: 19,
   },
-  privacyIcon: {
-    fontSize: 14,
+  privacyIconBox: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    backgroundColor: '#EEF2FF',
+    borderWidth: 1.5,
+    borderColor: '#1349EB',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   privacyCardTitle: {
     fontSize: 12,
@@ -232,13 +274,12 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   privacyCardText: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: '#4A4A4A',
-    lineHeight: 18,
+    lineHeight: 19,
   },
   boldDark: {
     fontWeight: '800',
     color: '#1F1F1F',
   },
 });
-

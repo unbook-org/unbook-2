@@ -5,8 +5,9 @@ WORKDIR /app
 # Copia os manifestos de dependências
 COPY package*.json ./
 
-# Instala as dependências do projeto
-RUN npm install
+# Instala dependências de forma reproduzível e limpa o cache do npm na mesma camada
+RUN npm ci --no-audit --no-fund && \
+    npm cache clean --force
 
 # Copia o restante do código da aplicação
 COPY . .

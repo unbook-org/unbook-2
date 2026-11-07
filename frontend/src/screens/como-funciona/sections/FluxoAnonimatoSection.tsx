@@ -1,42 +1,48 @@
-import React from 'react';
-import { View, Text, StyleSheet, useWindowDimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Platform, useWindowDimensions } from 'react-native';
+import { IconeEscudo } from '../../../components/UnbookIcons';
 
 export function FluxoAnonimatoSection() {
   const { width } = useWindowDimensions();
   const isMobile = width < 860;
+  const [hoveredStep, setHoveredStep] = useState<string | null>(null);
 
   const steps = [
     {
       step: '01',
-      title: 'Login com E-mail @aluno.unb.br',
+      title: 'Login Institucional @aluno.unb.br',
       description:
-        'Você faz login com o e-mail institucional apenas para provar que é um aluno real da UnB, eliminando bots e avaliações falsas.',
-      badge: 'AUTENTICAÇÃO',
+        'A autenticação via e-mail da UnB serve unicamente para confirmar que você estuda na universidade, barrando bots e avaliações falsas.',
+      badge: 'VALIDAÇÃO',
       badgeBg: '#1349EB',
+      badgeTextColor: '#FFFFFF',
     },
     {
       step: '02',
-      title: 'Hasheamento Criptográfico Unidirecional',
+      title: 'Hasheamento com Salt Secreto',
       description:
-        'Nosso backend aplica uma função hash com salt secreto que transforma seu login em um identificador matemático impossível de reverter.',
+        'Nosso backend processa sua identificação com uma função hash criptográfica irreversível acoplada a um salt exclusivo.',
       badge: 'CRIPTOGRAFIA',
       badgeBg: '#009A5E',
+      badgeTextColor: '#FFFFFF',
     },
     {
       step: '03',
-      title: 'Desacoplamento Completo do Usuário',
+      title: 'Desacoplamento Completo da Conta',
       description:
-        'A avaliação é salva em uma tabela isolada, sem ponte de chave estrangeira (FK) ligando a nota ou comentário ao seu perfil.',
+        'A avaliação é gravada em tabela isolada, sem chave estrangeira ligando o comentário ou nota ao seu e-mail ou perfil.',
       badge: 'PRIVACIDADE',
-      badgeBg: '#FF7A00',
+      badgeBg: '#F1C321',
+      badgeTextColor: '#1F1F1F',
     },
     {
       step: '04',
-      title: 'Disponibilidade Pública e Auditável',
+      title: 'Métricas e Médias Auditáveis',
       description:
-        'A comunidade acessa a média e os comentários agregados com total proteção contra retaliação por parte de docentes.',
+        'A comunidade acessa a distribuição consolidada de notas sem qualquer possibilidade de rastreio ou represália por docentes.',
       badge: 'SEGURANÇA',
-      badgeBg: '#9747FF',
+      badgeBg: '#FE4141',
+      badgeTextColor: '#FFFFFF',
     },
   ];
 
@@ -47,42 +53,66 @@ export function FluxoAnonimatoSection() {
           <View style={styles.titleRow}>
             <View style={styles.accentBar} />
             <Text style={styles.sectionTitle}>
-              COMO FUNCIONA O ANONIMATO POR DESIGN
+              ANONIMATO CRIPTOGRÁFICO POR DESIGN
             </Text>
           </View>
           <Text style={styles.subtitle}>
-            Entenda como garantimos que nenhum professor, coordenador ou colega saiba quem escreveu
+            Como garantimos matematicamente que sua identidade nunca é exposta
           </Text>
         </View>
 
+        {/* Linha dos 4 passos sequenciais */}
         <View style={[styles.stepsGrid, isMobile && styles.stepsGridMobile]}>
-          {steps.map((st, idx) => (
-            <View key={st.step} style={styles.stepCard}>
-              <View style={styles.stepHeader}>
-                <Text style={styles.stepNumber}>{st.step}</Text>
-                <View style={[styles.stepBadge, { backgroundColor: st.badgeBg }]}>
-                  <Text style={styles.stepBadgeText}>{st.badge}</Text>
+          {steps.map((st, idx) => {
+            const isHovered = hoveredStep === st.step;
+            return (
+              <View
+                key={st.step}
+                // @ts-ignore
+                onMouseEnter={() => setHoveredStep(st.step)}
+                // @ts-ignore
+                onMouseLeave={() => setHoveredStep(null)}
+                style={[
+                  styles.stepCard,
+                  isHovered && styles.stepCardHovered,
+                ]}
+              >
+                <View style={styles.stepHeader}>
+                  <Text style={styles.stepNumber}>{st.step}</Text>
+                  <View style={[styles.stepBadge, { backgroundColor: st.badgeBg }]}>
+                    <Text
+                      style={[
+                        styles.stepBadgeText,
+                        { color: st.badgeTextColor },
+                      ]}
+                    >
+                      {st.badge}
+                    </Text>
+                  </View>
                 </View>
+
+                <Text style={styles.stepTitle}>{st.title}</Text>
+                <Text style={styles.stepDesc}>{st.description}</Text>
+
+                {idx < steps.length - 1 && !isMobile && (
+                  <View style={styles.arrowIndicator}>
+                    <Text style={styles.arrowText}>→</Text>
+                  </View>
+                )}
               </View>
-
-              <Text style={styles.stepTitle}>{st.title}</Text>
-              <Text style={styles.stepDesc}>{st.description}</Text>
-
-              {idx < steps.length - 1 && !isMobile && (
-                <View style={styles.arrowIndicator}>
-                  <Text style={styles.arrowText}>→</Text>
-                </View>
-              )}
-            </View>
-          ))}
+            );
+          })}
         </View>
 
+        {/* Caixa de garantia estudantil sem emoji */}
         <View style={styles.guaranteeBox}>
-          <Text style={styles.guaranteeIcon}>🛡️</Text>
+          <View style={styles.guaranteeIconCircle}>
+            <IconeEscudo size={26} color="#009A5E" />
+          </View>
           <View style={styles.guaranteeContent}>
             <Text style={styles.guaranteeTitle}>Compromisso Estudantil de Dados</Text>
             <Text style={styles.guaranteeBody}>
-              Nem os próprios mantenedores do projeto têm acesso à correlação entre sua conta e sua avaliação. O código-fonte deste pipeline é 100% aberto e pode ser inspecionado por qualquer pessoa no GitHub.
+              Nem os próprios desenvolvedores do UnBook possuem meios de associar seu perfil a uma avaliação específica. O código do pipeline de anonimato é totalmente aberto e auditável por qualquer estudante no GitHub.
             </Text>
           </View>
         </View>
@@ -93,7 +123,7 @@ export function FluxoAnonimatoSection() {
 
 const styles = StyleSheet.create({
   sectionWrapper: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#1349EB',
     paddingVertical: 64,
     paddingHorizontal: 20,
     borderBottomWidth: 3,
@@ -122,12 +152,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 26,
     fontWeight: '900',
-    color: '#1F1F1F',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: '#707070',
+    color: '#FFFFFF',
     marginLeft: 18,
   },
   stepsGrid: {
@@ -147,13 +177,27 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     padding: 20,
     position: 'relative',
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
     justifyContent: 'space-between',
     minHeight: 220,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        } as any)
+      : {}),
+  },
+  stepCardHovered: {
+    transform: [{ translateY: -4 }],
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '6px 6px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   stepHeader: {
     flexDirection: 'row',
@@ -174,7 +218,6 @@ const styles = StyleSheet.create({
     borderColor: '#1F1F1F',
   },
   stepBadgeText: {
-    color: '#FFFFFF',
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 0.5,
@@ -187,13 +230,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   stepDesc: {
-    fontSize: 12,
+    fontSize: 12.5,
     color: '#555555',
     lineHeight: 18,
   },
   arrowIndicator: {
     position: 'absolute',
-    right: -14,
+    right: -13,
     top: '45%',
     width: 26,
     height: 26,
@@ -211,24 +254,42 @@ const styles = StyleSheet.create({
   guaranteeBox: {
     flexDirection: 'row',
     backgroundColor: '#FCFAEC',
-    borderWidth: 2,
+    borderWidth: 2.5,
     borderColor: '#1F1F1F',
     borderRadius: 12,
-    padding: 20,
+    padding: 22,
     alignItems: 'center',
-    gap: 16,
+    gap: 18,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 4, height: 4 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4px 4px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
-  guaranteeIcon: {
-    fontSize: 32,
+  guaranteeIconCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#E6F8F0',
+    borderWidth: 2,
+    borderColor: '#009A5E',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   guaranteeContent: {
     flex: 1,
   },
   guaranteeTitle: {
-    fontSize: 15,
+    fontSize: 15.5,
     fontWeight: '900',
     color: '#1F1F1F',
     marginBottom: 4,
+    letterSpacing: 0.2,
   },
   guaranteeBody: {
     fontSize: 13,
@@ -236,4 +297,3 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
 });
-

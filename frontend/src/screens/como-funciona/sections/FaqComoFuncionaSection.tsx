@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Platform } from 'react-native';
 
 interface FaqItem {
   id: string;
@@ -10,38 +10,39 @@ interface FaqItem {
 const FAQS: FaqItem[] = [
   {
     id: '1',
-    question: 'O professor consegue saber quem fez uma avaliação?',
+    question: 'Docentes ou o departamento conseguem saber quem fez uma avaliação?',
     answer:
-      'Não. O sistema separa criptograficamente sua identificação institucional (@aluno.unb.br) do conteúdo da sua avaliação antes de salvar qualquer registro no banco de dados. Nem os próprios desenvolvedores conseguem fazer a correlação reversa.',
+      'Não. O sistema separa criptograficamente seu e-mail institucional (@aluno.unb.br) do texto e notas da sua avaliação antes de salvar qualquer registro no banco de dados. Nem os próprios mantenedores do projeto têm acesso à correlação entre sua conta e sua avaliação.',
   },
   {
     id: '2',
-    question: 'Como os dados de turmas, docentes e horários são atualizados?',
+    question: 'Como os dados de disciplinas, professores e horários são atualizados?',
     answer:
-      'Utilizamos scripts automatizados e pipelines de dados de código aberto que consultam os dados públicos do catálogo SIGAA da UnB periodicamente, garantindo que novos semestres e mudanças de salas sejam refletidos.',
+      'Utilizamos scripts automatizados de código aberto que consultam os dados públicos do catálogo SIGAA da UnB no início de cada semestre, assegurando que novas turmas, salas e professores constem na plataforma.',
   },
   {
     id: '3',
-    question: 'O UnBook substitui a matrícula oficial no SIGAA?',
+    question: 'O UnBook substitui a matrícula oficial no SIGAA ou Matrícula Web?',
     answer:
-      'Não. O UnBook é uma ferramenta de apoio e planejamento prévio. Você utiliza o UnBPlanner para montar a grade ideal sem choques de horário e verificar avaliações, mas a confirmação de matrícula oficial deve sempre ser realizada pelo SIGAA ou Matrícula Web da UnB.',
+      'Não. O UnBook é uma plataforma de consulta acadêmica colaborativa e transparente. Você pesquisa disciplinas, avaliações honestas de docentes e ementas para embasar suas decisões de matrícula, mas o registro oficial das matérias deve sempre ser feito diretamente no SIGAA da UnB.',
   },
   {
     id: '4',
-    question: 'Como faço para enviar provas antigas ou resumos para a minha matéria?',
+    question: 'Como posso enviar provas antigas ou resumos para a minha matéria?',
     answer:
-      'Você pode enviar arquivos de semestres passados diretamente pela comunidade no Discord ou abrindo uma issue/PR no repositório do GitHub. Nossa equipe comunitária faz a triagem para garantir a integridade dos materiais.',
+      'Você pode enviar materiais de semestres anteriores diretamente pelo repositório no GitHub ou pela nossa comunidade estudantil no Discord. Nossa equipe de curadoria revisa os arquivos para assegurar qualidade e pertinência ao curso.',
   },
   {
     id: '5',
-    question: 'O UnBook tem algum custo para os estudantes?',
+    question: 'O UnBook possui algum custo ou cobra mensalidade?',
     answer:
-      'Não, o UnBook é e sempre será 100% gratuito e livre de anúncios invasivos. Os custos de servidores, domínio e APIs de Inteligência Artificial são mantidos através de doações voluntárias via PIX pela comunidade.',
+      'Não. O UnBook é e sempre será 100% gratuito e livre de anúncios invasivos. A infraestrutura de servidores, banco de dados e APIs de IA acadêmica é mantida inteiramente com doações voluntárias e trabalho discente.',
   },
 ];
 
 export function FaqComoFuncionaSection() {
   const [openId, setOpenId] = useState<string | null>('1');
+  const [hoveredFaq, setHoveredFaq] = useState<string | null>(null);
 
   const toggleFaq = (id: string) => {
     setOpenId(openId === id ? null : id);
@@ -56,23 +57,36 @@ export function FaqComoFuncionaSection() {
             <Text style={styles.sectionTitle}>PERGUNTAS FREQUENTES</Text>
           </View>
           <Text style={styles.subtitle}>
-            Tire suas dúvidas sobre o funcionamento, privacidade e dados do UnBook
+            Tire suas dúvidas sobre o funcionamento, privacidade e recursos do UnBook
           </Text>
         </View>
 
         <View style={styles.faqList}>
           {FAQS.map((faq) => {
             const isOpen = openId === faq.id;
+            const isHovered = hoveredFaq === faq.id;
             return (
               <Pressable
                 key={faq.id}
                 onPress={() => toggleFaq(faq.id)}
-                style={[styles.faqCard, isOpen && styles.faqCardOpen]}
+                // @ts-ignore
+                onMouseEnter={() => setHoveredFaq(faq.id)}
+                // @ts-ignore
+                onMouseLeave={() => setHoveredFaq(null)}
+                style={[
+                  styles.faqCard,
+                  isOpen && styles.faqCardOpen,
+                  isHovered && styles.faqCardHovered,
+                ]}
               >
                 <View style={styles.faqQuestionRow}>
-                  <Text style={styles.faqQuestionText}>{faq.question}</Text>
-                  <View style={styles.toggleIconBox}>
-                    <Text style={styles.toggleIconText}>{isOpen ? '−' : '+'}</Text>
+                  <Text style={[styles.faqQuestionText, isOpen && styles.faqQuestionTextOpen]}>
+                    {faq.question}
+                  </Text>
+                  <View style={[styles.toggleIconBox, isOpen && styles.toggleIconBoxOpen]}>
+                    <Text style={[styles.toggleIconText, isOpen && styles.toggleIconTextOpen]}>
+                      {isOpen ? '−' : '+'}
+                    </Text>
                   </View>
                 </View>
 
@@ -92,7 +106,7 @@ export function FaqComoFuncionaSection() {
 
 const styles = StyleSheet.create({
   sectionWrapper: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#009A5E',
     paddingVertical: 64,
     paddingHorizontal: 20,
     borderBottomWidth: 3,
@@ -121,12 +135,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 26,
     fontWeight: '900',
-    color: '#1F1F1F',
+    color: '#FFFFFF',
     letterSpacing: 0.5,
   },
   subtitle: {
     fontSize: 14,
-    color: '#707070',
+    color: '#FFFFFF',
     marginLeft: 18,
   },
   faqList: {
@@ -138,13 +152,30 @@ const styles = StyleSheet.create({
     borderColor: '#1F1F1F',
     borderRadius: 10,
     padding: 18,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 3, height: 3 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 3,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '3px 3px 0px #1F1F1F',
+          transition: 'transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease',
+        } as any)
+      : {}),
   },
   faqCardOpen: {
     backgroundColor: '#FFFFFF',
+    borderColor: '#009A5E',
+  },
+  faqCardHovered: {
+    transform: [{ translateY: -2 }],
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '4.5px 4.5px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   faqQuestionRow: {
     flexDirection: 'row',
@@ -158,6 +189,9 @@ const styles = StyleSheet.create({
     color: '#1F1F1F',
     flex: 1,
   },
+  faqQuestionTextOpen: {
+    color: '#009A5E',
+  },
   toggleIconBox: {
     width: 28,
     height: 28,
@@ -168,10 +202,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  toggleIconBoxOpen: {
+    backgroundColor: '#009A5E',
+    borderColor: '#1F1F1F',
+  },
   toggleIconText: {
     fontSize: 16,
     fontWeight: '900',
     color: '#1F1F1F',
+  },
+  toggleIconTextOpen: {
+    color: '#FFFFFF',
   },
   faqAnswerBox: {
     borderTopWidth: 1.5,
@@ -180,9 +221,8 @@ const styles = StyleSheet.create({
     paddingTop: 12,
   },
   faqAnswerText: {
-    fontSize: 13,
+    fontSize: 13.5,
     color: '#4A4A4A',
     lineHeight: 22,
   },
 });
-
