@@ -8,5 +8,4 @@ export * from './SecuritySection';
 export * from './TestimonialsSection';
 export * from './FaqSection';
 export * from './BadgesSection';
-export * from './ScheduleSimulatorSection';
 export * from './CtaSection';
