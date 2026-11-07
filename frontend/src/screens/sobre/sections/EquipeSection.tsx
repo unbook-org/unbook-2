@@ -9,6 +9,12 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import {
+  IconeTerminal,
+  IconeGrafico,
+  IconeDesign,
+  IconeMegafone,
+} from '../../../components/UnbookIcons';
 
 interface TeamMember {
   id: string;
@@ -16,6 +22,7 @@ interface TeamMember {
   role: string;
   initials: string;
   avatarBg: string;
+  avatarTextColor?: string;
   github?: string;
   linkedin?: string;
 }
@@ -26,23 +33,23 @@ interface Department {
   bannerTitle: string;
   bannerBg: string;
   bannerTextColor: string;
-  iconText: string;
+  iconComponent: (color: string) => React.ReactNode;
   members: TeamMember[];
 }
 
 const DEPARTMENTS: Department[] = [
   {
     id: 'software',
-    label: 'ENGENHARIA DE SOFTWARE & ARQUITETURA CORE',
+    label: 'ENGENHARIA DE SOFTWARE',
     bannerTitle: 'ENGENHARIA DE SOFTWARE & ARQUITETURA CORE',
     bannerBg: '#1349EB',
     bannerTextColor: '#FFFFFF',
-    iconText: '</>',
+    iconComponent: (color) => <IconeTerminal size={20} color={color} />,
     members: [
       {
         id: '1',
         name: 'Lucas Ferreira',
-        role: 'Eng. Software • 4º sem.',
+        role: 'Eng. de Software • 4º sem.',
         initials: 'LF',
         avatarBg: '#1349EB',
         github: 'https://github.com',
@@ -54,6 +61,7 @@ const DEPARTMENTS: Department[] = [
         role: 'Full-stack • 8º sem.',
         initials: 'AR',
         avatarBg: '#F1C321',
+        avatarTextColor: '#1F1F1F',
         github: 'https://github.com',
         linkedin: 'https://linkedin.com',
       },
@@ -79,11 +87,11 @@ const DEPARTMENTS: Department[] = [
   },
   {
     id: 'dados',
-    label: 'ENGENHARIA DE DADOS & PIPELINE',
-    bannerTitle: 'ENGENHARIA DE DADOS & PIPELINE',
+    label: 'DADOS & PIPELINES',
+    bannerTitle: 'ENGENHARIA DE DADOS & INTELIGÊNCIA ACADÊMICA',
     bannerBg: '#009A5E',
     bannerTextColor: '#FFFFFF',
-    iconText: '📊',
+    iconComponent: (color) => <IconeGrafico size={20} color={color} />,
     members: [
       {
         id: '5',
@@ -106,9 +114,10 @@ const DEPARTMENTS: Department[] = [
       {
         id: '7',
         name: 'Gabriel Rocha',
-        role: 'Scraping SIGAA • 3º sem.',
+        role: 'Catálogo SIGAA • 3º sem.',
         initials: 'GR',
         avatarBg: '#F1C321',
+        avatarTextColor: '#1F1F1F',
         github: 'https://github.com',
         linkedin: 'https://linkedin.com',
       },
@@ -116,18 +125,18 @@ const DEPARTMENTS: Department[] = [
   },
   {
     id: 'design',
-    label: 'PRODUCT DESIGN, IHC & UX/UI',
-    bannerTitle: 'PRODUCT DESIGN, IHC & UX/UI',
-    bannerBg: '#FF7A00',
-    bannerTextColor: '#FFFFFF',
-    iconText: '🎨',
+    label: 'DESIGN & UX/UI',
+    bannerTitle: 'PRODUCT DESIGN, IHC & EXPERIÊNCIA DO ESTUDANTE',
+    bannerBg: '#F1C321',
+    bannerTextColor: '#1F1F1F',
+    iconComponent: (color) => <IconeDesign size={20} color={color} />,
     members: [
       {
         id: '8',
         name: 'Isabela Torres',
         role: 'UX/UI • 7º sem.',
         initials: 'IT',
-        avatarBg: '#FF7A00',
+        avatarBg: '#009A5E',
         github: 'https://github.com',
         linkedin: 'https://linkedin.com',
       },
@@ -146,6 +155,7 @@ const DEPARTMENTS: Department[] = [
         role: 'IHC • 4º sem.',
         initials: 'LP',
         avatarBg: '#F1C321',
+        avatarTextColor: '#1F1F1F',
         github: 'https://github.com',
         linkedin: 'https://linkedin.com',
       },
@@ -153,18 +163,18 @@ const DEPARTMENTS: Department[] = [
   },
   {
     id: 'comunicacao',
-    label: 'COMUNICAÇÃO & CONTEÚDO',
-    bannerTitle: 'COMUNICAÇÃO & CONTEÚDO',
+    label: 'COMUNICAÇÃO & COMUNIDADE',
+    bannerTitle: 'COMUNICAÇÃO, EVENTOS & SUPORTE ESTUDANTIL',
     bannerBg: '#FE4141',
     bannerTextColor: '#FFFFFF',
-    iconText: '📢',
+    iconComponent: (color) => <IconeMegafone size={20} color={color} />,
     members: [
       {
         id: '11',
         name: 'Bruna Oliveira',
-        role: 'Conteúdo • 4º sem.',
+        role: 'Comunicação • 4º sem.',
         initials: 'BO',
-        avatarBg: '#FF7A00',
+        avatarBg: '#1349EB',
         github: 'https://github.com',
         linkedin: 'https://linkedin.com',
       },
@@ -189,6 +199,7 @@ export function EquipeSection({ onPressJoinTeam }: EquipeSectionProps) {
   const { width } = useWindowDimensions();
   const isMobile = width < 768;
   const [selectedDeptId, setSelectedDeptId] = useState('software');
+  const [hoveredMember, setHoveredMember] = useState<string | null>(null);
 
   const currentDept =
     DEPARTMENTS.find((d) => d.id === selectedDeptId) || DEPARTMENTS[0];
@@ -208,11 +219,14 @@ export function EquipeSection({ onPressJoinTeam }: EquipeSectionProps) {
         <View style={styles.header}>
           <View style={styles.titleRow}>
             <View style={styles.accentBar} />
-            <Text style={styles.sectionTitle}>QUEM FAZ ACONTECER</Text>
+            <Text style={styles.sectionTitle}>QUEM CONSTRÓI O UNBOOK</Text>
           </View>
-          <Text style={styles.subtitle}>Os estudantes por trás do UnBook</Text>
+          <Text style={styles.subtitle}>
+            Estudantes da Universidade de Brasília trabalhando voluntariamente pelo coletivo
+          </Text>
         </View>
 
+        {/* Abas dos departamentos */}
         <View style={styles.tabsRow}>
           {DEPARTMENTS.map((dept) => {
             const isSelected = dept.id === selectedDeptId;
@@ -238,6 +252,7 @@ export function EquipeSection({ onPressJoinTeam }: EquipeSectionProps) {
           })}
         </View>
 
+        {/* Faixa temática do departamento selecionado */}
         <View
           style={[
             styles.deptBanner,
@@ -245,76 +260,124 @@ export function EquipeSection({ onPressJoinTeam }: EquipeSectionProps) {
           ]}
         >
           <View style={styles.bannerLeft}>
-            <Text style={styles.bannerIcon}>{currentDept.iconText}</Text>
-            <Text style={styles.bannerTitleText}>{currentDept.bannerTitle}</Text>
+            <View style={styles.bannerIconBox}>
+              {currentDept.iconComponent(currentDept.bannerTextColor)}
+            </View>
+            <Text
+              style={[
+                styles.bannerTitleText,
+                { color: currentDept.bannerTextColor },
+              ]}
+            >
+              {currentDept.bannerTitle}
+            </Text>
           </View>
-          <Text style={styles.bannerMemberCount}>
-            {currentDept.members.length} MEMBROS
-          </Text>
+          <View
+            style={[
+              styles.memberCountBadge,
+              currentDept.bannerTextColor === '#1F1F1F' && styles.memberCountBadgeDark,
+            ]}
+          >
+            <Text
+              style={[
+                styles.bannerMemberCount,
+                { color: currentDept.bannerTextColor },
+              ]}
+            >
+              {currentDept.members.length} MEMBROS
+            </Text>
+          </View>
         </View>
 
+        {/* Grid de membros da equipe */}
         <View style={[styles.membersGrid, isMobile && styles.membersGridMobile]}>
-          {currentDept.members.map((member) => (
-            <View key={member.id} style={styles.memberCard}>
+          {currentDept.members.map((member) => {
+            const isHovered = hoveredMember === member.id;
+            return (
               <View
+                key={member.id}
+                // @ts-ignore
+                onMouseEnter={() => setHoveredMember(member.id)}
+                // @ts-ignore
+                onMouseLeave={() => setHoveredMember(null)}
                 style={[
-                  styles.avatarBox,
-                  { backgroundColor: member.avatarBg },
+                  styles.memberCard,
+                  isHovered && styles.memberCardHovered,
                 ]}
               >
-                <Text style={styles.avatarInitials}>{member.initials}</Text>
-              </View>
-
-              <Text style={styles.memberName}>{member.name}</Text>
-              <Text style={styles.memberRole}>{member.role}</Text>
-
-              <View style={styles.socialRow}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="GitHub"
-                  onPress={() => handleOpenUrl(member.github)}
-                  style={styles.socialBtn}
+                <View
+                  style={[
+                    styles.avatarBox,
+                    { backgroundColor: member.avatarBg },
+                  ]}
                 >
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
-                      stroke="#1F1F1F"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </Svg>
-                </Pressable>
+                  <Text
+                    style={[
+                      styles.avatarInitials,
+                      member.avatarTextColor
+                        ? { color: member.avatarTextColor }
+                        : { color: '#FFFFFF' },
+                    ]}
+                  >
+                    {member.initials}
+                  </Text>
+                </View>
 
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="LinkedIn"
-                  onPress={() => handleOpenUrl(member.linkedin)}
-                  style={styles.socialBtn}
-                >
-                  <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
-                    <Path
-                      d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"
-                      stroke="#1F1F1F"
-                      strokeWidth="2.2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <Path d="M4 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="#1F1F1F" />
-                  </Svg>
-                </Pressable>
+                <Text style={styles.memberName}>{member.name}</Text>
+                <Text style={styles.memberRole}>{member.role}</Text>
+
+                <View style={styles.socialRow}>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="GitHub do colaborador"
+                    onPress={() => handleOpenUrl(member.github)}
+                    style={styles.socialBtn}
+                  >
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+                        stroke="#1F1F1F"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </Svg>
+                  </Pressable>
+
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="LinkedIn do colaborador"
+                    onPress={() => handleOpenUrl(member.linkedin)}
+                    style={styles.socialBtn}
+                  >
+                    <Svg width={14} height={14} viewBox="0 0 24 24" fill="none">
+                      <Path
+                        d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"
+                        stroke="#1F1F1F"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <Path d="M4 4a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" fill="#1F1F1F" />
+                    </Svg>
+                  </Pressable>
+                </View>
               </View>
-            </View>
-          ))}
+            );
+          })}
 
+          {/* Card de recrutamento / chamada para novos alunos */}
           <View style={styles.recruitmentCard}>
             <View style={styles.avatarDashed}>
-              <Text style={styles.questionMark}>?</Text>
+              <Text style={styles.questionMark}>+</Text>
             </View>
-            <Text style={styles.recruitTitle}>Seja o próximo!</Text>
+            <Text style={styles.recruitTitle}>Faça parte da equipe!</Text>
+            <Text style={styles.recruitDesc}>
+              Ganhe horas de extensão e construa projetos para toda a UnB.
+            </Text>
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Entrar para a equipe"
+              accessibilityLabel="Entrar para a equipe do UnBook"
               onPress={() =>
                 onPressJoinTeam
                   ? onPressJoinTeam()
@@ -322,7 +385,7 @@ export function EquipeSection({ onPressJoinTeam }: EquipeSectionProps) {
               }
               style={styles.recruitBtn}
             >
-              <Text style={styles.recruitBtnText}>ENTRAR</Text>
+              <Text style={styles.recruitBtnText}>COLABORAR →</Text>
             </Pressable>
           </View>
         </View>
@@ -356,7 +419,7 @@ const styles = StyleSheet.create({
   accentBar: {
     width: 6,
     height: 28,
-    backgroundColor: '#FE4141',
+    backgroundColor: '#009A5E',
     borderRadius: 3,
   },
   sectionTitle: {
@@ -373,27 +436,35 @@ const styles = StyleSheet.create({
   tabsRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 10,
+    gap: 8,
     marginBottom: 20,
   },
   tabButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: 6,
+    backgroundColor: '#FFFFFF',
     borderWidth: 2,
     borderColor: '#1F1F1F',
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000000',
-    shadowOffset: { width: 2, height: 2 },
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 2.5, height: 2.5 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 3,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '2.5px 2.5px 0px #1F1F1F',
+          transition: 'all 0.18s ease',
+        } as any)
+      : {}),
   },
   tabButtonActive: {
     backgroundColor: '#1F1F1F',
   },
   tabButtonText: {
     fontSize: 11,
-    fontWeight: '800',
+    fontWeight: '900',
     color: '#1F1F1F',
     letterSpacing: 0.5,
   },
@@ -404,95 +475,117 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
+    borderRadius: 10,
     borderWidth: 2.5,
     borderColor: '#1F1F1F',
     marginBottom: 24,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 3, height: 3 },
-    shadowOpacity: 1,
-    shadowRadius: 0,
-  },
-  bannerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  bannerIcon: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '900',
-  },
-  bannerTitleText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-  },
-  bannerMemberCount: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '900',
-    letterSpacing: 0.5,
-    opacity: 0.9,
-  },
-  membersGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 20,
-  },
-  membersGridMobile: {
-    justifyContent: 'center',
-  },
-  memberCard: {
-    flex: 1,
-    minWidth: 180,
-    maxWidth: 220,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2.5,
-    borderColor: '#1F1F1F',
-    borderRadius: 12,
-    padding: 20,
-    alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 4, height: 4 },
     shadowOpacity: 1,
     shadowRadius: 0,
     elevation: 4,
   },
+  bannerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  bannerIconBox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bannerTitleText: {
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  memberCountBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: 'currentColor',
+  },
+  memberCountBadgeDark: {
+    backgroundColor: 'rgba(0, 0, 0, 0.08)',
+  },
+  bannerMemberCount: {
+    fontSize: 10,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  },
+  membersGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 18,
+  },
+  membersGridMobile: {
+    flexDirection: 'column',
+  },
+  memberCard: {
+    flex: 1,
+    minWidth: 200,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#1F1F1F',
+    borderRadius: 12,
+    padding: 18,
+    alignItems: 'center',
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 3.5, height: 3.5 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 4,
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '3.5px 3.5px 0px #1F1F1F',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        } as any)
+      : {}),
+  },
+  memberCardHovered: {
+    transform: [{ translateY: -4 }],
+    ...(Platform.OS === 'web'
+      ? ({
+          boxShadow: '5px 5px 0px #1F1F1F',
+        } as any)
+      : {}),
+  },
   avatarBox: {
     width: 52,
     height: 52,
-    borderRadius: 10,
+    borderRadius: 26,
     borderWidth: 2,
     borderColor: '#1F1F1F',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   avatarInitials: {
-    color: '#FFFFFF',
+    fontSize: 17,
     fontWeight: '900',
-    fontSize: 18,
+    letterSpacing: 0.5,
   },
   memberName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '900',
     color: '#1F1F1F',
-    textAlign: 'center',
     marginBottom: 4,
+    textAlign: 'center',
   },
   memberRole: {
-    fontSize: 11,
+    fontSize: 11.5,
+    fontWeight: '700',
     color: '#707070',
+    marginBottom: 14,
     textAlign: 'center',
-    marginBottom: 16,
   },
   socialRow: {
     flexDirection: 'row',
-    gap: 10,
+    gap: 8,
   },
   socialBtn: {
     width: 28,
@@ -503,59 +596,82 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF9F5',
     alignItems: 'center',
     justifyContent: 'center',
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+        } as any)
+      : {}),
   },
   recruitmentCard: {
     flex: 1,
-    minWidth: 180,
-    maxWidth: 220,
-    backgroundColor: '#FAF9F5',
-    borderWidth: 2.5,
+    minWidth: 200,
+    backgroundColor: '#FCFAEC',
+    borderWidth: 2,
     borderColor: '#1F1F1F',
     borderStyle: 'dashed',
     borderRadius: 12,
-    padding: 20,
+    padding: 18,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: '#1F1F1F',
+    shadowOffset: { width: 3, height: 3 },
+    shadowOpacity: 1,
+    shadowRadius: 0,
+    elevation: 3,
   },
   avatarDashed: {
     width: 48,
     height: 48,
-    borderRadius: 10,
+    borderRadius: 24,
     borderWidth: 2,
-    borderColor: '#A0A09B',
-    borderStyle: 'dashed',
+    borderColor: '#009A5E',
+    backgroundColor: '#E6F8F0',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   questionMark: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '900',
-    color: '#707070',
+    color: '#009A5E',
   },
   recruitTitle: {
-    fontSize: 13,
-    fontWeight: '800',
+    fontSize: 13.5,
+    fontWeight: '900',
     color: '#1F1F1F',
-    marginBottom: 12,
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  recruitDesc: {
+    fontSize: 11,
+    color: '#707070',
+    textAlign: 'center',
+    lineHeight: 16,
+    marginBottom: 14,
   },
   recruitBtn: {
     backgroundColor: '#009A5E',
-    borderWidth: 2,
+    borderWidth: 1.5,
     borderColor: '#1F1F1F',
     borderRadius: 6,
-    paddingVertical: 6,
+    paddingVertical: 7,
     paddingHorizontal: 16,
-    shadowColor: '#000000',
+    shadowColor: '#1F1F1F',
     shadowOffset: { width: 2, height: 2 },
     shadowOpacity: 1,
     shadowRadius: 0,
+    elevation: 2,
+    ...(Platform.OS === 'web'
+      ? ({
+          cursor: 'pointer',
+          boxShadow: '2px 2px 0px #1F1F1F',
+        } as any)
+      : {}),
   },
   recruitBtnText: {
     color: '#FFFFFF',
+    fontSize: 10.5,
     fontWeight: '900',
-    fontSize: 11,
     letterSpacing: 0.5,
   },
 });
-
