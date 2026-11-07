@@ -41,7 +41,7 @@ function lerRotaAtual(): EstadoRota {
     const subpath = pathname.replace(/^\/docs/, "");
     const destino = subpath ? `${docsUrl.replace(/\/$/, "")}${subpath}${window.location.search}` : docsUrl;
     window.location.replace(destino);
-    return { materia: null, professorIdentifier: null };
+    return { tipo: "home", materia: null, professorIdentifier: null };
   }
 
   // Rota de administração: redireciona para o Django Admin
@@ -49,7 +49,7 @@ function lerRotaAtual(): EstadoRota {
     const backendUrl = (process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080/api").replace(/\/api\/?$/, "");
     const rotaFormatada = pathname.endsWith("/") ? pathname : `${pathname}/`;
     window.location.replace(`${backendUrl}${rotaFormatada}${window.location.search}`);
-    return { materia: null, professorIdentifier: null };
+    return { tipo: "home", materia: null, professorIdentifier: null };
   }
 
   const params = new URLSearchParams(window.location.search);
